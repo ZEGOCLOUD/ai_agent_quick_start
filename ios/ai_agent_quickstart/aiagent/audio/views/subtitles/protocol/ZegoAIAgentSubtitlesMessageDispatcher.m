@@ -199,19 +199,6 @@
                 [self dispatchChatStateChange:    SubtitlesSessionState_AI_LISTEN];
             }
         }
-    } else if(cmd == ZegoAgentMessageCmdStatistics){
-        if(messageProtocol.statisticsData) {
-            long asr = messageProtocol.statisticsData.asr;
-            long custom_prompt = messageProtocol.statisticsData.customPrompt;
-            long llm_first_sentence = messageProtocol.statisticsData.llmFirstSentence;
-            long tts_first_sentence = messageProtocol.statisticsData.ttsFirstSentence;
-            long llm_first_token = messageProtocol.statisticsData.llmFirstToken;
-            long tts_first_audio = messageProtocol.statisticsData.ttsFirstAudio;
-            long total = asr + custom_prompt + llm_first_token + tts_first_audio;
-            
-            NSLog(@"cmd=100 PerfStatics(ms), seqId=%ld round=%ld asr=%ld custom_prompt=%ld llm_first_sentence=%ld tts_first_sentence=%ld llm_first_token=%ld tts_first_audio=%ld total=%ld ",
-                    seqId, round, asr, custom_prompt, llm_first_sentence, tts_first_sentence, llm_first_token, tts_first_audio, total);
-        }
     }
 }
 

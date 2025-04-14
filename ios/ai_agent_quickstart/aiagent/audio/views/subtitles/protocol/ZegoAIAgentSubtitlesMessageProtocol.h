@@ -24,9 +24,7 @@ typedef NS_ENUM(NSInteger, ZegoAIAgentSubtitlesMessageCommand) {
     /** 识别的ASR文本 - 语音识别结果 */
     ZegoAgentMessageCmdASRText = 3,
     /** LLM文本 - 大语言模型生成的回复文本 */
-    ZegoAgentMessageCmdLLMText = 4,
-    /** 统计相关数据 - 仅供内部使用，包含性能和时间统计 */
-    ZegoAgentMessageCmdStatistics = 100
+    ZegoAgentMessageCmdLLMText = 4
 };
 
 /**
@@ -126,41 +124,6 @@ typedef NS_ENUM(NSInteger, ZegoAIAgentSubtitlesSpeakStatus) {
 @end
 
 /**
- * @class ZegoAIAgentSubtitlesStatisticsData
- * @brief 性能统计数据模型
- *
- * 封装了会话过程中各个阶段的性能统计数据，包括ASR识别、LLM处理和TTS生成的时间统计。
- * 此类主要用于内部性能监控和优化，提供了完整的时间耗时分析。
- */
-@interface ZegoAIAgentSubtitlesStatisticsData : NSObject
-/** ASR识别耗时(ms)：从用户说话结束到ASR识别完成的时间 */
-@property (nonatomic, assign) int asr;
-/** 获取自定义Prompt耗时(ms) */
-@property (nonatomic, assign) int customPrompt;
-/** LLM首个token耗时(ms)：从LLM调用开始到生成首个token的时间 */
-@property (nonatomic, assign) int llmFirstToken;
-/** TTS首帧耗时(ms)：从LLM首个token到TTS生成首帧音频的时间 */
-@property (nonatomic, assign) int ttsFirstAudio;
-/** LLM首句耗时(ms)：从LLM首个token到生成首个完整句子的时间 */
-@property (nonatomic, assign) int llmFirstSentence;
-/** TTS首句耗时(ms)：从LLM首个token到TTS合成首个完整句子的时间 */
-@property (nonatomic, assign) int ttsFirstSentence;
-
-/**
- * 从字典创建统计数据对象
- * @param dict 包含统计数据的字典
- * @return 新创建的统计数据对象
- */
-- (instancetype)initWithDictionary:(NSDictionary *)dict;
-
-/**
- * 将统计数据转换为字典
- * @return 包含统计数据的字典
- */
-- (NSDictionary *)toDictionary;
-@end
-
-/**
  * @class ZegoAIAgentSubtitlesMessageProtocol
  * @brief RTC房间事件消息协议类
  *
@@ -210,12 +173,6 @@ typedef NS_ENUM(NSInteger, ZegoAIAgentSubtitlesSpeakStatus) {
  * 仅当cmdType = ZegoAgentMessageCmdLLMText时有效
  */
 @property (nonatomic, strong, readonly, nullable) ZegoAIAgentSubtitlesLLMTextData *llmTextData;
-
-/** 
- * 统计数据
- * 仅当cmdType = ZegoAgentMessageCmdStatistics时有效
- */
-@property (nonatomic, strong, readonly, nullable) ZegoAIAgentSubtitlesStatisticsData *statisticsData;
 
 /**
  * 根据JSON数据初始化消息内容

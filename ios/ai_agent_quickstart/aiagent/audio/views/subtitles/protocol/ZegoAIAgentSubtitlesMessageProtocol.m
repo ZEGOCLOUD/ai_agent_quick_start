@@ -119,61 +119,6 @@
 
 @end
 
-#pragma mark - ZegoAgentStatisticsData
-
-@implementation ZegoAIAgentSubtitlesStatisticsData
-
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        _asr = 0;
-        _customPrompt = 0;
-        _llmFirstToken = 0;
-        _ttsFirstAudio = 0;
-        _llmFirstSentence = 0;
-        _ttsFirstSentence = 0;
-    }
-    return self;
-}
-
-- (instancetype)initWithDictionary:(NSDictionary *)dict {
-    self = [self init];
-    if (self) {
-        if (dict[@"ASR"]) {
-            _asr = [dict[@"ASR"] intValue];
-        }
-        if (dict[@"CustomPrompt"]) {
-            _customPrompt = [dict[@"CustomPrompt"] intValue];
-        }
-        if (dict[@"LlmFirstToken"]) {
-            _llmFirstToken = [dict[@"LlmFirstToken"] intValue];
-        }
-        if (dict[@"TtsFirstAudio"]) {
-            _ttsFirstAudio = [dict[@"TtsFirstAudio"] intValue];
-        }
-        if (dict[@"LlmFirstSentence"]) {
-            _llmFirstSentence = [dict[@"LlmFirstSentence"] intValue];
-        }
-        if (dict[@"TtsFirstSentence"]) {
-            _ttsFirstSentence = [dict[@"TtsFirstSentence"] intValue];
-        }
-    }
-    return self;
-}
-
-- (NSDictionary *)toDictionary {
-    return @{
-        @"ASR": @(self.asr),
-        @"CustomPrompt": @(self.customPrompt),
-        @"LlmFirstToken": @(self.llmFirstToken),
-        @"TtsFirstAudio": @(self.ttsFirstAudio),
-        @"LlmFirstSentence": @(self.llmFirstSentence),
-        @"TtsFirstSentence": @(self.ttsFirstSentence)
-    };
-}
-
-@end
-
 #pragma mark - ZegoAgentMessageContent
 
 @implementation ZegoAIAgentSubtitlesMessageProtocol {
@@ -181,7 +126,6 @@
     ZegoAIAgentSubtitlesSpeakStatusData *_agentSpeakData;
     ZegoAIAgentSubtitlesASRTextData *_asrTextData;
     ZegoAIAgentSubtitlesLLMTextData *_llmTextData;
-    ZegoAIAgentSubtitlesStatisticsData *_statisticsData;
 }
 
 - (instancetype)init {
@@ -242,10 +186,6 @@
             _llmTextData = [[ZegoAIAgentSubtitlesLLMTextData alloc] initWithDictionary:_data];
             break;
             
-        case ZegoAgentMessageCmdStatistics:
-            _statisticsData = [[ZegoAIAgentSubtitlesStatisticsData alloc] initWithDictionary:_data];
-            break;
-            
         default:
             break;
     }
@@ -293,14 +233,6 @@
         case ZegoAgentMessageCmdLLMText:
             if (_llmTextData) {
                 dict[@"Data"] = [_llmTextData toDictionary];
-            } else {
-                dict[@"Data"] = @{};
-            }
-            break;
-            
-        case ZegoAgentMessageCmdStatistics:
-            if (_statisticsData) {
-                dict[@"Data"] = [_statisticsData toDictionary];
             } else {
                 dict[@"Data"] = @{};
             }

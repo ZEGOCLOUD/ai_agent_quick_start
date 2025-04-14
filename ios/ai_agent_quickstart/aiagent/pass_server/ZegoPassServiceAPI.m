@@ -74,8 +74,6 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
         return;
     }
     
-    self.streamToPlay = [self getAgentStreamID];
-    
     [self initZegoExpressEngine];
     [self loginRoom:^(int errorCode, NSDictionary *extendedData) {
         if (errorCode!=0) {
@@ -89,6 +87,9 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
         [[ZegoExpressEngine sharedEngine] callExperimentalAPI:params_publish];
         //进房后开始推流
         [self startPushlishStream];
+        
+        /// 记录智能体流信息
+        self.streamToPlay = [self getAgentStreamID];
         
         // 创建Agent实例
         [self createAgentInstanceWithCompletion:^(ZegoPassCreateAgentInstanceResponse *response) {
@@ -238,8 +239,7 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
     ZegoEngineProfile* profile = [[ZegoEngineProfile alloc]init];
     profile.appID = kZegoPassAppId;
     profile.appSign = kZegoPassAppSign;
-    profile.scenario = ZegoScenarioStandardVoiceCall; //设置该场景可以避免申请相机权限，接入方应按自己的业务场景设置具体值
-    NSLog(@"已设置引擎配置文件：场景=ZegoScenarioStandardVoiceCall");
+    profile.scenario = ZegoScenarioHighQualityChatroom; //设置该场景可以避免申请相机权限，接入方应按自己的业务场景设置具体值
     
     ZegoEngineConfig* engineConfig = [[ZegoEngineConfig alloc] init];
     engineConfig.advancedConfig = @{
@@ -250,7 +250,6 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
         @"set_audio_volume_ducking_mode":@1,/**该配置是用来做音量闪避的**/
         @"enable_rnd_volume_adaptive":@"true",/**该配置是用来做播放音量自适用**/
     };
-    NSLog(@"已设置高级音频配置项");
     
     [ZegoExpressEngine setEngineConfig:engineConfig];
     [ZegoExpressEngine createEngineWithProfile:profile eventHandler:self];
