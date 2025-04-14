@@ -1,0 +1,53 @@
+platform :ios, '13.0'
+
+target 'ai_agent_quickstart' do
+  # 使用 use_frameworks! 确保生成动态框架
+  use_frameworks!
+
+  # 修改路径到正确的 podspec 位置
+  pod 'ZegoExpressEngine', :path => 'libs/Express'
+  pod 'Masonry', '1.1.0'
+end
+
+# 添加 post_install 钩子来处理权限问题
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      # 基本构建设置
+      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      
+      # 代码签名设置
+      config.build_settings['CODE_SIGN_IDENTITY'] = ''
+      config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
+      config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+      
+      # 添加框架搜索路径
+      config.build_settings['FRAMEWORK_SEARCH_PATHS'] ||= ['$(inherited)', '$(PROJECT_DIR)/libs']
+      
+      # 添加权限相关设置
+      config.build_settings['EXPANDED_CODE_SIGN_IDENTITY'] = ''
+      config.build_settings['EXPANDED_CODE_SIGN_IDENTITY_NAME'] = ''
+      config.build_settings['SKIP_INSTALL'] = 'NO'
+      
+      # 添加其他必要的构建设置
+      config.build_settings.delete 'ARCHS'
+      config.build_settings['VALID_ARCHS'] = '$(ARCHS_STANDARD)'
+      config.build_settings['ONLY_ACTIVE_ARCH'] = 'NO'
+      
+      # 确保拥有正确的文件访问权限
+      config.build_settings['COMPILER_INDEX_STORE_ENABLE'] = 'NO'
+      
+      # 禁用沙盒化以解决文件访问权限问题
+      config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
+    end
+  end
+  
+  # 修复 deployment target 警告
+  installer.pods_project.build_configurations.each do |config|
+    config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+    # 禁用沙盒化 - 项目级别
+    config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
+  end
+end

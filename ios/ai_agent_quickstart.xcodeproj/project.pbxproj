@@ -1,0 +1,626 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		410323862DA91D600051488B /* ZegoAIAgentSubtitlesColors.m in Sources */ = {isa = PBXBuildFile; fileRef = 4103236F2DA91D600051488B /* ZegoAIAgentSubtitlesColors.m */; };
+		410323872DA91D600051488B /* ZegoAIAgentSubtitlesDefines.m in Sources */ = {isa = PBXBuildFile; fileRef = 410323712DA91D600051488B /* ZegoAIAgentSubtitlesDefines.m */; };
+		410323892DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 410323762DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.m */; };
+		4103238A2DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 410323792DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.m */; };
+		4103238B2DA91D600051488B /* ZegoAIAgentSubtitlesCellLabelView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4103237C2DA91D600051488B /* ZegoAIAgentSubtitlesCellLabelView.m */; };
+		4103238C2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4103237E2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.m */; };
+		4103238D2DA91D600051488B /* ZegoAIAgentSubtitlesTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 410323812DA91D600051488B /* ZegoAIAgentSubtitlesTableView.m */; };
+		4103238E2DA91D600051488B /* ZegoAIAgentStatusView.m in Sources */ = {isa = PBXBuildFile; fileRef = 410323842DA91D600051488B /* ZegoAIAgentStatusView.m */; };
+		410323962DA9235D0051488B /* ZegoAIAgentAudioSubtitlesForegroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = 410323952DA9235D0051488B /* ZegoAIAgentAudioSubtitlesForegroundView.m */; };
+		410B350D2DA7CE0A00CFA563 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B350C2DA7CE0A00CFA563 /* AppDelegate.m */; };
+		410B35102DA7CE0A00CFA563 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B350F2DA7CE0A00CFA563 /* SceneDelegate.m */; };
+		410B35132DA7CE0A00CFA563 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B35122DA7CE0A00CFA563 /* ViewController.m */; };
+		410B35162DA7CE0A00CFA563 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 410B35152DA7CE0A00CFA563 /* Base */; };
+		410B35182DA7CE0D00CFA563 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 410B35172DA7CE0D00CFA563 /* Assets.xcassets */; };
+		410B351B2DA7CE0D00CFA563 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 410B351A2DA7CE0D00CFA563 /* Base */; };
+		410B351E2DA7CE0D00CFA563 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B351D2DA7CE0D00CFA563 /* main.m */; };
+		41A863082DA7E51400B1A58B /* ZegoPassAgentConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A862F52DA7E51400B1A58B /* ZegoPassAgentConfig.m */; };
+		41A863092DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A862F72DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.m */; };
+		41A8630A2DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A862F92DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.m */; };
+		41A8630B2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A862FB2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.m */; };
+		41A8630C2DA7E51400B1A58B /* ZegoPassKey.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A862FD2DA7E51400B1A58B /* ZegoPassKey.m */; };
+		41A8630E2DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863012DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.m */; };
+		41A8630F2DA7E51400B1A58B /* ZegoPassServiceAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863032DA7E51400B1A58B /* ZegoPassServiceAPI.m */; };
+		41A863102DA7E51400B1A58B /* ZegoPassServiceProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863052DA7E51400B1A58B /* ZegoPassServiceProtocol.m */; };
+		41A863212DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */; };
+		41D010002DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 41D00FFE2DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m */; };
+		994E4C380DE5CD27D691850B /* Pods_ai_agent_quickstart.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 47C796174EF6FCC7EACFC4DE /* Pods_ai_agent_quickstart.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		3EE465397784B4ABB6270D64 /* Pods-ai_agent_quickstart.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ai_agent_quickstart.release.xcconfig"; path = "Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart.release.xcconfig"; sourceTree = "<group>"; };
+		4103236F2DA91D600051488B /* ZegoAIAgentSubtitlesColors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesColors.m; sourceTree = "<group>"; };
+		410323702DA91D600051488B /* ZegoAIAgentSubtitlesDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesDefines.h; sourceTree = "<group>"; };
+		410323712DA91D600051488B /* ZegoAIAgentSubtitlesDefines.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesDefines.m; sourceTree = "<group>"; };
+		410323752DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesMessageProtocol.h; sourceTree = "<group>"; };
+		410323762DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesMessageProtocol.m; sourceTree = "<group>"; };
+		410323772DA91D600051488B /* ZegoAIAgentSubtitlesEventHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesEventHandler.h; sourceTree = "<group>"; };
+		410323782DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesMessageDispatcher.h; sourceTree = "<group>"; };
+		410323792DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesMessageDispatcher.m; sourceTree = "<group>"; };
+		4103237C2DA91D600051488B /* ZegoAIAgentSubtitlesCellLabelView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesCellLabelView.m; sourceTree = "<group>"; };
+		4103237D2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesTableViewCell.h; sourceTree = "<group>"; };
+		4103237E2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesTableViewCell.m; sourceTree = "<group>"; };
+		410323802DA91D600051488B /* ZegoAIAgentSubtitlesTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesTableView.h; sourceTree = "<group>"; };
+		410323812DA91D600051488B /* ZegoAIAgentSubtitlesTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesTableView.m; sourceTree = "<group>"; };
+		410323842DA91D600051488B /* ZegoAIAgentStatusView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentStatusView.m; sourceTree = "<group>"; };
+		410323932DA922D50051488B /* ZegoAIAgentStatusView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentStatusView.h; sourceTree = "<group>"; };
+		410323942DA9235D0051488B /* ZegoAIAgentAudioSubtitlesForegroundView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentAudioSubtitlesForegroundView.h; sourceTree = "<group>"; };
+		410323952DA9235D0051488B /* ZegoAIAgentAudioSubtitlesForegroundView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentAudioSubtitlesForegroundView.m; sourceTree = "<group>"; };
+		410323972DA924A30051488B /* ZegoAIAgentSubtitlesCellLabelView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesCellLabelView.h; sourceTree = "<group>"; };
+		4103239A2DA924F40051488B /* ZegoAIAgentSubtitlesColors.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesColors.h; sourceTree = "<group>"; };
+		410B35082DA7CE0A00CFA563 /* ai_agent_quickstart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ai_agent_quickstart.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		410B350B2DA7CE0A00CFA563 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		410B350C2DA7CE0A00CFA563 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		410B350E2DA7CE0A00CFA563 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
+		410B350F2DA7CE0A00CFA563 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
+		410B35112DA7CE0A00CFA563 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		410B35122DA7CE0A00CFA563 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		410B35152DA7CE0A00CFA563 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		410B35172DA7CE0D00CFA563 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		410B351A2DA7CE0D00CFA563 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		410B351C2DA7CE0D00CFA563 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		410B351D2DA7CE0D00CFA563 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		41A862F42DA7E51400B1A58B /* ZegoPassAgentConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassAgentConfig.h; sourceTree = "<group>"; };
+		41A862F52DA7E51400B1A58B /* ZegoPassAgentConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassAgentConfig.m; sourceTree = "<group>"; };
+		41A862F62DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassCreateAgentInstanceRequest.h; sourceTree = "<group>"; };
+		41A862F72DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassCreateAgentInstanceRequest.m; sourceTree = "<group>"; };
+		41A862F82DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassCreateAgentInstanceResponse.h; sourceTree = "<group>"; };
+		41A862F92DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassCreateAgentInstanceResponse.m; sourceTree = "<group>"; };
+		41A862FA2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassDeleteAgentInstanceRequest.h; sourceTree = "<group>"; };
+		41A862FB2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassDeleteAgentInstanceRequest.m; sourceTree = "<group>"; };
+		41A862FC2DA7E51400B1A58B /* ZegoPassKey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassKey.h; sourceTree = "<group>"; };
+		41A862FD2DA7E51400B1A58B /* ZegoPassKey.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassKey.m; sourceTree = "<group>"; };
+		41A863002DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassRegisterAgentRequest.h; sourceTree = "<group>"; };
+		41A863012DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassRegisterAgentRequest.m; sourceTree = "<group>"; };
+		41A863022DA7E51400B1A58B /* ZegoPassServiceAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassServiceAPI.h; sourceTree = "<group>"; };
+		41A863032DA7E51400B1A58B /* ZegoPassServiceAPI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassServiceAPI.m; sourceTree = "<group>"; };
+		41A863042DA7E51400B1A58B /* ZegoPassServiceProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassServiceProtocol.h; sourceTree = "<group>"; };
+		41A863052DA7E51400B1A58B /* ZegoPassServiceProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassServiceProtocol.m; sourceTree = "<group>"; };
+		41A8631F2DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentAudioViewController.h; sourceTree = "<group>"; };
+		41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentAudioViewController.m; sourceTree = "<group>"; };
+		41A863282DA7EF2A00B1A58B /* ZegoExpressEngine.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ZegoExpressEngine.xcframework; path = libs/Express/Library/ZegoExpressEngine.xcframework; sourceTree = "<group>"; };
+		41D00FFE2DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesMessageModel.m; sourceTree = "<group>"; };
+		41D00FFF2DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesMessageModel.h; sourceTree = "<group>"; };
+		47C796174EF6FCC7EACFC4DE /* Pods_ai_agent_quickstart.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ai_agent_quickstart.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		DDC0A4DEA925D0CF2BE3E972 /* Pods-ai_agent_quickstart.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ai_agent_quickstart.debug.xcconfig"; path = "Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart.debug.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		410B35052DA7CE0A00CFA563 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				994E4C380DE5CD27D691850B /* Pods_ai_agent_quickstart.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		410323742DA91D600051488B /* core */ = {
+			isa = PBXGroup;
+			children = (
+				4103239A2DA924F40051488B /* ZegoAIAgentSubtitlesColors.h */,
+				4103236F2DA91D600051488B /* ZegoAIAgentSubtitlesColors.m */,
+				410323702DA91D600051488B /* ZegoAIAgentSubtitlesDefines.h */,
+				410323712DA91D600051488B /* ZegoAIAgentSubtitlesDefines.m */,
+			);
+			path = core;
+			sourceTree = "<group>";
+		};
+		4103237A2DA91D600051488B /* protocol */ = {
+			isa = PBXGroup;
+			children = (
+				410323782DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.h */,
+				410323792DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.m */,
+				410323772DA91D600051488B /* ZegoAIAgentSubtitlesEventHandler.h */,
+				410323752DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.h */,
+				410323762DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.m */,
+			);
+			path = protocol;
+			sourceTree = "<group>";
+		};
+		4103237F2DA91D600051488B /* views */ = {
+			isa = PBXGroup;
+			children = (
+				41D00FFF2DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.h */,
+				41D00FFE2DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m */,
+				410323972DA924A30051488B /* ZegoAIAgentSubtitlesCellLabelView.h */,
+				4103237C2DA91D600051488B /* ZegoAIAgentSubtitlesCellLabelView.m */,
+				4103237D2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.h */,
+				4103237E2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.m */,
+			);
+			path = views;
+			sourceTree = "<group>";
+		};
+		410323822DA91D600051488B /* subtitles */ = {
+			isa = PBXGroup;
+			children = (
+				410323742DA91D600051488B /* core */,
+				4103237A2DA91D600051488B /* protocol */,
+				4103237F2DA91D600051488B /* views */,
+				410323802DA91D600051488B /* ZegoAIAgentSubtitlesTableView.h */,
+				410323812DA91D600051488B /* ZegoAIAgentSubtitlesTableView.m */,
+			);
+			path = subtitles;
+			sourceTree = "<group>";
+		};
+		410323852DA91D600051488B /* views */ = {
+			isa = PBXGroup;
+			children = (
+				410323822DA91D600051488B /* subtitles */,
+				410323932DA922D50051488B /* ZegoAIAgentStatusView.h */,
+				410323842DA91D600051488B /* ZegoAIAgentStatusView.m */,
+				410323942DA9235D0051488B /* ZegoAIAgentAudioSubtitlesForegroundView.h */,
+				410323952DA9235D0051488B /* ZegoAIAgentAudioSubtitlesForegroundView.m */,
+			);
+			path = views;
+			sourceTree = "<group>";
+		};
+		410B34FF2DA7CE0A00CFA563 = {
+			isa = PBXGroup;
+			children = (
+				410B350A2DA7CE0A00CFA563 /* ai_agent_quickstart */,
+				410B35092DA7CE0A00CFA563 /* Products */,
+				9CA74BF5EE6BCF7EB51765FF /* Pods */,
+				D8617B052F094CBD82AB3FED /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		410B35092DA7CE0A00CFA563 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				410B35082DA7CE0A00CFA563 /* ai_agent_quickstart.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		410B350A2DA7CE0A00CFA563 /* ai_agent_quickstart */ = {
+			isa = PBXGroup;
+			children = (
+				41A863072DA7E51400B1A58B /* aiagent */,
+				410B350B2DA7CE0A00CFA563 /* AppDelegate.h */,
+				410B350C2DA7CE0A00CFA563 /* AppDelegate.m */,
+				410B350E2DA7CE0A00CFA563 /* SceneDelegate.h */,
+				410B350F2DA7CE0A00CFA563 /* SceneDelegate.m */,
+				410B35112DA7CE0A00CFA563 /* ViewController.h */,
+				410B35122DA7CE0A00CFA563 /* ViewController.m */,
+				410B35142DA7CE0A00CFA563 /* Main.storyboard */,
+				410B35172DA7CE0D00CFA563 /* Assets.xcassets */,
+				410B35192DA7CE0D00CFA563 /* LaunchScreen.storyboard */,
+				410B351C2DA7CE0D00CFA563 /* Info.plist */,
+				410B351D2DA7CE0D00CFA563 /* main.m */,
+			);
+			path = ai_agent_quickstart;
+			sourceTree = "<group>";
+		};
+		41A863062DA7E51400B1A58B /* pass_server */ = {
+			isa = PBXGroup;
+			children = (
+				41A863022DA7E51400B1A58B /* ZegoPassServiceAPI.h */,
+				41A863032DA7E51400B1A58B /* ZegoPassServiceAPI.m */,
+				41A862FC2DA7E51400B1A58B /* ZegoPassKey.h */,
+				41A862FD2DA7E51400B1A58B /* ZegoPassKey.m */,
+				41A862F42DA7E51400B1A58B /* ZegoPassAgentConfig.h */,
+				41A862F52DA7E51400B1A58B /* ZegoPassAgentConfig.m */,
+				41A863042DA7E51400B1A58B /* ZegoPassServiceProtocol.h */,
+				41A863052DA7E51400B1A58B /* ZegoPassServiceProtocol.m */,
+				41A862F62DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.h */,
+				41A862F72DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.m */,
+				41A862F82DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.h */,
+				41A862F92DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.m */,
+				41A862FA2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.h */,
+				41A862FB2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.m */,
+				41A863002DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.h */,
+				41A863012DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.m */,
+			);
+			path = pass_server;
+			sourceTree = "<group>";
+		};
+		41A863072DA7E51400B1A58B /* aiagent */ = {
+			isa = PBXGroup;
+			children = (
+				41A863062DA7E51400B1A58B /* pass_server */,
+				41A863112DA7E67800B1A58B /* audio */,
+			);
+			path = aiagent;
+			sourceTree = "<group>";
+		};
+		41A863112DA7E67800B1A58B /* audio */ = {
+			isa = PBXGroup;
+			children = (
+				410323852DA91D600051488B /* views */,
+				41A8631F2DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.h */,
+				41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */,
+			);
+			path = audio;
+			sourceTree = "<group>";
+		};
+		9CA74BF5EE6BCF7EB51765FF /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				DDC0A4DEA925D0CF2BE3E972 /* Pods-ai_agent_quickstart.debug.xcconfig */,
+				3EE465397784B4ABB6270D64 /* Pods-ai_agent_quickstart.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		D8617B052F094CBD82AB3FED /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				41A863282DA7EF2A00B1A58B /* ZegoExpressEngine.xcframework */,
+				47C796174EF6FCC7EACFC4DE /* Pods_ai_agent_quickstart.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		410B35072DA7CE0A00CFA563 /* ai_agent_quickstart */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 410B35372DA7CE0E00CFA563 /* Build configuration list for PBXNativeTarget "ai_agent_quickstart" */;
+			buildPhases = (
+				3C6F7153714B50D410A97996 /* [CP] Check Pods Manifest.lock */,
+				410B35042DA7CE0A00CFA563 /* Sources */,
+				410B35052DA7CE0A00CFA563 /* Frameworks */,
+				410B35062DA7CE0A00CFA563 /* Resources */,
+				CE215F5DDC37F600E8F7EE4D /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ai_agent_quickstart;
+			productName = ai_agent_quickstart;
+			productReference = 410B35082DA7CE0A00CFA563 /* ai_agent_quickstart.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		410B35002DA7CE0A00CFA563 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					410B35072DA7CE0A00CFA563 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+				};
+			};
+			buildConfigurationList = 410B35032DA7CE0A00CFA563 /* Build configuration list for PBXProject "ai_agent_quickstart" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 410B34FF2DA7CE0A00CFA563;
+			productRefGroup = 410B35092DA7CE0A00CFA563 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				410B35072DA7CE0A00CFA563 /* ai_agent_quickstart */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		410B35062DA7CE0A00CFA563 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				410B35182DA7CE0D00CFA563 /* Assets.xcassets in Resources */,
+				410B351B2DA7CE0D00CFA563 /* Base in Resources */,
+				410B35162DA7CE0A00CFA563 /* Base in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3C6F7153714B50D410A97996 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ai_agent_quickstart-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CE215F5DDC37F600E8F7EE4D /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		410B35042DA7CE0A00CFA563 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				41A8630E2DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.m in Sources */,
+				41D010002DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m in Sources */,
+				4103238A2DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.m in Sources */,
+				41A8630F2DA7E51400B1A58B /* ZegoPassServiceAPI.m in Sources */,
+				41A8630A2DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.m in Sources */,
+				41A863082DA7E51400B1A58B /* ZegoPassAgentConfig.m in Sources */,
+				410B35132DA7CE0A00CFA563 /* ViewController.m in Sources */,
+				41A8630B2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.m in Sources */,
+				41A863092DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.m in Sources */,
+				410323872DA91D600051488B /* ZegoAIAgentSubtitlesDefines.m in Sources */,
+				410B350D2DA7CE0A00CFA563 /* AppDelegate.m in Sources */,
+				4103238C2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.m in Sources */,
+				410323862DA91D600051488B /* ZegoAIAgentSubtitlesColors.m in Sources */,
+				4103238E2DA91D600051488B /* ZegoAIAgentStatusView.m in Sources */,
+				4103238D2DA91D600051488B /* ZegoAIAgentSubtitlesTableView.m in Sources */,
+				41A863102DA7E51400B1A58B /* ZegoPassServiceProtocol.m in Sources */,
+				410B351E2DA7CE0D00CFA563 /* main.m in Sources */,
+				410323962DA9235D0051488B /* ZegoAIAgentAudioSubtitlesForegroundView.m in Sources */,
+				41A863212DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m in Sources */,
+				410B35102DA7CE0A00CFA563 /* SceneDelegate.m in Sources */,
+				41A8630C2DA7E51400B1A58B /* ZegoPassKey.m in Sources */,
+				4103238B2DA91D600051488B /* ZegoAIAgentSubtitlesCellLabelView.m in Sources */,
+				410323892DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		410B35142DA7CE0A00CFA563 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				410B35152DA7CE0A00CFA563 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		410B35192DA7CE0D00CFA563 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				410B351A2DA7CE0D00CFA563 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		410B35352DA7CE0E00CFA563 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		410B35362DA7CE0E00CFA563 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		410B35382DA7CE0E00CFA563 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DDC0A4DEA925D0CF2BE3E972 /* Pods-ai_agent_quickstart.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B82BHJ5H89;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ai_agent_quickstart/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "im.zego.aiagent.quickstart.ai-agent-quickstart";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		410B35392DA7CE0E00CFA563 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3EE465397784B4ABB6270D64 /* Pods-ai_agent_quickstart.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B82BHJ5H89;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ai_agent_quickstart/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "im.zego.aiagent.quickstart.ai-agent-quickstart";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		410B35032DA7CE0A00CFA563 /* Build configuration list for PBXProject "ai_agent_quickstart" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				410B35352DA7CE0E00CFA563 /* Debug */,
+				410B35362DA7CE0E00CFA563 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		410B35372DA7CE0E00CFA563 /* Build configuration list for PBXNativeTarget "ai_agent_quickstart" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				410B35382DA7CE0E00CFA563 /* Debug */,
+				410B35392DA7CE0E00CFA563 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 410B35002DA7CE0A00CFA563 /* Project object */;
+}
