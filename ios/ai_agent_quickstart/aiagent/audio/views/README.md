@@ -25,13 +25,13 @@
 
 协议基本结构：
 
-| 参数      | 类型   | 描述                                                                                                                   |
-| --------- | ------ | ---------------------------------------------------------------------------------------------------------------------- |
-| Timestamp | int64  | 时间戳，秒级别                                                                                                         |
-| SeqId     | int64  | 包序列号，保证有序性，不保证连续性                                                                                     |
-| Round     | int64  | 对话轮次，每次用户主动说话轮次增加                                                                                     |
-| Cmd       | int    | 1:用户说话状态`<br>`2:智能体说话状态`<br>`3:识别的ASR文本`<br>`4:LLM文本`<br>`100:延时统计数据【禁止对外提供】 |
-| Data      | Object | 具体内容，各Cmd对应不同Data                                                                                            |
+| 参数      | 类型   | 描述                                                                              |
+| --------- | ------ | --------------------------------------------------------------------------------- |
+| Timestamp | int64  | 时间戳，秒级别                                                                    |
+| SeqId     | int64  | 包序列号，保证有序性，不保证连续性                                                |
+| Round     | int64  | 对话轮次，每次用户主动说话轮次增加                                                |
+| Cmd       | int    | 1:用户说话状态 `<br>`2:智能体说话状态 `<br>`3:识别的ASR文本 `<br>`4:LLM文本 |
+| Data      | Object | 具体内容，各Cmd对应不同Data                                                       |
 
 #### 2.1.1 Cmd = 1 (用户说话状态)
 
@@ -99,8 +99,6 @@ flowchart TD
 ```objective-c
 // 在头文件中实现ZegoEventHandler协议
 @interface YourViewController () <ZegoEventHandler>
-@property (nonatomic, strong) ZegoAIAgentSubtitlesTableView *subtitlesView;
-@property (nonatomic, assign) ZegoAIAgentSessionState chatSessionState;
 @end
 
 // 在实现文件中
