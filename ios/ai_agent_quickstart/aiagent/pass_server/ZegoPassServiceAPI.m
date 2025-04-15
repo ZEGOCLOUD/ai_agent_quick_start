@@ -75,7 +75,11 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
     }
     
     [self initZegoExpressEngine];
+    __weak typeof(self) weakSelf = self;
     [self loginRoom:^(int errorCode, NSDictionary *extendedData) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) { return; }
+        
         if (errorCode!=0) {
             NSString* errorMsg =[NSString stringWithFormat:@"进入语音房间失败:%d", errorCode];
             completion(NO, errorMsg);
@@ -86,13 +90,16 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
         NSString *params_publish = @"{\"method\":\"liveroom.audio.set_publish_latency_mode\",\"params\":{\"mode\":1,\"channel\":0}}";
         [[ZegoExpressEngine sharedEngine] callExperimentalAPI:params_publish];
         //进房后开始推流
-        [self startPushlishStream];
+        [strongSelf startPushlishStream];
         
         /// 记录智能体流信息
-        self.streamToPlay = [self getAgentStreamID];
+        strongSelf.streamToPlay = [strongSelf getAgentStreamID];
         
         // 创建Agent实例
-        [self createAgentInstanceWithCompletion:^(ZegoPassCreateAgentInstanceResponse *response) {
+        [strongSelf createAgentInstanceWithCompletion:^(ZegoPassCreateAgentInstanceResponse *response) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) { return; }
+            
             if (response.code == 0 && response.agentInstanceId) {
                 if (completion) {
                     completion(YES, nil);
@@ -334,11 +341,13 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
     user.userID = self.userId;
     
     NSLog(@"开始登录房间...");
+    __weak typeof(self) weakSelf = self;
     [[ZegoExpressEngine sharedEngine] loginRoom:self.roomId
                                            user:user
                                          config:roomConfig
                                        callback:^(int errorCode, NSDictionary * _Nonnull extendedData) {
-        NSLog(@"loginRoom 调用结果: code=%d, roomID=%@", errorCode, self.roomId);
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        NSLog(@"loginRoom 调用结果: code=%d, roomID=%@", errorCode, strongSelf.roomId);
         
         if (errorCode != 0) {
             NSLog(@"loginRoom 失败: code=%d, extendedData=%@", errorCode, extendedData);
@@ -346,7 +355,7 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
             return;
         }
         
-        NSLog(@"loginRoom 成功: roomID=%@", self.roomId);
+        NSLog(@"loginRoom 成功: roomID=%@", strongSelf.roomId);
         complete(errorCode, extendedData);
     }];
 }

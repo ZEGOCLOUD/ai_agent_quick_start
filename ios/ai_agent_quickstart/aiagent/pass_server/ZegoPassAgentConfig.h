@@ -188,7 +188,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// 语音识别配置
 @property (nonatomic, strong, nullable) ZegoPassASR *asr;
 /// 扩展参数数组
-@property (nonatomic, strong, nullable) NSArray<ZegoPassExtensionParam *> *extensionParams;
+@property (nonatomic, strong, nullable) NSDictionary *extensionParams;
 
 /**
  * 将对象转换为字典

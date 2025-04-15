@@ -24,10 +24,16 @@
     [self setupForeground];
     [self setupCloseBotton];
     
+    __weak typeof(self) weakSelf = self;
     [[ZegoPassServiceAPI sharedInstance] initWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
+        
         if(success) {
             // 开始音频聊天流程
-            [self startAudioChat];
+            [strongSelf startAudioChat];
         } else {
             NSLog(@"初始化错误");
         }
@@ -119,12 +125,18 @@
         }
         
         // 2. 开始聊天会话
+        __weak typeof(self) weakSelf = self;
         [[ZegoPassServiceAPI sharedInstance] startChatWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            
             if (success) {
                 NSLog(@"音频聊天开始成功");
                 
-                if(nil != self.foregroundView) {
-                    [self.foregroundView updateStatusText:@"已连接"];
+                if(nil != strongSelf.foregroundView) {
+                    [strongSelf.foregroundView updateStatusText:@"已连接"];
                 }
             } else {
                 NSLog(@"音频聊天开始失败：%@", errorMessage);
@@ -157,4 +169,4 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-@end 
+@end

@@ -139,13 +139,7 @@
     
     if (self.asr) dict[@"ASR"] = [self.asr toDictionary];
     
-    if (self.extensionParams) {
-        NSMutableArray *extensionParamsArray = [NSMutableArray array];
-        for (ZegoPassExtensionParam *param in self.extensionParams) {
-            [extensionParamsArray addObject:[param toDictionary]];
-        }
-        dict[@"ExtensionParams"] = extensionParamsArray;
-    }
+    dict[@"ExtensionParams"] = self.extensionParams;
     
     return dict;
 }
