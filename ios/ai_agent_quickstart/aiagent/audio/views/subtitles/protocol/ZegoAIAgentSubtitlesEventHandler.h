@@ -40,6 +40,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)onRecvLLMChatMsg:(ZegoAIAgentAudioSubtitlesMessage*)message;
 
+/**
+ * 接收到Express实验性API内容
+ * @param content API内容
+ */
+- (void)onExpressExperimentalAPIContent:(NSString *)content;
+
 @end
 
 NS_ASSUME_NONNULL_END 

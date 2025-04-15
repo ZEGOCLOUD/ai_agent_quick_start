@@ -64,6 +64,15 @@
         return;
     }
     
+    // 向事件处理程序分发原始内容
+    @synchronized (self.eventHandlers) {
+        for (id<ZegoAIAgentSubtitlesEventHandler> handler in self.eventHandlers) {
+            if ([handler respondsToSelector:@selector(onExpressExperimentalAPIContent:)]) {
+                [handler onExpressExperimentalAPIContent:content];
+            }
+        }
+    }
+    
     NSDictionary* contentDict = [self dictFromJson:content];
     if (!contentDict) {
          NSLog(@"parseExperimentalAPIContent content解析失败: %@", content);
