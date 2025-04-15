@@ -107,7 +107,7 @@ flowchart TD
 ```objective-c
 // 实现ZegoEventHandler协议
 @interface YourService () <ZegoEventHandler>
-@property (nonatomic, strong) YourViewController *foregroundView;
+@property (nonatomic, strong) YourViewController *youViewController;
 @end
 
 @implementation YourService
@@ -118,7 +118,7 @@ flowchart TD
     [self.youViewController handleExpressExperimentalAPIContent:content];
 }
 
-@end // YourViewController implementation
+@end // YourService implementation
 ```
 
 ```objective-c// 在头文件中实现ZegoEventHandler协议
