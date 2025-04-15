@@ -374,3 +374,74 @@ sequenceDiagram
    **解答**: 使用SeqId对消息进行排序，确保按照正确顺序处理和显示。
 4. **问题**: 如何提高字幕显示的流畅度？
    **解答**: 优化UI更新逻辑，减少主线程阻塞，可以考虑使用异步处理消息和UI更新。
+
+# 代码目录结构与文件说明
+
+AI语音通话实时字幕功能的代码结构如下，主要包含UI视图组件、字幕处理核心逻辑和协议定义等内容。
+
+## 1 顶层视图组件
+
+| 文件名 | 说明 |
+|--------|------|
+| ZegoAIAgentAudioSubtitlesForegroundView.h/m | AI音频对话界面的前景视图，负责显示音频对话的前景UI元素，包括字幕、状态指示和交互控件。实现了ZegoAIAgentSubtitlesEventHandler协议，用于处理字幕相关的事件和更新。 |
+| ZegoAIAgentStatusView.h/m | AI智能体状态显示视图，负责显示AI智能体当前的状态信息，包括连接状态、处理状态等。 |
+
+## 2 字幕核心组件 (subtitles目录)
+
+### 2.1 主要视图组件
+
+| 文件名 | 说明 |
+|--------|------|
+| ZegoAIAgentSubtitlesTableView.h/m | 智能体对话字幕表格视图，负责显示用户与AI智能体之间的对话内容，以表格形式呈现对话历史。支持实时更新，能够在用户说话和AI回复时即时显示对应的字幕内容。 |
+
+### 2.2 字幕视图子组件 (subtitles/views目录)
+
+| 文件名 | 说明 |
+|--------|------|
+| ZegoAIAgentSubtitlesMessageModel.h/m | 字幕消息模型，定义了字幕消息的数据结构和属性。 |
+| ZegoAIAgentSubtitlesTableViewCell.h/m | 字幕表格的单元格视图，用于在表格中显示单条字幕消息。 |
+| ZegoAIAgentSubtitlesCellLabelView.h/m | 字幕单元格中的标签视图，负责文本内容的具体渲染。 |
+
+### 2.3 字幕协议定义 (subtitles/protocol目录)
+
+| 文件名 | 说明 |
+|--------|------|
+| ZegoAIAgentSubtitlesEventHandler.h | 字幕事件处理协议，定义了处理字幕相关事件的方法集合。 |
+| ZegoAIAgentSubtitlesMessageProtocol.h/m | 字幕消息协议，定义了字幕消息的格式和处理规则。 |
+| ZegoAIAgentSubtitlesMessageDispatcher.h/m | 字幕消息分发器，负责将收到的消息分发给相应的处理组件。 |
+
+### 2.4 字幕核心定义 (subtitles/core目录)
+
+| 文件名 | 说明 |
+|--------|------|
+| ZegoAIAgentSubtitlesDefines.h/m | 字幕相关的枚举、常量和基础数据结构定义，包括会话状态枚举、消息命令类型等。 |
+| ZegoAIAgentSubtitlesColors.h/m | 字幕UI的颜色定义和主题配置。 |
+
+## 3 使用流程
+
+1. 初始化`ZegoAIAgentAudioSubtitlesForegroundView`实例
+2. 在SDK的消息回调中调用相应处理方法
+3. 前景视图会自动处理各类消息并更新UI显示，包括：
+   - 用户/AI的说话状态变化
+   - ASR实时识别结果展示
+   - LLM增量文本展示
+   - 会话状态的转换与显示
+
+## 4 UI组件关系图
+
+```mermaid
+graph TD
+    ForegroundView[ZegoAIAgentAudioSubtitlesForegroundView] --> StatusView[ZegoAIAgentStatusView]
+    ForegroundView --> SubtitlesTableView[ZegoAIAgentSubtitlesTableView]
+    
+    SubtitlesTableView --> TableViewCell[ZegoAIAgentSubtitlesTableViewCell]
+    TableViewCell --> CellLabelView[ZegoAIAgentSubtitlesCellLabelView]
+    
+    SubtitlesTableView -- 数据模型 --> MessageModel[ZegoAIAgentSubtitlesMessageModel]
+    ForegroundView -- 消息处理 --> MessageDispatcher[ZegoAIAgentSubtitlesMessageDispatcher]
+    
+    MessageDispatcher -- 定义 --> SubtitlesDefines[ZegoAIAgentSubtitlesDefines]
+    SubtitlesTableView -- 样式 --> SubtitlesColors[ZegoAIAgentSubtitlesColors]
+```
+
+使用以上组件，您可以轻松实现AI语音通话中的实时字幕功能，为用户提供更好的交互体验。
