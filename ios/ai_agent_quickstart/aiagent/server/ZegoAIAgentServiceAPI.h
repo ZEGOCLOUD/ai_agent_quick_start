@@ -1,24 +1,27 @@
 //
-//  ZegoPassServiceAPI.h
+//  ZegoAIAgentServiceAPI.h
 //  ai_agent_uikit
 //
-//  Created by Zego 2024/4/11.
+//  Created by AI on 2024/7/14.
 //
 
 #import <Foundation/Foundation.h>
-#import "ZegoPassServiceProtocol.h"
+#import "ZegoAIServiceCommonResponse.h"
+#import "ZegoAIRegisterAgentResponse.h"
+#import "ZegoAICreateAgentInstanceResponse.h"
+#import "ZegoAIGetTokenResponse.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * @class ZegoPassServiceAPI
+ * @class ZegoAIAgentServiceAPI
  * @brief 智能体服务API封装类
  *
  * 该类封装了与ZEGO AI智能体服务交互的所有API，作为客户端与服务器之间的通信桥梁。
  * 提供智能体初始化、会话创建、交互和终止等功能，使用单例模式确保全局唯一实例。
  * 所有与智能体服务相关的操作都应通过此类进行，它处理底层通信细节和状态管理。
  */
-@interface ZegoPassServiceAPI : NSObject
+@interface ZegoAIAgentServiceAPI : NSObject
 
 /**
  * 单例方法

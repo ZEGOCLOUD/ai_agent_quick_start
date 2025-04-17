@@ -23,15 +23,17 @@
 		410B35182DA7CE0D00CFA563 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 410B35172DA7CE0D00CFA563 /* Assets.xcassets */; };
 		410B351B2DA7CE0D00CFA563 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 410B351A2DA7CE0D00CFA563 /* Base */; };
 		410B351E2DA7CE0D00CFA563 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B351D2DA7CE0D00CFA563 /* main.m */; };
-		41A863082DA7E51400B1A58B /* ZegoPassAgentConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A862F52DA7E51400B1A58B /* ZegoPassAgentConfig.m */; };
-		41A863092DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A862F72DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.m */; };
-		41A8630A2DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A862F92DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.m */; };
-		41A8630B2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A862FB2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.m */; };
-		41A8630C2DA7E51400B1A58B /* ZegoPassKey.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A862FD2DA7E51400B1A58B /* ZegoPassKey.m */; };
-		41A8630E2DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863012DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.m */; };
-		41A8630F2DA7E51400B1A58B /* ZegoPassServiceAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863032DA7E51400B1A58B /* ZegoPassServiceAPI.m */; };
-		41A863102DA7E51400B1A58B /* ZegoPassServiceProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863052DA7E51400B1A58B /* ZegoPassServiceProtocol.m */; };
+		41A8630F2DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863032DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m */; };
 		41A863212DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */; };
+		41CD42B52DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42A52DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.m */; };
+		41CD42B62DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42A72DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.m */; };
+		41CD42B72DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42A92DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.m */; };
+		41CD42BA2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42AF2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.m */; };
+		41CD42BB2DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42B12DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.m */; };
+		41CD42BC2DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42B32DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m */; };
+		41CD42C42DB1014F008F13F4 /* ZegoKey.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42C22DB1014F008F13F4 /* ZegoKey.m */; };
+		41CD42C92DB104F5008F13F4 /* ZegoAIGetTokenResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42C62DB104F5008F13F4 /* ZegoAIGetTokenResponse.m */; };
+		41CD42CA2DB104F5008F13F4 /* ZegoAIGetTokenRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42C82DB104F5008F13F4 /* ZegoAIGetTokenRequest.m */; };
 		41D010002DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 41D00FFE2DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m */; };
 		994E4C380DE5CD27D691850B /* Pods_ai_agent_quickstart.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 47C796174EF6FCC7EACFC4DE /* Pods_ai_agent_quickstart.framework */; };
 /* End PBXBuildFile section */
@@ -69,25 +71,29 @@
 		410B351A2DA7CE0D00CFA563 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		410B351C2DA7CE0D00CFA563 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		410B351D2DA7CE0D00CFA563 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		41A862F42DA7E51400B1A58B /* ZegoPassAgentConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassAgentConfig.h; sourceTree = "<group>"; };
-		41A862F52DA7E51400B1A58B /* ZegoPassAgentConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassAgentConfig.m; sourceTree = "<group>"; };
-		41A862F62DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassCreateAgentInstanceRequest.h; sourceTree = "<group>"; };
-		41A862F72DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassCreateAgentInstanceRequest.m; sourceTree = "<group>"; };
-		41A862F82DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassCreateAgentInstanceResponse.h; sourceTree = "<group>"; };
-		41A862F92DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassCreateAgentInstanceResponse.m; sourceTree = "<group>"; };
-		41A862FA2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassDeleteAgentInstanceRequest.h; sourceTree = "<group>"; };
-		41A862FB2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassDeleteAgentInstanceRequest.m; sourceTree = "<group>"; };
-		41A862FC2DA7E51400B1A58B /* ZegoPassKey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassKey.h; sourceTree = "<group>"; };
-		41A862FD2DA7E51400B1A58B /* ZegoPassKey.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassKey.m; sourceTree = "<group>"; };
-		41A863002DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassRegisterAgentRequest.h; sourceTree = "<group>"; };
-		41A863012DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassRegisterAgentRequest.m; sourceTree = "<group>"; };
-		41A863022DA7E51400B1A58B /* ZegoPassServiceAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassServiceAPI.h; sourceTree = "<group>"; };
-		41A863032DA7E51400B1A58B /* ZegoPassServiceAPI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassServiceAPI.m; sourceTree = "<group>"; };
-		41A863042DA7E51400B1A58B /* ZegoPassServiceProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoPassServiceProtocol.h; sourceTree = "<group>"; };
-		41A863052DA7E51400B1A58B /* ZegoPassServiceProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoPassServiceProtocol.m; sourceTree = "<group>"; };
+		41A863022DA7E51400B1A58B /* ZegoAIAgentServiceAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentServiceAPI.h; sourceTree = "<group>"; };
+		41A863032DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentServiceAPI.m; sourceTree = "<group>"; };
 		41A8631F2DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentAudioViewController.h; sourceTree = "<group>"; };
 		41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentAudioViewController.m; sourceTree = "<group>"; };
 		41A863282DA7EF2A00B1A58B /* ZegoExpressEngine.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ZegoExpressEngine.xcframework; path = libs/Express/Library/ZegoExpressEngine.xcframework; sourceTree = "<group>"; };
+		41CD42A42DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAICreateAgentInstanceRequest.h; sourceTree = "<group>"; };
+		41CD42A52DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAICreateAgentInstanceRequest.m; sourceTree = "<group>"; };
+		41CD42A62DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAICreateAgentInstanceResponse.h; sourceTree = "<group>"; };
+		41CD42A72DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAICreateAgentInstanceResponse.m; sourceTree = "<group>"; };
+		41CD42A82DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIDeleteAgentInstanceRequest.h; sourceTree = "<group>"; };
+		41CD42A92DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIDeleteAgentInstanceRequest.m; sourceTree = "<group>"; };
+		41CD42AE2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIRegisterAgentRequest.h; sourceTree = "<group>"; };
+		41CD42AF2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIRegisterAgentRequest.m; sourceTree = "<group>"; };
+		41CD42B02DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIRegisterAgentResponse.h; sourceTree = "<group>"; };
+		41CD42B12DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIRegisterAgentResponse.m; sourceTree = "<group>"; };
+		41CD42B22DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIServiceCommonResponse.h; sourceTree = "<group>"; };
+		41CD42B32DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIServiceCommonResponse.m; sourceTree = "<group>"; };
+		41CD42C22DB1014F008F13F4 /* ZegoKey.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZegoKey.m; path = ai_agent_quickstart/aiagent/server/ZegoKey.m; sourceTree = SOURCE_ROOT; };
+		41CD42C32DB1014F008F13F4 /* ZegoKey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ZegoKey.h; path = ai_agent_quickstart/aiagent/server/ZegoKey.h; sourceTree = SOURCE_ROOT; };
+		41CD42C52DB104F5008F13F4 /* ZegoAIGetTokenRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIGetTokenRequest.h; sourceTree = "<group>"; };
+		41CD42C62DB104F5008F13F4 /* ZegoAIGetTokenResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIGetTokenResponse.m; sourceTree = "<group>"; };
+		41CD42C72DB104F5008F13F4 /* ZegoAIGetTokenResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIGetTokenResponse.h; sourceTree = "<group>"; };
+		41CD42C82DB104F5008F13F4 /* ZegoAIGetTokenRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIGetTokenRequest.m; sourceTree = "<group>"; };
 		41D00FFE2DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesMessageModel.m; sourceTree = "<group>"; };
 		41D00FFF2DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesMessageModel.h; sourceTree = "<group>"; };
 		47C796174EF6FCC7EACFC4DE /* Pods_ai_agent_quickstart.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ai_agent_quickstart.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -203,33 +209,22 @@
 			path = ai_agent_quickstart;
 			sourceTree = "<group>";
 		};
-		41A863062DA7E51400B1A58B /* pass_server */ = {
+		41A863062DA7E51400B1A58B /* server */ = {
 			isa = PBXGroup;
 			children = (
-				41A863022DA7E51400B1A58B /* ZegoPassServiceAPI.h */,
-				41A863032DA7E51400B1A58B /* ZegoPassServiceAPI.m */,
-				41A862FC2DA7E51400B1A58B /* ZegoPassKey.h */,
-				41A862FD2DA7E51400B1A58B /* ZegoPassKey.m */,
-				41A862F42DA7E51400B1A58B /* ZegoPassAgentConfig.h */,
-				41A862F52DA7E51400B1A58B /* ZegoPassAgentConfig.m */,
-				41A863042DA7E51400B1A58B /* ZegoPassServiceProtocol.h */,
-				41A863052DA7E51400B1A58B /* ZegoPassServiceProtocol.m */,
-				41A862F62DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.h */,
-				41A862F72DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.m */,
-				41A862F82DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.h */,
-				41A862F92DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.m */,
-				41A862FA2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.h */,
-				41A862FB2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.m */,
-				41A863002DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.h */,
-				41A863012DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.m */,
+				41CD42B42DB0F87B008F13F4 /* protocol */,
+				41CD42C32DB1014F008F13F4 /* ZegoKey.h */,
+				41CD42C22DB1014F008F13F4 /* ZegoKey.m */,
+				41A863022DA7E51400B1A58B /* ZegoAIAgentServiceAPI.h */,
+				41A863032DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m */,
 			);
-			path = pass_server;
+			path = server;
 			sourceTree = "<group>";
 		};
 		41A863072DA7E51400B1A58B /* aiagent */ = {
 			isa = PBXGroup;
 			children = (
-				41A863062DA7E51400B1A58B /* pass_server */,
+				41A863062DA7E51400B1A58B /* server */,
 				41A863112DA7E67800B1A58B /* audio */,
 			);
 			path = aiagent;
@@ -243,6 +238,29 @@
 				41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */,
 			);
 			path = audio;
+			sourceTree = "<group>";
+		};
+		41CD42B42DB0F87B008F13F4 /* protocol */ = {
+			isa = PBXGroup;
+			children = (
+				41CD42C52DB104F5008F13F4 /* ZegoAIGetTokenRequest.h */,
+				41CD42C82DB104F5008F13F4 /* ZegoAIGetTokenRequest.m */,
+				41CD42C72DB104F5008F13F4 /* ZegoAIGetTokenResponse.h */,
+				41CD42C62DB104F5008F13F4 /* ZegoAIGetTokenResponse.m */,
+				41CD42A42DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.h */,
+				41CD42A52DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.m */,
+				41CD42A62DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.h */,
+				41CD42A72DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.m */,
+				41CD42A82DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.h */,
+				41CD42A92DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.m */,
+				41CD42AE2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.h */,
+				41CD42AF2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.m */,
+				41CD42B02DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.h */,
+				41CD42B12DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.m */,
+				41CD42B22DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.h */,
+				41CD42B32DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m */,
+			);
+			path = protocol;
 			sourceTree = "<group>";
 		};
 		9CA74BF5EE6BCF7EB51765FF /* Pods */ = {
@@ -377,27 +395,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				41A8630E2DA7E51400B1A58B /* ZegoPassRegisterAgentRequest.m in Sources */,
 				41D010002DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m in Sources */,
 				4103238A2DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.m in Sources */,
-				41A8630F2DA7E51400B1A58B /* ZegoPassServiceAPI.m in Sources */,
-				41A8630A2DA7E51400B1A58B /* ZegoPassCreateAgentInstanceResponse.m in Sources */,
-				41A863082DA7E51400B1A58B /* ZegoPassAgentConfig.m in Sources */,
+				41CD42C92DB104F5008F13F4 /* ZegoAIGetTokenResponse.m in Sources */,
+				41A8630F2DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m in Sources */,
 				410B35132DA7CE0A00CFA563 /* ViewController.m in Sources */,
-				41A8630B2DA7E51400B1A58B /* ZegoPassDeleteAgentInstanceRequest.m in Sources */,
-				41A863092DA7E51400B1A58B /* ZegoPassCreateAgentInstanceRequest.m in Sources */,
 				410323872DA91D600051488B /* ZegoAIAgentSubtitlesDefines.m in Sources */,
 				410B350D2DA7CE0A00CFA563 /* AppDelegate.m in Sources */,
 				4103238C2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.m in Sources */,
+				41CD42BC2DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m in Sources */,
 				410323862DA91D600051488B /* ZegoAIAgentSubtitlesColors.m in Sources */,
+				41CD42BA2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.m in Sources */,
+				41CD42B72DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.m in Sources */,
 				4103238E2DA91D600051488B /* ZegoAIAgentStatusView.m in Sources */,
 				4103238D2DA91D600051488B /* ZegoAIAgentSubtitlesTableView.m in Sources */,
-				41A863102DA7E51400B1A58B /* ZegoPassServiceProtocol.m in Sources */,
 				410B351E2DA7CE0D00CFA563 /* main.m in Sources */,
+				41CD42C42DB1014F008F13F4 /* ZegoKey.m in Sources */,
+				41CD42B52DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.m in Sources */,
+				41CD42BB2DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.m in Sources */,
+				41CD42CA2DB104F5008F13F4 /* ZegoAIGetTokenRequest.m in Sources */,
 				410323962DA9235D0051488B /* ZegoAIAgentAudioSubtitlesForegroundView.m in Sources */,
 				41A863212DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m in Sources */,
+				41CD42B62DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.m in Sources */,
 				410B35102DA7CE0A00CFA563 /* SceneDelegate.m in Sources */,
-				41A8630C2DA7E51400B1A58B /* ZegoPassKey.m in Sources */,
 				4103238B2DA91D600051488B /* ZegoAIAgentSubtitlesCellLabelView.m in Sources */,
 				410323892DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.m in Sources */,
 			);

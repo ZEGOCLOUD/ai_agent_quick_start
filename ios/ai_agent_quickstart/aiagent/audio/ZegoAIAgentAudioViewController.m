@@ -4,7 +4,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <Masonry/Masonry.h>
 
-#import "ZegoPassServiceAPI.h"
+#import "ZegoAIAgentServiceAPI.h"
 #import "ZegoAIAgentAudioSubtitlesForegroundView.h"
 
 @interface ZegoAIAgentAudioViewController ()
@@ -25,7 +25,7 @@
     [self setupCloseBotton];
     
     __weak typeof(self) weakSelf = self;
-    [[ZegoPassServiceAPI sharedInstance] initWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+    [[ZegoAIAgentServiceAPI sharedInstance] initWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) {
             return;
@@ -126,7 +126,7 @@
         
         // 2. 开始聊天会话
         __weak typeof(self) weakSelf = self;
-        [[ZegoPassServiceAPI sharedInstance] startChatWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+        [[ZegoAIAgentServiceAPI sharedInstance] startChatWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) {
                 return;
@@ -155,7 +155,7 @@
 // 停止聊天会话
 - (void)stopChat {
     // 调用SDK停止聊天
-    [[ZegoPassServiceAPI sharedInstance] stopChatWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+    [[ZegoAIAgentServiceAPI sharedInstance] stopChatWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
         if (success) {
             NSLog(@"聊天停止成功");
         } else {

@@ -29,15 +29,14 @@ ai_agent_quickstart/
 │   │           ├── core/     # 字幕核心处理
 │   │           ├── views/    # 字幕UI组件
 │   │           └── protocol/ # 字幕相关协议
-│   └── pass_server/          # PASS服务接口
-│       ├── ZegoPassServiceAPI.h/m                   # 服务API封装
-│       ├── ZegoPassServiceProtocol.h/m              # 服务协议定义
-│       ├── ZegoPassAgentConfig.h/m                  # 智能体配置
-│       ├── ZegoPassKey.h/m                          # 密钥管理
-│       ├── ZegoPassRegisterAgentRequest.h/m         # 注册智能体请求
-│       ├── ZegoPassCreateAgentInstanceRequest.h/m   # 创建智能体实例请求
-│       ├── ZegoPassCreateAgentInstanceResponse.h/m  # 创建智能体实例响应
-│       └── ZegoPassDeleteAgentInstanceRequest.h/m   # 删除智能体实例请求
+│   └── server/               # 后台服务接口
+│       ├── ZegoAIAgentServiceAPI.h/m                # 服务API封装
+│       └── ZegoKey.h/m                              # 密钥管理
+│          └── protocol/      # 后台服务协议
+│              ├── ZegoAIRegisterAgentRequest.h/m         # 注册智能体请求
+│              ├── ZegoAICreateAgentInstanceRequest.h/m   # 创建智能体实例请求
+│              ├── ZegoAICreateAgentInstanceResponse.h/m  # 创建智能体实例响应
+│              └── ZegoAIDeleteAgentInstanceRequest.h/m   # 删除智能体实例请求
 └── libs/                     # 第三方库
     └── Express/              # ZEGO Express SDK
 ```
@@ -56,22 +55,22 @@ sequenceDiagram
     participant User as 用户
     participant VC as ViewController
     participant AudioVC as AudioViewController
-    participant PassAPI as ZegoPassServiceAPI
-    participant PassServer as ZEGO AI服务
+    participant ServiceAPI as ZegoAIAgentServiceAPI
+    participant PassServer as AI服务
     participant Express as ZEGO EXPRESS SDK
 
     VC->>AudioVC: 点击"开始音频聊天"按钮
-    AudioVC->>PassAPI: initWithCompletion
-    PassAPI->>PassServer: 创建智能体
+    AudioVC->>ServiceAPI: initWithCompletion
+    ServiceAPI->>PassServer: 创建智能体
     AudioVC->>AudioVC: 请求麦克风权限
-    AudioVC->>PassAPI: startChatWithCompletion
-    PassAPI->>Express: 初始化引擎/进房/推流
-    Express-->>PassAPI: 成功
-    PassAPI->>PassServer: 创建智能体实例
-    PassServer-->>PassAPI: 返回实例ID
-    PassAPI-->>AudioVC: 聊天开始成功
-    Express-->>PassAPI: onRoomStreamUpdate回调(流更新)
-    PassAPI->>Express: 开始拉流(订阅智能体流)
+    AudioVC->>ServiceAPI: startChatWithCompletion
+    ServiceAPI->>Express: 初始化引擎/进房/推流
+    Express-->>ServiceAPI: 成功
+    ServiceAPI->>PassServer: 创建智能体实例
+    PassServer-->>ServiceAPI: 返回实例ID
+    ServiceAPI-->>AudioVC: 聊天开始成功
+    Express-->>ServiceAPI: onRoomStreamUpdate回调(流更新)
+    ServiceAPI->>Express: 开始拉流(订阅智能体流)
   
     loop 实时对话过程
         User->>Express: 说话
@@ -84,15 +83,15 @@ sequenceDiagram
     end
   
     User->>AudioVC: 点击关闭按钮
-    AudioVC->>PassAPI: stopChatWithCompletion
-    PassAPI->>Express: 退出房间/停止拉流/停止推流/销毁引擎
-    PassAPI->>PassServer: 终止智能体实例
+    AudioVC->>ServiceAPI: stopChatWithCompletion
+    ServiceAPI->>Express: 退出房间/停止拉流/停止推流/销毁引擎
+    ServiceAPI->>PassServer: 终止智能体实例
     AudioVC->>VC: 返回主界面
 ```
 
 ## 主要组件说明
 
-### 1. ZegoPassServiceAPI
+### 1. ZegoAIAgentServiceAPI
 
 提供与ZEGO AI服务交互的接口，包括初始化、创建智能体实例、开始聊天和结束聊天。
 
@@ -104,10 +103,6 @@ sequenceDiagram
 
 字幕显示组件，实现对话内容的实时显示，包括用户输入和AI回复。
 
-### 4. ZegoPassAgentConfig
-
-AI智能体配置类，包含LLM、TTS和ASR相关配置。
-
 ## 使用说明
 
 1. 克隆项目到本地
@@ -115,7 +110,7 @@ AI智能体配置类，包含LLM、TTS和ASR相关配置。
 3. 配置AppID和密钥
    - 前往 [ZEGO 控制台](https://console.zegocloud.com/) 创建项目.
    - 获取 **AppID**，**AppSign** 和**AppSecret**
-   - 复制`ZegoPassKey.template.m`（位于`ai_agent_quickstart/aiagent/pass_server/`目录）文件并重命名为`ZegoPassKey.m`
+   - 复制`ZegoKey.template.m`（位于`ai_agent_quickstart/aiagent/server/`目录）文件并重命名为`ZegoKey.m`
    - 使用自己的密钥信息填充该文件
 4. 构建并运行项目
 5. 在主界面点击"开始音频聊天"按钮开始体验

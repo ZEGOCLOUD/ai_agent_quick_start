@@ -1,32 +1,33 @@
 //
-//  ZegoPassServiceAPI.m
+//  ZegoAIAgentServiceAPI.m
 //  ai_agent_uikit
 //
 //  Created by AI on 2024/7/14.
 //
 
-#import "ZegoPassServiceAPI.h"
+#import "ZegoAIAgentServiceAPI.h"
 
 #import <UIKit/UIKit.h>
 #import <ZegoExpressEngine/ZegoExpressEngine.h>
 #import <ZegoExpressEngine/ZegoExpressEventHandler.h>
 
-#import "ZegoPassAgentConfig.h"
-#import "ZegoPassRegisterAgentRequest.h"
-#import "ZegoPassCreateAgentInstanceRequest.h"
-#import "ZegoPassCreateAgentInstanceResponse.h"
-#import "ZegoPassDeleteAgentInstanceRequest.h"
-#import "ZegoPassKey.h"
-#import "ZegoPassServiceProtocol.h"
+#import "ZegoKey.h"
 
 #import "ZegoAIAgentSubtitlesMessageDispatcher.h"
+#import "ZegoAIRegisterAgentRequest.h"
+#import "ZegoAIRegisterAgentResponse.h"
+#import "ZegoAICreateAgentInstanceRequest.h"
+#import "ZegoAICreateAgentInstanceResponse.h"
+#import "ZegoAIDeleteAgentInstanceRequest.h"
+#import "ZegoAIGetTokenRequest.h"
+#import "ZegoAIGetTokenResponse.h"
 
 typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
 
 // 环境 URL
-static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实际URL需要替换
+static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 实际URL需要替换
 
-@interface ZegoPassServiceAPI () <ZegoEventHandler>
+@interface ZegoAIAgentServiceAPI () <ZegoEventHandler>
 
 @property (nonatomic, copy) NSString *currentBaseURL;
 @property (nonatomic, copy) NSString *agentId;
@@ -38,15 +39,15 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
 
 @end
 
-@implementation ZegoPassServiceAPI
+@implementation ZegoAIAgentServiceAPI
 
 #pragma mark - Singleton
 
 + (instancetype)sharedInstance {
-    static ZegoPassServiceAPI *instance = nil;
+    static ZegoAIAgentServiceAPI *instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        instance = [[ZegoPassServiceAPI alloc] init];
+        instance = [[ZegoAIAgentServiceAPI alloc] init];
         instance.currentBaseURL = kBaseURL;
         
         instance.userId = [self generateRandomUserId];
@@ -56,6 +57,23 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
 }
 
 #pragma mark - Public Methods
+
+- (void)getTokenWithCompletion:(void (^)(ZegoAIGetTokenResponse *response))completion {
+    NSString *baseUrl = [NSString stringWithFormat:@"%@/api/zegotoken", self.currentBaseURL];
+    
+    // 将userId作为URL参数拼接
+    NSString *url = [NSString stringWithFormat:@"%@?userId=%@", baseUrl, self.userId];
+    
+    NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:nil method:@"GET"];
+    
+    [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
+        ZegoAIGetTokenResponse *tokenResponse = [ZegoAIGetTokenResponse fromServiceResponse:response];
+        
+        if (completion) {
+            completion(tokenResponse);
+        }
+    }];
+}
 
 - (void)initWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
     [self registerAgentWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
@@ -96,7 +114,7 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
         strongSelf.streamToPlay = [strongSelf getAgentStreamID];
         
         // 创建Agent实例
-        [strongSelf createAgentInstanceWithCompletion:^(ZegoPassCreateAgentInstanceResponse *response) {
+        [strongSelf createAgentInstanceWithCompletion:^(ZegoAICreateAgentInstanceResponse *response) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) { return; }
             
@@ -117,7 +135,7 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
     [self unInitZegoExpressEngine];
     
     // 删除Agent实例
-    [self deleteAgentInstanceWithCompletion:^(ZegoPassServiceCommonResponse *response) {
+    [self deleteAgentInstanceWithCompletion:^(ZegoAIServiceCommonResponse *response) {
         if (response.code == 0) {
             if (completion) {
                 completion(YES, nil);
@@ -133,49 +151,27 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
 #pragma mark - Agent API Methods
 
 - (void)registerAgentWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
-    NSString *url = [NSString stringWithFormat:@"%@/?Action=RegisterAgent", self.currentBaseURL];
-    
-    // 创建默认的Agent配置
-    ZegoPassAgentConfig *config = [[ZegoPassAgentConfig alloc] init];
-    config.name = @"小智";
-    
-    // 创建LLM配置
-    ZegoPassLLM *llm = [[ZegoPassLLM alloc] init];
-    llm.apiKey = kZegoPassLLMApiKey;
-    llm.url = kZegoPassLLMUrl;
-    llm.model = kZegoPassLLMModel;
-    llm.systemPrompt = @"你是小智，成年女性，是**即构科技创造的陪伴助手**，上知天文下知地理，聪明睿智、热情友善。\n对话要求：1、按照人设要求与用户对话。\n2、不能超过100字。";
-    config.llm = llm;
-    
-    // 创建TTS配置
-    ZegoPassTTS *tts = [[ZegoPassTTS alloc] init];
-    tts.vendor = kZegoPassTTSVendor;
-    tts.params = [ZegoPassKey zegoPassTTSParams];
-    config.tts = tts;
+    NSString *url = [NSString stringWithFormat:@"%@/api/agent/register", self.currentBaseURL];
     
     // 创建请求
-    ZegoPassRegisterAgentRequest *request = [[ZegoPassRegisterAgentRequest alloc] init];
+    ZegoAIRegisterAgentRequest *request = [[ZegoAIRegisterAgentRequest alloc] init];
     request.agentId = @"zg_agent_t_i";
-    request.agentConfig = config;
+    request.agentName = @"小智";
     
     NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:[request toDictionary] method:@"POST"];
     
-    [self sendRequest:urlRequest completion:^(ZegoPassServiceCommonResponse *response) {
-        if (response.code == 0) {
+    [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
+        ZegoAIRegisterAgentResponse *registerResponse = [ZegoAIRegisterAgentResponse fromServiceResponse:response];
+        
+        if (registerResponse.code == 0) {
             // 注册成功，保存agentId
-            self.agentId = request.agentId;
-            if (completion) {
-                completion(YES, nil);
-            }
-        } else if(410001008 == response.code) {
-            // 智能体已经注册过了
-            self.agentId = request.agentId;
+            self.agentId = registerResponse.agentId;
             if (completion) {
                 completion(YES, nil);
             }
         } else {
             if (completion) {
-                completion(NO, response.message);
+                completion(NO, registerResponse.message);
             }
         }
     }];
@@ -191,27 +187,22 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
     return [NSString stringWithFormat:@"%@_%@_main", self.roomId, self.userId];
 }
 
-- (void)createAgentInstanceWithCompletion:(void (^)(ZegoPassCreateAgentInstanceResponse *response))completion {
-    NSString *url = [NSString stringWithFormat:@"%@/?Action=CreateAgentInstance", self.currentBaseURL];
-    
-    // 创建RTC信息
-    ZegoPassRtcInfo *rtcInfo = [[ZegoPassRtcInfo alloc] init];
-    rtcInfo.roomId = self.roomId;
-    rtcInfo.agentStreamId = [self getAgentStreamID];
-    rtcInfo.agentUserId = self.agentId;
-    rtcInfo.userStreamId = [self getUserStreamID];
-    rtcInfo.welcomeMessage = @"你好，我是你的智能助手，有什么可以帮助你的？";
+- (void)createAgentInstanceWithCompletion:(void (^)(ZegoAICreateAgentInstanceResponse *response))completion {
+    NSString *url = [NSString stringWithFormat:@"%@/api/agent/create", self.currentBaseURL];
     
     // 创建请求
-    ZegoPassCreateAgentInstanceRequest *request = [[ZegoPassCreateAgentInstanceRequest alloc] init];
+    ZegoAICreateAgentInstanceRequest *request = [[ZegoAICreateAgentInstanceRequest alloc] init];
     request.agentId = self.agentId;
     request.userId = self.userId;
-    request.rtcInfo = rtcInfo;
+    request.roomId = self.roomId;
+    request.agentStreamId = [self getAgentStreamID];
+    request.agentUserId = self.agentId;
+    request.userStreamId = [self getUserStreamID];
     
     NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:[request toDictionary] method:@"POST"];
     
-    [self sendRequest:urlRequest completion:^(ZegoPassServiceCommonResponse *response) {
-        ZegoPassCreateAgentInstanceResponse *instanceResponse = [ZegoPassCreateAgentInstanceResponse fromServiceResponse:response];
+    [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
+        ZegoAICreateAgentInstanceResponse *instanceResponse = [ZegoAICreateAgentInstanceResponse fromServiceResponse:response];
         if(instanceResponse.code == 0){
             self.agentInstanceId = instanceResponse.agentInstanceId;
         }
@@ -222,21 +213,20 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
     }];
 }
 
-- (void)deleteAgentInstanceWithCompletion:(void (^)(ZegoPassServiceCommonResponse *response))completion {
-    NSString *url = [NSString stringWithFormat:@"%@/?Action=DeleteAgentInstance", self.currentBaseURL];
+- (void)deleteAgentInstanceWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
+    NSString *url = [NSString stringWithFormat:@"%@/api/agent/delete", self.currentBaseURL];
     
-    ZegoPassDeleteAgentInstanceRequest *request = [[ZegoPassDeleteAgentInstanceRequest alloc] init];
+    ZegoAIDeleteAgentInstanceRequest *request = [[ZegoAIDeleteAgentInstanceRequest alloc] init];
     request.agentInstanceId = self.agentInstanceId;
     
     NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:[request toDictionary] method:@"POST"];
     
-    [self sendRequest:urlRequest completion:^(ZegoPassServiceCommonResponse *response) {
+    [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
         if (completion) {
             completion(response);
         }
     }];
 }
-
 
 #pragma mark - RTC API Methods
 
@@ -244,8 +234,7 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
     NSLog(@"开始初始化ZegoExpressEngine");
     
     ZegoEngineProfile* profile = [[ZegoEngineProfile alloc]init];
-    profile.appID = kZegoPassAppId;
-    profile.appSign = kZegoPassAppSign;
+    profile.appID = kZegoAppId;
     profile.scenario = ZegoScenarioHighQualityChatroom; //设置该场景可以避免申请相机权限，接入方应按自己的业务场景设置具体值
     
     ZegoEngineConfig* engineConfig = [[ZegoEngineConfig alloc] init];
@@ -334,29 +323,47 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
     [self enable3A];
     NSLog(@"已启用3A功能（AEC、AGC、ANS）");
     
-    ZegoRoomConfig* roomConfig = [[ZegoRoomConfig alloc]init];
-    roomConfig.isUserStatusNotify = YES;
-    ZegoUser* user = [[ZegoUser alloc]init];
-    user.userName = self.userId;
-    user.userID = self.userId;
-    
-    NSLog(@"开始登录房间...");
     __weak typeof(self) weakSelf = self;
-    [[ZegoExpressEngine sharedEngine] loginRoom:self.roomId
-                                           user:user
-                                         config:roomConfig
-                                       callback:^(int errorCode, NSDictionary * _Nonnull extendedData) {
+    
+    // 先获取token，然后再登录房间
+    [self getTokenWithCompletion:^(ZegoAIGetTokenResponse *response) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
-        NSLog(@"loginRoom 调用结果: code=%d, roomID=%@", errorCode, strongSelf.roomId);
+        if (!strongSelf) { return; }
         
-        if (errorCode != 0) {
-            NSLog(@"loginRoom 失败: code=%d, extendedData=%@", errorCode, extendedData);
-            complete(errorCode, extendedData);
+        if (response.code != 0 || !response.token) {
+            NSLog(@"获取token失败: code=%ld, message=%@", (long)response.code, response.message);
+            complete(-1, @{@"error": @"获取token失败"});
             return;
         }
         
-        NSLog(@"loginRoom 成功: roomID=%@", strongSelf.roomId);
-        complete(errorCode, extendedData);
+        NSString *token = response.token;
+        NSLog(@"获取token成功: token=%@, userId=%@, expireTime=%f", token, response.userId, response.expireTime);
+        
+        ZegoRoomConfig* roomConfig = [[ZegoRoomConfig alloc] init];
+        roomConfig.isUserStatusNotify = YES;
+        roomConfig.token = token;
+        
+        ZegoUser* user = [[ZegoUser alloc] init];
+        user.userName = strongSelf.userId;
+        user.userID = strongSelf.userId;
+        
+        NSLog(@"开始登录房间...");
+        [[ZegoExpressEngine sharedEngine] loginRoom:strongSelf.roomId
+                                               user:user
+                                             config:roomConfig
+                                           callback:^(int errorCode, NSDictionary * _Nonnull extendedData) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            NSLog(@"loginRoom 调用结果: code=%d, roomID=%@", errorCode, strongSelf.roomId);
+            
+            if (errorCode != 0) {
+                NSLog(@"loginRoom 失败: code=%d, extendedData=%@", errorCode, extendedData);
+                complete(errorCode, extendedData);
+                return;
+            }
+            
+            NSLog(@"loginRoom 成功: roomID=%@", strongSelf.roomId);
+            complete(errorCode, extendedData);
+        }];
     }];
 }
 
@@ -416,7 +423,7 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
     request.HTTPMethod = method;
     
     // 设置通用请求头
-    ZegoPassServiceCommonHeader *header = [[ZegoPassServiceCommonHeader alloc] init];
+    ZegoAIServiceCommonHeader *header = [[ZegoAIServiceCommonHeader alloc] init];
     [header applyToRequest:request];
     
     // 如果是POST请求且有参数，设置请求体
@@ -432,7 +439,7 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
 }
 
 - (void)sendRequest:(NSMutableURLRequest *)request
-         completion:(void(^)(ZegoPassServiceCommonResponse *response))completion {
+         completion:(void(^)(ZegoAIServiceCommonResponse *response))completion {
     // 打印请求信息
     NSLog(@"\n=== HTTP Request ===\nURL: %@\nMethod: %@\nHeaders: %@\nBody: %@\n==================",
           request.URL,
@@ -446,7 +453,7 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
                                                             NSURLResponse * _Nullable response,
                                                             NSError * _Nullable error) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            ZegoPassServiceCommonResponse *httpResponse = [[ZegoPassServiceCommonResponse alloc] init];
+            ZegoAIServiceCommonResponse *httpResponse = [[ZegoAIServiceCommonResponse alloc] init];
             
             // 打印响应信息
             NSHTTPURLResponse *httpUrlResponse = (NSHTTPURLResponse *)response;
@@ -487,10 +494,10 @@ static NSString *const kBaseURL = @"https://aigc-chat-api.zegotech.cn";  // 实�
             }
             
             // 解析响应数据
-            httpResponse.code = [dict[@"Code"] integerValue];
-            httpResponse.message = dict[@"Message"];
-            httpResponse.requestId = dict[@"RequestId"];
-            httpResponse.data = dict[@"Data"];
+            httpResponse.code = [dict[@"code"] integerValue];
+            httpResponse.message = dict[@"message"];
+            httpResponse.requestId = dict[@"requestId"];
+            httpResponse.data = dict;
 
             if (completion) {
                 completion(httpResponse);

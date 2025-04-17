@@ -71,4 +71,4 @@ DerivedData/
 *.moved-aside
 
 # Sensitive information files
-ai_agent_quickstart/aiagent/pass_server/ZegoPassKey.m
+ai_agent_quickstart/aiagent/server/ZegoKey.m
