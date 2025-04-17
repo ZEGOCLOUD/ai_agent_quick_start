@@ -9,8 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
     "axios": "^1.8.4",
-    "crypto-js": "^4.2.0",
+    "element-plus": "^2.9.7",
     "vue": "^3.5.13",
     "zego-express-engine-webrtc": "file:lib/zego-express-engine-webrtc.tgz"
   },
@@ -18,7 +19,6 @@
     "node": ">=16.14.0"
   },
   "devDependencies": {
-    "@types/crypto-js": "^4.2.2",
     "@vitejs/plugin-basic-ssl": "^2.0.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/tsconfig": "^0.7.0",

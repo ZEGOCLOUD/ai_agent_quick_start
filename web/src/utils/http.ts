@@ -3,7 +3,7 @@ import type { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 
 // 创建axios实例
 const service = axios.create({
-  baseURL: '',
+  baseURL: import.meta.env.VITE_APP_BASE_URL,
   timeout: 15000,  // 请求超时时间
   headers: {
     'Content-Type': 'application/json;charset=utf-8',

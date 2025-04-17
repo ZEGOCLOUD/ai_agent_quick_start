@@ -6,12 +6,6 @@ import basicSsl from "@vitejs/plugin-basic-ssl";
 export default defineConfig({
   plugins: [vue(), basicSsl(),],
   server: {
-    proxy: {
-      '/?Action': {
-        target: 'https://aigc-chat-api.zegotech.cn',
-        changeOrigin: true
-      }
-    },
     https: true,
   }
 })

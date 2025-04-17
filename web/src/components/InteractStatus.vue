@@ -1,7 +1,7 @@
 <!-- 互动状态组件 -->
 <template>
-  <div v-if="status" :class="['interact-status']">
-    <p class="bot-name">{{ name }}</p>
+  <div :class="['interact-status']">
+    <p class="bot-name">智能体名称：{{ name }}</p>
     <p v-show="status === SignalStatus.Listening">正在听...</p>
     <p v-show="status === SignalStatus.Thinking">正在想...</p>
     <p v-show="status === SignalStatus.Speaking">可以随时说话打断我</p>
@@ -20,22 +20,23 @@ const props = defineProps<{
 
 <style scoped>
 .interact-status {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   text-align: center;
   min-width: 184px;
-  padding: 10px;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
+  padding: 12px 15px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  font-size: 14px;
 }
 
 .bot-name{
-  font-size: 18px !important;
+  font-size: 16px !important;
   font-weight: 500;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  -o-text-overflow:ellipsis;
-  width: 50%;
-  transform: translate(50%);
+  margin-bottom: 8px;
+}
+
+.interact-status p {
+  margin: 0;
+  line-height: 1.4;
 }
 </style>

@@ -20,7 +20,8 @@ pnpm install
 
 ### 2. 环境配置
 
-修改 `src/config.ts` 文件，配置 AppID 和 AppSign等信息。
+修改 `src/config.ts` 文件，配置 appId 和 server。
+修改 .env 文件，配置 VITE_APP_BASE_URL 业务后台地址。
 
 ### 3. 启动项目
 
@@ -28,43 +29,19 @@ pnpm install
 pnpm dev
 ```
 
-## 核心功能
-
-### 1. 初始化配置
-
-- 初始化 ZegoExpressEngine SDK
-- 配置 AppID 和服务器参数
-- 检查系统要求和权限
-
-### 2. 智能体生命周期管理
-
-#### 2.1 注册智能体
-- 调用 RegisterAgent API 创建智能体
-- 配置智能体参数（名称、LLM配置、TTS配置等）
-
-#### 2.2 创建智能体实例
-- 调用 CreateAgentInstance API
-- 配置 RTC 相关参数（房间ID、流ID等）
-- 设置用户和智能体的音频流
-
-#### 2.3 实时语音交互
-- 进入 RTC 房间
-- 创建和推送本地音频流
-- 监听和处理远端流事件
-
-#### 2.4 资源清理
-- 销毁本地音频流
-- 退出房间
-- 删除智能体实例
-
-## 注意事项
-
-- Token 生成建议在服务端进行
-- 不建议在客户端放置密钥，本文仅用于演示
-
-## 技术支持
-
-如果您在使用过程中遇到问题，请参考以下资源：
-
-- [ZEGO Express SDK 文档](https://doc-zh.zego.im/article/5054)
-- [技术支持](https://www.zego.im)
+### 4. 目录结构
+├── lib #第三方库
+├── src
+│   ├── api
+│   │   ├── agent # AI Agent API
+│   ├── components
+│   │   ├── Quickstart # 快速开始组件
+│   │   ├── ChatMessage # 聊天消息组件
+│   │   ├── InteractStatus # 互动状态组件
+│   ├── hooks
+│   │   ├── useChat # 聊天相关的 hooks
+│   ├── solution
+│   │   ├── ExpressManager # Express SDK 管理类
+│   ├── utils
+│   │   ├── http # http 请求工具
+│   ├── config # 配置文件

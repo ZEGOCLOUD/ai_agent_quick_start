@@ -27,7 +27,7 @@ export interface Message {
 
 export function useChat(zg: ExpressManager) {
   // 状态管理
-  const signalStatus = ref<SignalStatus>();
+  const signalStatus = ref<SignalStatus>(SignalStatus.Listening);
   const messages = ref<Message[]>([]);
   const userMsgSeq = ref(0);
   let agentMsgMap: Record<string, Message[]> = {};
@@ -194,6 +194,7 @@ export function useChat(zg: ExpressManager) {
   function clearMessages() {
     messages.value = [];
     userMsgSeq.value = 0;
+    signalStatus.value = SignalStatus.Listening;
     agentMsgMap = {};
   }
 
