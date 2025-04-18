@@ -19,7 +19,7 @@
         tokenResponse.token = response.data[@"token"];
         tokenResponse.userId = response.data[@"userId"];
         
-        id expireTimeObj = response.data[@"expireTime"];
+        id expireTimeObj = response.data[@"expire_time"];
         if (expireTimeObj && [expireTimeObj isKindOfClass:[NSNumber class]]) {
             tokenResponse.expireTime = [expireTimeObj doubleValue];
         }
