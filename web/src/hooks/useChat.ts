@@ -20,7 +20,7 @@ interface RoomMessage {
 export interface Message {
   sender: string;
   message_id: string;
-  seq_id: number;
+  seqId: number;
   content: string;
   type: string;
 }
@@ -29,7 +29,7 @@ export function useChat(zg: ExpressManager) {
   // 状态管理
   const signalStatus = ref<SignalStatus>(SignalStatus.Listening);
   const messages = ref<Message[]>([]);
-  const userMsgSeq = ref(0);
+  let userMsgSeq = 0;
   let agentMsgMap: Record<string, Message[]> = {};
 
   /**
@@ -59,12 +59,12 @@ export function useChat(zg: ExpressManager) {
 
       // 用户说话文本处理
       case 3:
-        handleUserMessage(SeqId, Data, Round);
+        handleUserMessage(SeqId, Data);
         break;
 
       // 智能体说话文本处理
       case 4:
-        handleAgentMessage(SeqId, Data, Round);
+        handleAgentMessage(SeqId, Data);
         break;
 
       default:
@@ -72,73 +72,72 @@ export function useChat(zg: ExpressManager) {
     }
   }
   // 处理用户消息
-  function handleUserMessage(seq_id: number, data: MessageData, round: number) {
-    console.log(`"mytag 用户说话文本内容：", ${seq_id}, ${data.Text}`);
-    if (seq_id > userMsgSeq.value) {
+  function handleUserMessage(seqId: number, data: MessageData) {
+    console.log(`"mytag 用户说话文本内容：", ${seqId}, ${data.Text}`);
+    if (seqId > userMsgSeq) {
       if (data.EndFlag) {
-        console.log(`"mytag 用户说话完毕", ${seq_id}`);
+        console.log(`"mytag 用户说话完毕", ${seqId}`);
       }
-      const asrText = data.Text;
+
+      const content = data.Text.trim();
       const messageId = data.MessageId;
-      addOrUpdateMessage({
+      userMsgSeq = seqId;
+      if (!content) return;
+      const index = messages.value.findIndex(
+        (message) => message.message_id === messageId
+      );
+      const newMessage = {
         sender: "user",
         message_id: messageId,
-        seq_id: seq_id,
-        content: asrText,
+        seqId: seqId,
+        content: content,
         type: "message",
-      });
-      userMsgSeq.value = seq_id;
+      };
+
+      if (index !== -1) {
+        messages.value[index].content = newMessage.content;
+      } else {
+        messages.value.push(newMessage);
+      }
     }
   }
 
   // 处理智能体消息
-  function handleAgentMessage(seq_id: number, data: MessageData, round: number) {
+  function handleAgentMessage(
+    seqId: number,
+    data: MessageData
+  ) {
     const llmEndFlag = data.EndFlag;
-    console.log(`"mytag 智能体说话文本内容：", ${seq_id}, ${data.Text}`);
+    console.log(`"mytag 智能体说话文本内容：", ${seqId}, ${data.Text}`);
     if (llmEndFlag) {
-      console.log(`"mytag 智能体回答完毕", ${seq_id}, ${round}`);
+      console.log(`"mytag 智能体回答完毕", ${seqId}`);
     }
-    const llmText = data.Text;
+    const content = data.Text.trim();
     const llmMessageId = data.MessageId;
-    addOrUpdateMessage({
+    if (!content) return;
+    const index = messages.value.findIndex(
+      (message) => message.message_id === llmMessageId
+    );
+    const newMessage = {
       sender: "bot",
       message_id: llmMessageId,
-      seq_id: seq_id,
-      content: llmText,
+      seqId: seqId,
+      content: content,
       type: "message",
-    });
-
-  }
-
-  // 添加或更新消息
-  function addOrUpdateMessage(newMessage: Message) {
-    if (!newMessage.content?.trim()) {
-      return;
+    };
+    if (!agentMsgMap[newMessage.message_id]) {
+      agentMsgMap[newMessage.message_id] = [];
     }
-
-    const isBotMessage = newMessage.sender === "bot";
-    const index = messages.value.findIndex(
-      (message) => message.message_id === newMessage.message_id
-    );
-    if (isBotMessage) {
-      if (!agentMsgMap[newMessage.message_id]) {
-        agentMsgMap[newMessage.message_id] = []
-      }
-      agentMsgMap[newMessage.message_id].push({...newMessage});
-    }
+    agentMsgMap[newMessage.message_id].push({ ...newMessage });
 
     if (index !== -1) {
-      if (isBotMessage) {
-        const newMessages = agentMsgMap[newMessage.message_id]
-        const sortedMessages = newMessages
-          .sort((a, b) => a.seq_id - b.seq_id)
-          .map(({ content }) => content)
-          .join("");
-        if (sortedMessages.trim()) {
-          messages.value[index].content = sortedMessages;
-        }
-      } else if (newMessage.content.trim()) {
-        messages.value[index].content = newMessage.content;
+      const newMessages = agentMsgMap[newMessage.message_id];
+      const sortedMessages = newMessages
+        .sort((a, b) => a.seqId - b.seqId)
+        .map(({ content }) => content)
+        .join("");
+      if (sortedMessages.trim()) {
+        messages.value[index].content = sortedMessages;
       }
     } else {
       messages.value.push(newMessage);
@@ -193,18 +192,14 @@ export function useChat(zg: ExpressManager) {
 
   function clearMessages() {
     messages.value = [];
-    userMsgSeq.value = 0;
     signalStatus.value = SignalStatus.Listening;
+    userMsgSeq = 0;
     agentMsgMap = {};
   }
 
   return {
     signalStatus,
     messages,
-    handleUserMessage,
-    handleAgentMessage,
-    handleUserSpeakStatus,
-    handleAgentSpeakStatus,
     setupEventListeners,
     clearMessages,
   };
