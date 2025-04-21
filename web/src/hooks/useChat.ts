@@ -19,7 +19,7 @@ interface RoomMessage {
 
 export interface Message {
   sender: string;
-  message_id: string;
+  messageId: string;
   seqId: number;
   content: string;
   type: string;
@@ -84,11 +84,11 @@ export function useChat(zg: ExpressManager) {
       userMsgSeq = seqId;
       if (!content) return;
       const index = messages.value.findIndex(
-        (message) => message.message_id === messageId
+        (message) => message.messageId === messageId
       );
       const newMessage = {
         sender: "user",
-        message_id: messageId,
+        messageId: messageId,
         seqId: seqId,
         content: content,
         type: "message",
@@ -116,22 +116,22 @@ export function useChat(zg: ExpressManager) {
     const llmMessageId = data.MessageId;
     if (!content) return;
     const index = messages.value.findIndex(
-      (message) => message.message_id === llmMessageId
+      (message) => message.messageId === llmMessageId
     );
     const newMessage = {
       sender: "bot",
-      message_id: llmMessageId,
+      messageId: llmMessageId,
       seqId: seqId,
       content: content,
       type: "message",
     };
-    if (!agentMsgMap[newMessage.message_id]) {
-      agentMsgMap[newMessage.message_id] = [];
+    if (!agentMsgMap[newMessage.messageId]) {
+      agentMsgMap[newMessage.messageId] = [];
     }
-    agentMsgMap[newMessage.message_id].push({ ...newMessage });
+    agentMsgMap[newMessage.messageId].push({ ...newMessage });
 
     if (index !== -1) {
-      const newMessages = agentMsgMap[newMessage.message_id];
+      const newMessages = agentMsgMap[newMessage.messageId];
       const sortedMessages = newMessages
         .sort((a, b) => a.seqId - b.seqId)
         .map(({ content }) => content)
