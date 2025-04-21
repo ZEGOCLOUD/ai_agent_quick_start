@@ -97,11 +97,11 @@ QuickStart/
 
 ## 注意事项
 
-- 使用前请确保已注册 ZEGO 开发者账号并创建应用
+- 使用前请确保已[注册 ZEGO 开发者账号](https://console.zegocloud.com/)并创建应用
 - 运行时需要麦克风权限，请确保授予
 - 确保设备有稳定的网络连接
 - 本示例使用了 ZEGO Express SDK，请确保了解其基本用法
 
 ## 技术支持
 
-如有任何问题，请联系 ZEGO 技术支持或访问[开发者中心](https://docs.zegocloud.com/)获取更多信息。
+如有任何问题，请联系 ZEGO 技术支持或访问[开发者中心](https://doc-zh.zego.im/)获取更多信息。
