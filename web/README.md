@@ -30,18 +30,20 @@ pnpm dev
 ```
 
 ### 4. 目录结构
-├── lib #第三方库
-├── src
-│   ├── api
-│   │   ├── agent # AI Agent API
-│   ├── components
-│   │   ├── Quickstart # 快速开始组件
-│   │   ├── ChatMessage # 聊天消息组件
-│   │   ├── InteractStatus # 互动状态组件
-│   ├── hooks
-│   │   ├── useChat # 聊天相关的 hooks
-│   ├── solution
-│   │   ├── ExpressManager # Express SDK 管理类
-│   ├── utils
-│   │   ├── http # http 请求工具
-│   ├── config # 配置文件
+```
+├── lib                 # 第三方库
+└── src
+    ├── api
+    │   └── agent       # AI Agent API
+    ├── components
+    │   ├── Quickstart  # 快速开始组件
+    │   ├── ChatMessage # 聊天消息组件
+    │   └── InteractStatus # 互动状态组件
+    ├── hooks
+    │   └── useChat     # 聊天相关的 hooks
+    ├── solution
+    │   └── ExpressManager # Express SDK 管理类
+    ├── utils
+    │   └── http        # http 请求工具
+    └── config          # 配置文件
+```
