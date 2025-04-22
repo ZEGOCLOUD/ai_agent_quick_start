@@ -3,6 +3,7 @@ package im.zego.aiagent.express.quickstart;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -12,7 +13,10 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.squareup.picasso.Picasso;
+import im.zego.aiagent.express.quickstart.AudioChatMessageParser.AudioChatMessage;
+import im.zego.aiagent.express.quickstart.AudioChatMessageParser.AudioChatMessageListListener;
 import im.zego.zegoexpress.ZegoExpressEngine;
+import im.zego.zegoexpress.callback.IZegoEventHandler;
 import im.zego.zegoexpress.callback.IZegoRoomLoginCallback;
 import im.zego.zegoexpress.constants.ZegoAECMode;
 import im.zego.zegoexpress.constants.ZegoANSMode;
@@ -24,22 +28,23 @@ import im.zego.zegoexpress.entity.ZegoRoomConfig;
 import im.zego.zegoexpress.entity.ZegoUser;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
-import timber.log.Timber;
 
 public class VoiceChatActivity extends AppCompatActivity {
 
     private String background_url = "https://zego-ai.oss-cn-shanghai.aliyuncs.com/agent-avatar/38597_1740990880443-20250303-163355.jpeg";
     private String agentInstanceId;
     private String agentId;
-    private String agentName;
     private String userId = ;  // 用户自己定义的 userId
     private String userName = ; // 用户自己定义的 userName
-    private long appId =;
+    private long appId = ;
+    private static final String TAG = "VoiceChatActivity";
+    private AudioChatMessageParser audioChatMessageParser = new AudioChatMessageParser();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +57,7 @@ public class VoiceChatActivity extends AppCompatActivity {
         });
 
         agentId = getIntent().getStringExtra("agentId");
-        agentName = getIntent().getStringExtra("agentName");
+        String agentName = getIntent().getStringExtra("agentName");
 
         TextView name = findViewById(R.id.ai_name);
         name.setText(agentName);
@@ -64,6 +69,8 @@ public class VoiceChatActivity extends AppCompatActivity {
         });
 
         initExpressSDK();
+
+        initTTS();
 
         requestZegoToken(userId);
     }
@@ -172,7 +179,8 @@ public class VoiceChatActivity extends AppCompatActivity {
                                     String userStreamId = generateUserStreamID(agentId, userId);
                                     String agentUserId = agentId;
 
-                                    createAgentInstance(roomId, userStreamId, agentStreamId, agentUserId, agentStreamID);
+                                    createAgentInstance(roomId, userStreamId, agentStreamId, agentUserId,
+                                        agentStreamID);
                                 }
                             });
                         } else {
@@ -212,6 +220,40 @@ public class VoiceChatActivity extends AppCompatActivity {
         ZegoExpressEngine.createEngine(zegoEngineProfile, null);
     }
 
+    private void initTTS() {
+        ZegoExpressEngine.getEngine().setEventHandler(new IZegoEventHandler() {
+            @Override
+            public void onRecvExperimentalAPI(String content) {
+                super.onRecvExperimentalAPI(content);
+                try {
+                    // 第一步：将 content 解析为 JSONObject
+                    JSONObject json = new JSONObject(content);
+
+                    // 第二步：检查 method 字段的值
+                    if (json.has("method") && json.getString("method")
+                        .equals("liveroom.room.on_recive_room_channel_message")) {
+                        // 第三步：获取 params 并解析
+                        JSONObject paramsObject = json.getJSONObject("params");
+                        String msgContent = paramsObject.getString("msg_content");
+
+                        // 假设 AudioChatTextMessage 有构造函数或方法来解析 JSON 字符串
+                        audioChatMessageParser.parseAudioChatMessage(msgContent);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        AIChatListView messageList = findViewById(R.id.message_list);
+        audioChatMessageParser.setAudioChatMessageListListener(new AudioChatMessageListListener() {
+            @Override
+            public void onMessageListUpdated(List<AudioChatMessage> messagesList) {
+                messageList.onMessageListUpdated(messagesList);
+            }
+        });
+    }
+
     private void loginRoom(String agentId, String userId, String userName, String token,
         IZegoRoomLoginCallback callback) {
         ZegoEngineConfig config = new ZegoEngineConfig();
@@ -238,7 +280,7 @@ public class VoiceChatActivity extends AppCompatActivity {
         String roomId = generateRoomID(agentId);
         ZegoExpressEngine.getEngine()
             .loginRoom(roomId, new ZegoUser(userId, userName), roomConfig, (errorCode, extendedData) -> {
-                Timber.d(
+                Log.d(TAG,
                     "loginRoom() called with: errorCode = [" + errorCode + "], extendedData = [" + extendedData + "]");
                 if (errorCode == 0) {
                     String userSteamID = generateUserStreamID(agentId, userId);

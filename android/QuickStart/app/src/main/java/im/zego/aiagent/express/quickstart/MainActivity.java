@@ -18,8 +18,6 @@ import okhttp3.Callback;
 import okhttp3.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
-import timber.log.Timber;
-import timber.log.Timber.DebugTree;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        Timber.plant(new DebugTree());
         findViewById(R.id.start_voice_chat).setOnClickListener(v -> {
             requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO);
         });
