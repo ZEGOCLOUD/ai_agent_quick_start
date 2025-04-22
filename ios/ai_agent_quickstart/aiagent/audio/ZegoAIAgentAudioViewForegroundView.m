@@ -1,18 +1,19 @@
 //
-//  ZegoAIAudioChatForeground.m
+//  ZegoAIAgentAudioViewForegroundView.m
 //
 //  Created on 2024/7/15.
 //  Copyright © 2024 Zego. All rights reserved.
 //
 
-#import "ZegoAIAgentAudioSubtitlesForegroundView.h"
+#import "ZegoAIAgentAudioViewForegroundView.h"
+
+#import <Masonry/Masonry.h>
+
 #import "ZegoAIAgentStatusView.h"
 #import "ZegoAIAgentSubtitlesTableView.h"
 #import "ZegoAIAgentSubtitlesMessageDispatcher.h"
 
-#import <Masonry/Masonry.h>
-
-@interface ZegoAIAgentAudioSubtitlesForegroundView()
+@interface ZegoAIAgentAudioViewForegroundView()<ZegoAIAgentSubtitlesEventHandler>
 
 // 智能体状态
 @property (nonatomic, strong, readwrite) ZegoAIAgentStatusView *agentStatus;
@@ -21,7 +22,7 @@
 
 @end
 
-@implementation ZegoAIAgentAudioSubtitlesForegroundView
+@implementation ZegoAIAgentAudioViewForegroundView
 
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
@@ -30,6 +31,10 @@
         [self registerEventHandler];
     }
     return self;
+}
+
+- (void)dealloc {
+    [self unregisterEventHandler];
 }
 
 - (void)setupUI {
@@ -68,6 +73,8 @@
     }];
 }
 
+#pragma mark - ZegoAIAgentSubtitlesEventHandler
+
 - (void)registerEventHandler {
     [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] registerEventHandler:self];
 }
@@ -75,8 +82,6 @@
 - (void)unregisterEventHandler {
     [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] unregisterEventHandler:self];
 }
-
-#pragma mark - ZegoAIAgentChatEventHandler
 
 - (void)onRecvChatStateChange:(ZegoAIAgentSessionState)state {
     [self.agentStatus updateTextByState:state];
@@ -90,6 +95,10 @@
     [self.chatView handleRecvLLMMessage:message];
 }
 
+- (void)onExpressExperimentalAPIContent:(NSString *)content{
+    // nothing need to do
+}
+
 #pragma mark - Public Methods
 
 /**
@@ -98,10 +107,6 @@
  */
 - (void)updateStatusText:(NSString *)statusText {
     [self.agentStatus updateStatusText:statusText];
-}
-
-- (void)dealloc {
-    [self unregisterEventHandler];
 }
 
 @end 

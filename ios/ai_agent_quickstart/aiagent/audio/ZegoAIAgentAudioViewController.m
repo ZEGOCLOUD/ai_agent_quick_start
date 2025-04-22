@@ -5,12 +5,12 @@
 #import <Masonry/Masonry.h>
 
 #import "ZegoAIAgentServiceAPI.h"
-#import "ZegoAIAgentAudioSubtitlesForegroundView.h"
+#import "ZegoAIAgentAudioViewForegroundView.h"
 
 @interface ZegoAIAgentAudioViewController ()
 
 // 前景UI组件
-@property (nonatomic, strong) ZegoAIAgentAudioSubtitlesForegroundView *foregroundView;
+@property (nonatomic, strong) ZegoAIAgentAudioViewForegroundView *foregroundView;
 
 @end
 
@@ -70,7 +70,7 @@
 
 - (void)setupForeground {
     // 创建前景UI
-    self.foregroundView = [[ZegoAIAgentAudioSubtitlesForegroundView alloc] initWithFrame:self.view.bounds];
+    self.foregroundView = [[ZegoAIAgentAudioViewForegroundView alloc] initWithFrame:self.view.bounds];
     [self.view addSubview:self.foregroundView];
     
     // 设置约束

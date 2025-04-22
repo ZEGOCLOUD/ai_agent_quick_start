@@ -443,13 +443,98 @@ AI语音通话实时字幕功能的代码结构如下，主要包含UI视图组�
 
 ## 3 使用流程
 
-1. 初始化 `ZegoAIAgentAudioSubtitlesForegroundView`实例
-2. 在SDK的消息回调中调用相应处理方法
-3. 前景视图会自动处理各类消息并更新UI显示，包括：
+1. 初始化 `ZegoAIAgentStatusView`和`ZegoAIAgentSubtitlesTableView`实例
+```objective-c
+@interface ZegoAIAgentAudioViewForegroundView()<ZegoAIAgentSubtitlesEventHandler>
+
+// 智能体状态
+@property (nonatomic, strong, readwrite) ZegoAIAgentStatusView *agentStatus;
+// 智能体字幕
+@property (nonatomic, strong, readwrite) ZegoAIAgentSubtitlesTableView *chatView;
+
+@end
+
+@implementation ZegoAIAgentAudioViewForegroundView
+
+- (instancetype)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self setupUI];
+        [self registerEventHandler];
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [self unregisterEventHandler];
+}
+
+- (void)setupUI {
+    [self setupStatus];
+    [self setupSubtitles];
+}
+
+- (void)setupStatus {
+    // 智能体状态
+    self.agentStatus = [[ZegoAIAgentStatusView alloc] initWithFrame:CGRectZero];
+    [self addSubview:self.agentStatus];
+    
+    [self.agentStatus updateStatusText:@"等待连接..."];
+    [self.agentStatus mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.width.mas_equalTo(104);
+        make.height.mas_equalTo(30);
+        make.top.equalTo(self).offset(50);
+        make.centerX.equalTo(self);
+    }];
+}
+
+- (void)setupSubtitles {
+    // 添加聊天视图 - 占据屏幕下半部分
+    CGRect chatFrame = CGRectMake(0,
+                                 self.bounds.size.height / 2,
+                                 self.bounds.size.width,
+                                 self.bounds.size.height / 2);
+    self.chatView = [[ZegoAIAgentSubtitlesTableView alloc] initWithFrame:chatFrame style:UITableViewStylePlain];
+    
+    [self addSubview:self.chatView];
+    
+    // 使用Masonry添加约束
+    [self.chatView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.right.bottom.equalTo(self);
+        make.height.equalTo(self.mas_height).multipliedBy(0.5);
+    }];
+}
+```
+
+2. 在`ZegoAIAgentSubtitlesEventHandler`的消息回调中会自动处理各类消息并更新UI显示，包括：
    - 用户/AI的说话状态变化
    - ASR实时识别结果展示
    - LLM增量文本展示
    - 会话状态的转换与显示
+```objective-c
+#pragma mark - ZegoAIAgentSubtitlesEventHandler
+
+- (void)registerEventHandler {
+    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] registerEventHandler:self];
+}
+
+- (void)unregisterEventHandler {
+    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] unregisterEventHandler:self];
+}
+
+- (void)onRecvChatStateChange:(ZegoAIAgentSessionState)state {
+    [self.agentStatus updateTextByState:state];
+}
+
+- (void)onRecvAsrChatMsg:(ZegoAIAgentAudioSubtitlesMessage *)message {
+    [self.chatView handleRecvAsrMessage:message];
+}
+
+- (void)onRecvLLMChatMsg:(ZegoAIAgentAudioSubtitlesMessage *)message {
+    [self.chatView handleRecvLLMMessage:message];
+}
+
+```
 
 ## 4 UI组件关系图
 

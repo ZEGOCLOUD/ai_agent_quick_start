@@ -13,14 +13,14 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * @class ZegoAIAgentAudioSubtitlesForegroundView
+ * @class ZegoAIAgentAudioViewForegroundView
  * @brief AI音频对话界面的前景视图
  *
  * 该类负责显示音频对话的前景UI元素，包括字幕、状态指示和交互控件。
  * 实现了ZegoAIAgentSubtitlesEventHandler协议，用于处理字幕相关的事件和更新。
  * 作为音频对话界面的主要可视部分，它包含了会话状态显示、字幕表格等UI组件。
  */
-@interface ZegoAIAgentAudioSubtitlesForegroundView : UIView <ZegoAIAgentSubtitlesEventHandler>
+@interface ZegoAIAgentAudioViewForegroundView : UIView <ZegoAIAgentSubtitlesEventHandler>
 
 /**
  * 更新状态文本
