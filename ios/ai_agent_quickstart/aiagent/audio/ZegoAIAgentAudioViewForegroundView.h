@@ -8,8 +8,6 @@
 #import <UIKit/UIKit.h>
 #import "ZegoAIAgentSubtitlesEventHandler.h"
 
-@class ZegoAIAgentSubtitlesTableView;
-
 NS_ASSUME_NONNULL_BEGIN
 
 /**
@@ -21,14 +19,6 @@ NS_ASSUME_NONNULL_BEGIN
  * 作为音频对话界面的主要可视部分，它包含了会话状态显示、字幕表格等UI组件。
  */
 @interface ZegoAIAgentAudioViewForegroundView : UIView <ZegoAIAgentSubtitlesEventHandler>
-
-/**
- * 更新状态文本
- * @param statusText 状态文本，如"已连接"、"正在处理"等
- * 
- * 此方法用于更新界面上显示的当前会话状态信息，反映AI智能体连接和处理状态
- */
-- (void)updateStatusText:(NSString *)statusText;
 
 @end
 

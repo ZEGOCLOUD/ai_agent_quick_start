@@ -24,10 +24,8 @@
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        // 注册事件
-        [self registerEventHandler];
-        
-        // 初始化字幕控件, 如果需要开启字幕，请注释下面这行代码
+        // 初始化字幕控件, 如果需要开启字幕，请取消下面这2行代码的注释
+//        [self registerEventHandler];
 //        [self setupSubtitles];
     }
     return self;

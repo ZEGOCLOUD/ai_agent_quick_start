@@ -324,14 +324,14 @@ AI语音通话实时字幕功能的代码结构如下，主要包含UI视图组�
 1. 初始化 `ZegoAIAgentSubtitlesTableView`实例
 
 ```objective-c
-@interface ZegoAIAgentAudioViewForegroundView()<ZegoAIAgentSubtitlesEventHandler>
+@interface YourView()<ZegoAIAgentSubtitlesEventHandler>
 
 // 智能体字幕
 @property (nonatomic, strong, readwrite) ZegoAIAgentSubtitlesTableView *chatView;
 
 @end
 
-@implementation ZegoAIAgentAudioViewForegroundView
+@implementation YourView
 
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
@@ -365,10 +365,8 @@ AI语音通话实时字幕功能的代码结构如下，主要包含UI视图组�
 ```
 
 2. 在 `ZegoAIAgentSubtitlesEventHandler`的消息回调中会自动处理各类消息并更新UI显示，包括：
-   - 用户/AI的说话状态变化
    - ASR实时识别结果展示
    - LLM增量文本展示
-   - 会话状态的转换与显示
 
 ```objective-c
 #pragma mark - ZegoAIAgentSubtitlesEventHandler
