@@ -51,8 +51,9 @@
         <h2>第三步: 销毁智能体实例并退出RTC房间</h2>
         <!-- 可以开始互动状态 -->
         <div v-show="inInteraction" class="interaction-container">
-          <InteractStatus :status="signalStatus" :name="agentName" />
-          <ChatMessage :messages="messages" />
+          开始互动吧
+          <!-- 需要展示字幕时打开注释 -->
+          <!-- <ChatMessage :messages="messages" /> -->
         </div>
         <!-- 智能体音频流容器 -->
         <div v-show="false" id="remoteSteamView"></div>
@@ -89,12 +90,11 @@ import config from "../config";
 import { ExpressManager } from "../solution/ExpressManager";
 import type { ZegoStreamList } from "zego-express-engine-webrtc/sdk/code/zh/ZegoExpressEntity.web";
 import type ZegoLocalStream from "zego-express-engine-webrtc/sdk/code/zh/ZegoLocalStream.web";
-import InteractStatus from "./InteractStatus.vue";
 import ChatMessage from "./ChatMessage.vue";
 import { useChat } from "../hooks/useChat";
 
 const zg = ExpressManager.getInstance();
-const { signalStatus, messages, setupEventListeners, clearMessages } =
+const { messages, setupEventListeners, clearMessages } =
   useChat(zg);
 // 步骤定义
 const steps = [
@@ -367,7 +367,6 @@ onMounted(() => {
 .interaction-container {
   margin-bottom: 30px;
   width: 100%;
-  background-color: #f0f2f5;
   border-radius: 8px;
   box-sizing: border-box;
 }

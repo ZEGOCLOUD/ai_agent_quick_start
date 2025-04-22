@@ -79,8 +79,8 @@ onUpdated(scrollToBottom);
   flex-direction: column;
   width: 100%;
   height: 200px;
-  background-color: rgba(255, 255, 255, 0.05);
   box-sizing: border-box;
+  background-color: #f0f2f5;
 }
 
 .chat-message {

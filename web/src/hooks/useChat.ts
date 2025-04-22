@@ -1,5 +1,4 @@
 import { ref } from "vue";
-import { AgentStatus, SignalStatus, UserStatus } from "../types/enum";
 import type { ExpressManager } from "../solution/ExpressManager";
 
 interface MessageData {
@@ -27,7 +26,6 @@ export interface Message {
 
 export function useChat(zg: ExpressManager) {
   // 状态管理
-  const signalStatus = ref<SignalStatus>(SignalStatus.Listening);
   const messages = ref<Message[]>([]);
   let userMsgSeq = 0;
   let agentMsgMap: Record<string, Message[]> = {};
@@ -41,21 +39,6 @@ export function useChat(zg: ExpressManager) {
     const { Cmd, SeqId, Data, Round } = msg;
 
     switch (Cmd) {
-      // 用户说话状态处理
-      case 1:
-        console.log(
-          `"mytag 用户说话状态",${Data.SpeakStatus === 1 ? "开始" : "结束"}`
-        );
-        handleUserSpeakStatus(Data.SpeakStatus);
-        break;
-
-      // 智能体说话状态处理
-      case 2:
-        console.log(
-          `"mytag 智能体说话状态",${Data.SpeakStatus === 1 ? "开始" : "结束"}`
-        );
-        handleAgentSpeakStatus(Data.SpeakStatus, SeqId);
-        break;
 
       // 用户说话文本处理
       case 3:
@@ -145,34 +128,6 @@ export function useChat(zg: ExpressManager) {
   }
 
   /**
-   * 更新交互状态信号
-   * @param {SignalStatus} signal - 状态信号
-   */
-  function handleSignal(signal: SignalStatus) {
-    signalStatus.value = signal;
-  }
-
-  // 处理用户说话状态
-  function handleUserSpeakStatus(status: UserStatus) {
-    if (status === UserStatus.Listening) {
-      handleSignal(SignalStatus.Listening);
-    }
-    if (status === UserStatus.Thinking) {
-      handleSignal(SignalStatus.Thinking);
-    }
-  }
-
-  // 处理智能体说话状态
-  function handleAgentSpeakStatus(status: number, seq: number) {
-    if (status === AgentStatus.Speaking) {
-      handleSignal(SignalStatus.Speaking);
-    }
-    if (status === AgentStatus.Listening) {
-      handleSignal(SignalStatus.Listening);
-    }
-  }
-
-  /**
    * 设置事件监听
    */
   function setupEventListeners() {
@@ -192,13 +147,11 @@ export function useChat(zg: ExpressManager) {
 
   function clearMessages() {
     messages.value = [];
-    signalStatus.value = SignalStatus.Listening;
     userMsgSeq = 0;
     agentMsgMap = {};
   }
 
   return {
-    signalStatus,
     messages,
     setupEventListeners,
     clearMessages,
