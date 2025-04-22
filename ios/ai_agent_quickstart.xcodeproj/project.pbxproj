@@ -7,14 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		410323862DA91D600051488B /* ZegoAIAgentSubtitlesColors.m in Sources */ = {isa = PBXBuildFile; fileRef = 4103236F2DA91D600051488B /* ZegoAIAgentSubtitlesColors.m */; };
-		410323872DA91D600051488B /* ZegoAIAgentSubtitlesDefines.m in Sources */ = {isa = PBXBuildFile; fileRef = 410323712DA91D600051488B /* ZegoAIAgentSubtitlesDefines.m */; };
-		410323892DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 410323762DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.m */; };
-		4103238A2DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 410323792DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.m */; };
-		4103238B2DA91D600051488B /* ZegoAIAgentSubtitlesCellLabelView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4103237C2DA91D600051488B /* ZegoAIAgentSubtitlesCellLabelView.m */; };
-		4103238C2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4103237E2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.m */; };
-		4103238D2DA91D600051488B /* ZegoAIAgentSubtitlesTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 410323812DA91D600051488B /* ZegoAIAgentSubtitlesTableView.m */; };
-		4103238E2DA91D600051488B /* ZegoAIAgentStatusView.m in Sources */ = {isa = PBXBuildFile; fileRef = 410323842DA91D600051488B /* ZegoAIAgentStatusView.m */; };
 		410B350D2DA7CE0A00CFA563 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B350C2DA7CE0A00CFA563 /* AppDelegate.m */; };
 		410B35102DA7CE0A00CFA563 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B350F2DA7CE0A00CFA563 /* SceneDelegate.m */; };
 		410B35132DA7CE0A00CFA563 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B35122DA7CE0A00CFA563 /* ViewController.m */; };
@@ -22,6 +14,15 @@
 		410B35182DA7CE0D00CFA563 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 410B35172DA7CE0D00CFA563 /* Assets.xcassets */; };
 		410B351B2DA7CE0D00CFA563 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 410B351A2DA7CE0D00CFA563 /* Base */; };
 		410B351E2DA7CE0D00CFA563 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B351D2DA7CE0D00CFA563 /* main.m */; };
+		419158A02DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m in Sources */ = {isa = PBXBuildFile; fileRef = 4191588B2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m */; };
+		419158A12DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.m in Sources */ = {isa = PBXBuildFile; fileRef = 4191588D2DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.m */; };
+		419158A22DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 419158912DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageDispatcher.m */; };
+		419158A32DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 419158932DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageProtocol.m */; };
+		419158A42DB782ED009BAA71 /* ZegoAIAgentSubtitlesCellLabelView.m in Sources */ = {isa = PBXBuildFile; fileRef = 419158962DB782ED009BAA71 /* ZegoAIAgentSubtitlesCellLabelView.m */; };
+		419158A52DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 419158982DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageModel.m */; };
+		419158A62DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4191589A2DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableViewCell.m */; };
+		419158A72DB782ED009BAA71 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 4191589C2DB782ED009BAA71 /* README.md */; };
+		419158A82DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4191589E2DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableView.m */; };
 		41A72B152DB74CAE00D921D0 /* ZegoAIAgentAudioViewForegroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A72B142DB74CAE00D921D0 /* ZegoAIAgentAudioViewForegroundView.m */; };
 		41A8630F2DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863032DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m */; };
 		41A863212DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */; };
@@ -34,29 +35,11 @@
 		41CD42C42DB1014F008F13F4 /* ZegoKey.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42C22DB1014F008F13F4 /* ZegoKey.m */; };
 		41CD42C92DB104F5008F13F4 /* ZegoAIGetTokenResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42C62DB104F5008F13F4 /* ZegoAIGetTokenResponse.m */; };
 		41CD42CA2DB104F5008F13F4 /* ZegoAIGetTokenRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42C82DB104F5008F13F4 /* ZegoAIGetTokenRequest.m */; };
-		41D010002DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 41D00FFE2DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m */; };
 		994E4C380DE5CD27D691850B /* Pods_ai_agent_quickstart.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 47C796174EF6FCC7EACFC4DE /* Pods_ai_agent_quickstart.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		3EE465397784B4ABB6270D64 /* Pods-ai_agent_quickstart.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ai_agent_quickstart.release.xcconfig"; path = "Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart.release.xcconfig"; sourceTree = "<group>"; };
-		4103236F2DA91D600051488B /* ZegoAIAgentSubtitlesColors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesColors.m; sourceTree = "<group>"; };
-		410323702DA91D600051488B /* ZegoAIAgentSubtitlesDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesDefines.h; sourceTree = "<group>"; };
-		410323712DA91D600051488B /* ZegoAIAgentSubtitlesDefines.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesDefines.m; sourceTree = "<group>"; };
-		410323752DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesMessageProtocol.h; sourceTree = "<group>"; };
-		410323762DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesMessageProtocol.m; sourceTree = "<group>"; };
-		410323772DA91D600051488B /* ZegoAIAgentSubtitlesEventHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesEventHandler.h; sourceTree = "<group>"; };
-		410323782DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesMessageDispatcher.h; sourceTree = "<group>"; };
-		410323792DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesMessageDispatcher.m; sourceTree = "<group>"; };
-		4103237C2DA91D600051488B /* ZegoAIAgentSubtitlesCellLabelView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesCellLabelView.m; sourceTree = "<group>"; };
-		4103237D2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesTableViewCell.h; sourceTree = "<group>"; };
-		4103237E2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesTableViewCell.m; sourceTree = "<group>"; };
-		410323802DA91D600051488B /* ZegoAIAgentSubtitlesTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesTableView.h; sourceTree = "<group>"; };
-		410323812DA91D600051488B /* ZegoAIAgentSubtitlesTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesTableView.m; sourceTree = "<group>"; };
-		410323842DA91D600051488B /* ZegoAIAgentStatusView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentStatusView.m; sourceTree = "<group>"; };
-		410323932DA922D50051488B /* ZegoAIAgentStatusView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentStatusView.h; sourceTree = "<group>"; };
-		410323972DA924A30051488B /* ZegoAIAgentSubtitlesCellLabelView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesCellLabelView.h; sourceTree = "<group>"; };
-		4103239A2DA924F40051488B /* ZegoAIAgentSubtitlesColors.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesColors.h; sourceTree = "<group>"; };
 		410B35082DA7CE0A00CFA563 /* ai_agent_quickstart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ai_agent_quickstart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		410B350B2DA7CE0A00CFA563 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		410B350C2DA7CE0A00CFA563 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -69,6 +52,24 @@
 		410B351A2DA7CE0D00CFA563 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		410B351C2DA7CE0D00CFA563 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		410B351D2DA7CE0D00CFA563 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		4191588A2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesColors.h; sourceTree = "<group>"; };
+		4191588B2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesColors.m; sourceTree = "<group>"; };
+		4191588C2DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesDefines.h; sourceTree = "<group>"; };
+		4191588D2DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesDefines.m; sourceTree = "<group>"; };
+		4191588F2DB782ED009BAA71 /* ZegoAIAgentSubtitlesEventHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesEventHandler.h; sourceTree = "<group>"; };
+		419158902DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageDispatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesMessageDispatcher.h; sourceTree = "<group>"; };
+		419158912DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageDispatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesMessageDispatcher.m; sourceTree = "<group>"; };
+		419158922DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesMessageProtocol.h; sourceTree = "<group>"; };
+		419158932DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesMessageProtocol.m; sourceTree = "<group>"; };
+		419158952DB782ED009BAA71 /* ZegoAIAgentSubtitlesCellLabelView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesCellLabelView.h; sourceTree = "<group>"; };
+		419158962DB782ED009BAA71 /* ZegoAIAgentSubtitlesCellLabelView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesCellLabelView.m; sourceTree = "<group>"; };
+		419158972DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesMessageModel.h; sourceTree = "<group>"; };
+		419158982DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesMessageModel.m; sourceTree = "<group>"; };
+		419158992DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesTableViewCell.h; sourceTree = "<group>"; };
+		4191589A2DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesTableViewCell.m; sourceTree = "<group>"; };
+		4191589C2DB782ED009BAA71 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		4191589D2DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesTableView.h; sourceTree = "<group>"; };
+		4191589E2DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesTableView.m; sourceTree = "<group>"; };
 		41A72B132DB74CAE00D921D0 /* ZegoAIAgentAudioViewForegroundView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentAudioViewForegroundView.h; sourceTree = "<group>"; };
 		41A72B142DB74CAE00D921D0 /* ZegoAIAgentAudioViewForegroundView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentAudioViewForegroundView.m; sourceTree = "<group>"; };
 		41A863022DA7E51400B1A58B /* ZegoAIAgentServiceAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentServiceAPI.h; sourceTree = "<group>"; };
@@ -94,8 +95,6 @@
 		41CD42C62DB104F5008F13F4 /* ZegoAIGetTokenResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIGetTokenResponse.m; sourceTree = "<group>"; };
 		41CD42C72DB104F5008F13F4 /* ZegoAIGetTokenResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIGetTokenResponse.h; sourceTree = "<group>"; };
 		41CD42C82DB104F5008F13F4 /* ZegoAIGetTokenRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIGetTokenRequest.m; sourceTree = "<group>"; };
-		41D00FFE2DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesMessageModel.m; sourceTree = "<group>"; };
-		41D00FFF2DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesMessageModel.h; sourceTree = "<group>"; };
 		47C796174EF6FCC7EACFC4DE /* Pods_ai_agent_quickstart.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ai_agent_quickstart.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDC0A4DEA925D0CF2BE3E972 /* Pods-ai_agent_quickstart.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ai_agent_quickstart.debug.xcconfig"; path = "Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -112,64 +111,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		410323742DA91D600051488B /* core */ = {
-			isa = PBXGroup;
-			children = (
-				4103239A2DA924F40051488B /* ZegoAIAgentSubtitlesColors.h */,
-				4103236F2DA91D600051488B /* ZegoAIAgentSubtitlesColors.m */,
-				410323702DA91D600051488B /* ZegoAIAgentSubtitlesDefines.h */,
-				410323712DA91D600051488B /* ZegoAIAgentSubtitlesDefines.m */,
-			);
-			path = core;
-			sourceTree = "<group>";
-		};
-		4103237A2DA91D600051488B /* protocol */ = {
-			isa = PBXGroup;
-			children = (
-				410323782DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.h */,
-				410323792DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.m */,
-				410323772DA91D600051488B /* ZegoAIAgentSubtitlesEventHandler.h */,
-				410323752DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.h */,
-				410323762DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.m */,
-			);
-			path = protocol;
-			sourceTree = "<group>";
-		};
-		4103237F2DA91D600051488B /* views */ = {
-			isa = PBXGroup;
-			children = (
-				41D00FFF2DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.h */,
-				41D00FFE2DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m */,
-				410323972DA924A30051488B /* ZegoAIAgentSubtitlesCellLabelView.h */,
-				4103237C2DA91D600051488B /* ZegoAIAgentSubtitlesCellLabelView.m */,
-				4103237D2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.h */,
-				4103237E2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.m */,
-			);
-			path = views;
-			sourceTree = "<group>";
-		};
-		410323822DA91D600051488B /* subtitles */ = {
-			isa = PBXGroup;
-			children = (
-				410323742DA91D600051488B /* core */,
-				4103237A2DA91D600051488B /* protocol */,
-				4103237F2DA91D600051488B /* views */,
-				410323802DA91D600051488B /* ZegoAIAgentSubtitlesTableView.h */,
-				410323812DA91D600051488B /* ZegoAIAgentSubtitlesTableView.m */,
-			);
-			path = subtitles;
-			sourceTree = "<group>";
-		};
-		410323852DA91D600051488B /* views */ = {
-			isa = PBXGroup;
-			children = (
-				410323822DA91D600051488B /* subtitles */,
-				410323932DA922D50051488B /* ZegoAIAgentStatusView.h */,
-				410323842DA91D600051488B /* ZegoAIAgentStatusView.m */,
-			);
-			path = views;
-			sourceTree = "<group>";
-		};
 		410B34FF2DA7CE0A00CFA563 = {
 			isa = PBXGroup;
 			children = (
@@ -207,6 +148,55 @@
 			path = ai_agent_quickstart;
 			sourceTree = "<group>";
 		};
+		4191588E2DB782ED009BAA71 /* core */ = {
+			isa = PBXGroup;
+			children = (
+				4191588A2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.h */,
+				4191588B2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m */,
+				4191588C2DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.h */,
+				4191588D2DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.m */,
+			);
+			path = core;
+			sourceTree = "<group>";
+		};
+		419158942DB782ED009BAA71 /* protocol */ = {
+			isa = PBXGroup;
+			children = (
+				4191588F2DB782ED009BAA71 /* ZegoAIAgentSubtitlesEventHandler.h */,
+				419158902DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageDispatcher.h */,
+				419158912DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageDispatcher.m */,
+				419158922DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageProtocol.h */,
+				419158932DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageProtocol.m */,
+			);
+			path = protocol;
+			sourceTree = "<group>";
+		};
+		4191589B2DB782ED009BAA71 /* views */ = {
+			isa = PBXGroup;
+			children = (
+				419158952DB782ED009BAA71 /* ZegoAIAgentSubtitlesCellLabelView.h */,
+				419158962DB782ED009BAA71 /* ZegoAIAgentSubtitlesCellLabelView.m */,
+				419158972DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageModel.h */,
+				419158982DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageModel.m */,
+				419158992DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableViewCell.h */,
+				4191589A2DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableViewCell.m */,
+			);
+			path = views;
+			sourceTree = "<group>";
+		};
+		4191589F2DB782ED009BAA71 /* subtitles */ = {
+			isa = PBXGroup;
+			children = (
+				4191588E2DB782ED009BAA71 /* core */,
+				419158942DB782ED009BAA71 /* protocol */,
+				4191589B2DB782ED009BAA71 /* views */,
+				4191589C2DB782ED009BAA71 /* README.md */,
+				4191589D2DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableView.h */,
+				4191589E2DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableView.m */,
+			);
+			path = subtitles;
+			sourceTree = "<group>";
+		};
 		41A863062DA7E51400B1A58B /* server */ = {
 			isa = PBXGroup;
 			children = (
@@ -231,7 +221,7 @@
 		41A863112DA7E67800B1A58B /* audio */ = {
 			isa = PBXGroup;
 			children = (
-				410323852DA91D600051488B /* views */,
+				4191589F2DB782ED009BAA71 /* subtitles */,
 				41A8631F2DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.h */,
 				41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */,
 				41A72B132DB74CAE00D921D0 /* ZegoAIAgentAudioViewForegroundView.h */,
@@ -342,6 +332,7 @@
 			files = (
 				410B35182DA7CE0D00CFA563 /* Assets.xcassets in Resources */,
 				410B351B2DA7CE0D00CFA563 /* Base in Resources */,
+				419158A72DB782ED009BAA71 /* README.md in Resources */,
 				410B35162DA7CE0A00CFA563 /* Base in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -395,21 +386,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				41D010002DACA91D00FDB4B7 /* ZegoAIAgentSubtitlesMessageModel.m in Sources */,
-				4103238A2DA91D600051488B /* ZegoAIAgentSubtitlesMessageDispatcher.m in Sources */,
+				419158A02DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m in Sources */,
 				41CD42C92DB104F5008F13F4 /* ZegoAIGetTokenResponse.m in Sources */,
+				419158A82DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableView.m in Sources */,
 				41A8630F2DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m in Sources */,
+				419158A22DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageDispatcher.m in Sources */,
+				419158A12DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.m in Sources */,
 				410B35132DA7CE0A00CFA563 /* ViewController.m in Sources */,
-				410323872DA91D600051488B /* ZegoAIAgentSubtitlesDefines.m in Sources */,
 				410B350D2DA7CE0A00CFA563 /* AppDelegate.m in Sources */,
-				4103238C2DA91D600051488B /* ZegoAIAgentSubtitlesTableViewCell.m in Sources */,
 				41CD42BC2DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m in Sources */,
-				410323862DA91D600051488B /* ZegoAIAgentSubtitlesColors.m in Sources */,
+				419158A32DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageProtocol.m in Sources */,
+				419158A62DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableViewCell.m in Sources */,
 				41CD42BA2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.m in Sources */,
 				41CD42B72DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.m in Sources */,
-				4103238E2DA91D600051488B /* ZegoAIAgentStatusView.m in Sources */,
-				4103238D2DA91D600051488B /* ZegoAIAgentSubtitlesTableView.m in Sources */,
 				410B351E2DA7CE0D00CFA563 /* main.m in Sources */,
+				419158A52DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageModel.m in Sources */,
+				419158A42DB782ED009BAA71 /* ZegoAIAgentSubtitlesCellLabelView.m in Sources */,
 				41CD42C42DB1014F008F13F4 /* ZegoKey.m in Sources */,
 				41CD42B52DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.m in Sources */,
 				41CD42BB2DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.m in Sources */,
@@ -417,9 +409,7 @@
 				41A863212DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m in Sources */,
 				41CD42B62DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.m in Sources */,
 				410B35102DA7CE0A00CFA563 /* SceneDelegate.m in Sources */,
-				4103238B2DA91D600051488B /* ZegoAIAgentSubtitlesCellLabelView.m in Sources */,
 				41A72B152DB74CAE00D921D0 /* ZegoAIAgentAudioViewForegroundView.m in Sources */,
-				410323892DA91D600051488B /* ZegoAIAgentSubtitlesMessageProtocol.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,14 +9,11 @@
 
 #import <Masonry/Masonry.h>
 
-#import "ZegoAIAgentStatusView.h"
 #import "ZegoAIAgentSubtitlesTableView.h"
 #import "ZegoAIAgentSubtitlesMessageDispatcher.h"
 
 @interface ZegoAIAgentAudioViewForegroundView()<ZegoAIAgentSubtitlesEventHandler>
 
-// 智能体状态
-@property (nonatomic, strong, readwrite) ZegoAIAgentStatusView *agentStatus;
 // 智能体字幕
 @property (nonatomic, strong, readwrite) ZegoAIAgentSubtitlesTableView *chatView;
 
@@ -27,33 +24,18 @@
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        [self setupUI];
+        // 注册事件
         [self registerEventHandler];
+        
+        // 初始化字幕控件, 如果需要开启字幕，请注释下面这行代码
+//        [self setupSubtitles];
     }
     return self;
 }
 
 - (void)dealloc {
+    // 反注册事件
     [self unregisterEventHandler];
-}
-
-- (void)setupUI {
-    [self setupStatus];
-    [self setupSubtitles];
-}
-
-- (void)setupStatus {
-    // 智能体状态
-    self.agentStatus = [[ZegoAIAgentStatusView alloc] initWithFrame:CGRectZero];
-    [self addSubview:self.agentStatus];
-    
-    [self.agentStatus updateStatusText:@"等待连接..."];
-    [self.agentStatus mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.width.mas_equalTo(104);
-        make.height.mas_equalTo(30);
-        make.top.equalTo(self).offset(50);
-        make.centerX.equalTo(self);
-    }];
 }
 
 - (void)setupSubtitles {
@@ -83,30 +65,12 @@
     [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] unregisterEventHandler:self];
 }
 
-- (void)onRecvChatStateChange:(ZegoAIAgentSessionState)state {
-    [self.agentStatus updateTextByState:state];
-}
-
 - (void)onRecvAsrChatMsg:(ZegoAIAgentAudioSubtitlesMessage *)message {
     [self.chatView handleRecvAsrMessage:message];
 }
 
 - (void)onRecvLLMChatMsg:(ZegoAIAgentAudioSubtitlesMessage *)message {
     [self.chatView handleRecvLLMMessage:message];
-}
-
-- (void)onExpressExperimentalAPIContent:(NSString *)content{
-    // nothing need to do
-}
-
-#pragma mark - Public Methods
-
-/**
- * 更新状态文本
- * @param statusText 状态文本
- */
-- (void)updateStatusText:(NSString *)statusText {
-    [self.agentStatus updateStatusText:statusText];
 }
 
 @end 

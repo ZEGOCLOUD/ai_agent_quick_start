@@ -4,20 +4,10 @@
 
 用户在与AI语音通话的过程中，若需要在UI上展示过程中，展示以下内容：
 
-* 通话状态：
-
-  * 呼叫中（服务初始化中）
-  * 呼叫成功（服务初始化完成，可以开始互动）
-* 互动状态：
-
-  * AI说话状态：正在说话，未说话。
-  * 用户状态：正在说话；未说话。
 * 实时字幕：
 
   * 用户内容：流式展示用户正在说的话（语音识别的实时结果）
   * AI回应内容：流式展示AI输出的内容（大语言模型实时的输出结果）】
-
-  ![字幕显示1](doc_imgs/subtitles_display_1.PNG)![字幕显示2](doc_imgs/subtitles_display_2.PNG)
 
 ## 前提条件
 
@@ -35,51 +25,34 @@ flowchart TD
     ImplementCallback --> ParseMessage[解析RTC房间自定义消息]
     ParseMessage --> InitUI[初始化字幕UI组件]
   
-    ParseMessage --> |Cmd=1| ProcessUserSpeak[处理用户说话状态]
-    ParseMessage --> |Cmd=2| ProcessAgentSpeak[处理智能体说话状态]
     ParseMessage --> |Cmd=3| ProcessASR[处理ASR文本]
     ParseMessage --> |Cmd=4| ProcessLLM[处理LLM文本]
   
-    ProcessUserSpeak --> UpdateUI1[更新UI状态]
-    ProcessAgentSpeak --> UpdateUI2[更新UI状态]
     ProcessASR --> UpdateSubtitles1[更新用户字幕]
     ProcessLLM --> UpdateSubtitles2[更新AI字幕]
   
-    UpdateUI1 --> HandleEndFlags[处理消息结束标志]
-    UpdateUI2 --> HandleEndFlags
-    UpdateSubtitles1 --> HandleEndFlags
+    UpdateSubtitles1 --> HandleEndFlags[处理消息结束标志]
     UpdateSubtitles2 --> HandleEndFlags
   
     HandleEndFlags --> CleanupCache[清理消息缓存]
     CleanupCache --> Ready[字幕功能就绪]
 ```
+
 ### 协议说明
 
 #### RTC房间事件消息协议
 
-用户与Agent进行语音对话期间，服务端通过RTC房间自定义消息下发状态信息，如用户说话状态、机器人说话状态、ASR识别文本、大模型回答的文本等。客户端监听房间自定义消息，解析对应的状态事件来渲染UI。
+用户与Agent进行语音对话期间，服务端通过RTC房间自定义消息下发状态信息，如ASR识别文本、大模型回答的文本等。客户端监听房间自定义消息，解析对应的状态事件来渲染UI。
 
 协议基本结构：
 
-| 参数      | 类型   | 描述                                                                              |
-| --------- | ------ | --------------------------------------------------------------------------------- |
-| Timestamp | int64  | 时间戳，秒级别                                                                    |
-| SeqId     | int64  | 包序列号，保证有序性，不保证连续性                                                |
-| Round     | int64  | 对话轮次，每次用户主动说话轮次增加                                                |
-| Cmd       | int    | 1:用户说话状态 `<br>`2:智能体说话状态 `<br>`3:识别的ASR文本 `<br>`4:LLM文本 |
-| Data      | Object | 具体内容，各Cmd对应不同Data                                                       |
-
-##### 用户说话状态 (Cmd = 1)
-
-| 参数        | 类型 | 描述                     |
-| ----------- | ---- | ------------------------ |
-| SpeakStatus | int  | 1: 说话开始, 2: 说话结束 |
-
-##### 智能体说话状态 (Cmd = 2)
-
-| 参数        | 类型 | 描述                     |
-| ----------- | ---- | ------------------------ |
-| SpeakStatus | int  | 1: 说话开始, 2: 说话结束 |
+| 参数      | 类型   | 描述                               |
+| --------- | ------ | ---------------------------------- |
+| Timestamp | int64  | 时间戳，秒级别                     |
+| SeqId     | int64  | 包序列号，保证有序性，不保证连续性 |
+| Round     | int64  | 对话轮次，每次用户主动说话轮次增加 |
+| Cmd       | int    | 3:识别的ASR文本 `<br>`4:LLM文本  |
+| Data      | Object | 具体内容，各Cmd对应不同Data        |
 
 ##### ASR用户语音文本 (Cmd = 3)
 
@@ -102,6 +75,7 @@ flowchart TD
 #### 监听SDK事件
 
 实现ZegoEventHandler协议以接收RTC房间自定义消息：
+
 > Express SDK的初始化部分在此处省略，假定已在应用启动过程中正确初始化
 
 ```objective-c
@@ -121,7 +95,7 @@ flowchart TD
 @end // YourService implementation
 ```
 
-```objective-c// 在头文件中实现ZegoEventHandler协议
+```objective-c//
 @interface YourViewController () <ZegoEventHandler>
 
 @end
@@ -162,13 +136,13 @@ flowchart TD
     NSString *sendIdName = params[@"send_idname"];
     NSString *sendNickname = params[@"send_nickname"];
     NSString *roomId = params[@"roomid"];
-    
+  
     if (!msgContent || !sendIdName || !roomId) {
          NSLog(@"parseExperimentalAPIContent 参数不完整: msgContent=%@, sendIdName=%@, roomId=%@",
                 msgContent, sendIdName, roomId);
         return;
     }
-    
+  
     // 解析消息内容
     [self handleMessageContent:msgContent userID:sendIdName userName:sendNickname ?: @""];
 }
@@ -189,12 +163,6 @@ flowchart TD
   
     // 根据命令类型处理消息
     switch (cmd) {
-        case 1: // 用户说话状态
-            [self handleUserSpeakStatus:data seqId:seqId round:round timestamp:timestamp];
-            break;
-        case 2: // 智能体说话状态
-            [self handleAgentSpeakStatus:data seqId:seqId round:round timestamp:timestamp];
-            break;
         case 3: // ASR文本
             [self handleAsrText:data seqId:seqId round:round timestamp:timestamp];
             break;
@@ -210,80 +178,6 @@ flowchart TD
 #### 消息处理核心逻辑
 
 以下是处理不同类型消息的核心逻辑：
-
-##### 用户说话状态处理 (Cmd=1)
-
-```objective-c
-- (void)handleUserSpeakStatus:(NSDictionary *)data seqId:(int64_t)seqId round:(int64_t)round timestamp:(int64_t)timestamp {
-    int speakStatus = [data[@"SpeakStatus"] intValue];
-  
-    if (speakStatus == 1) { // 说话开始
-        // 用户开始说话，UI更新显示"正在听"状态
-    } else if (speakStatus == 2) { // 说话结束
-        // 用户结束说话，UI更新显示"正在想"状态
-    }
-}
-```
-
-用户说话状态处理序列图：
-
-```mermaid
-sequenceDiagram
-    participant Client as 客户端
-    participant SDK as Express SDK
-    participant StatusHandler as 状态处理器
-    participant UIView as 状态UI组件
-  
-    SDK->>Client: onRecvExperimentalAPI(消息)
-    Client->>Client: 解析消息内容
-    Client->>StatusHandler: handleUserSpeakStatus(data, seqId, round, timestamp)
-    Note over StatusHandler: 检查speakStatus值
-  
-    alt speakStatus = 1 (说话开始)
-        StatusHandler->>UIView: 更新UI状态为"AI正在听"
-    else speakStatus = 2 (说话结束)
-        StatusHandler->>UIView: 更新UI状态为"AI正在思考"
-    end
-  
-    Note over Client: 用户状态变化顺序：<br/>说话开始 -> 说话结束 -> AI开始回复
-```
-
-##### 智能体说话状态处理 (Cmd=2)
-
-```objective-c
-- (void)handleAgentSpeakStatus:(NSDictionary *)data seqId:(int64_t)seqId round:(int64_t)round timestamp:(int64_t)timestamp {
-    int speakStatus = [data[@"SpeakStatus"] intValue];
-  
-    if (speakStatus == 1) { // 说话开始
-        // AI开始说话，UI更新显示"正在讲"状态
-    } else if (speakStatus == 2) { // 说话结束
-        // AI结束说话，UI更新恢复"正在听"状态
-    }
-}
-```
-
-智能体说话状态处理序列图：
-
-```mermaid
-sequenceDiagram
-    participant Client as 客户端
-    participant SDK as Express SDK
-    participant StatusHandler as 状态处理器
-    participant UIView as 状态UI组件
-  
-    SDK->>Client: onRecvExperimentalAPI(消息)
-    Client->>Client: 解析消息内容
-    Client->>StatusHandler: handleAgentSpeakStatus(data, seqId, round, timestamp)
-    Note over StatusHandler: 检查speakStatus值
-  
-    alt speakStatus = 1 (说话开始)
-        StatusHandler->>UIView: 更新UI状态为"AI正在说话"
-    else speakStatus = 2 (说话结束)
-        StatusHandler->>UIView: 更新UI状态为"AI正在听"
-    end
-  
-    Note over Client: 智能体状态变化顺序：<br/>说话开始 -> 说话结束 -> 等待用户说话
-```
 
 ##### ASR文本处理 (Cmd=3)
 
@@ -384,25 +278,10 @@ sequenceDiagram
 - **消息顺序处理**：服务器可能会发送乱序的消息，需要根据SeqId进行排序处理。
 - **流式文本处理**：
 
-   - ASR文本每次下发的是全量文本，需要完全替换之前的内容
-   - LLM文本每次下发的是增量文本，需要累加到之前的内容
-- **状态转换**：
-
-   - 用户说话 -> AI思考 -> AI回复 -> 用户说话
-   - 每个状态都需要正确处理并更新UI
+  - ASR文本每次下发的是全量文本，需要完全替换之前的内容
+  - LLM文本每次下发的是增量文本，需要累加到之前的内容
 - **消息去重**：确保处理消息时检查SeqId，避免处理已经过时的消息。
 - **内存管理**：及时清理已完成的消息缓存，特别是当用户进行长时间对话时。
-
-## 常见问题
-
-- **问题**: 为什么有些消息没有显示？
-   **解答**: 检查是否正确处理了SeqId和是否正确组装了增量消息。
-- **问题**: 为什么状态显示不正确？
-   **解答**: 确保正确实现了所有状态转换的处理逻辑，并在UI上及时更新。
-- **问题**: 如何处理网络延迟导致的消息乱序？
-   **解答**: 使用SeqId对消息进行排序，确保按照正确顺序处理和显示。
-- **问题**: 如何提高字幕显示的流畅度？
-   **解答**: 优化UI更新逻辑，减少主线程阻塞，可以考虑使用异步处理消息和UI更新。
 
 # 代码目录结构与文件说明
 
@@ -413,8 +292,7 @@ AI语音通话实时字幕功能的代码结构如下，主要包含UI视图组�
 | 文件名                                      | 说明                                                                                                                                                             |
 | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ZegoAIAgentAudioSubtitlesForegroundView.h/m | AI音频对话界面的前景视图，负责显示音频对话的前景UI元素，包括字幕、状态指示和交互控件。实现了ZegoAIAgentSubtitlesEventHandler协议，用于处理字幕相关的事件和更新。 |
-| ZegoAIAgentStatusView.h/m                   | AI智能体状态显示视图，负责显示AI智能体当前的状态信息，包括连接状态、处理状态等。                                                                                 |
-| ZegoAIAgentSubtitlesTableView.h/m | 智能体对话字幕表格视图，负责显示用户与AI智能体之间的对话内容，以表格形式呈现对话历史。支持实时更新，能够在用户说话和AI回复时即时显示对应的字幕内容。 |
+| ZegoAIAgentSubtitlesTableView.h/m           | 智能体对话字幕表格视图，负责显示用户与AI智能体之间的对话内容，以表格形式呈现对话历史。支持实时更新，能够在用户说话和AI回复时即时显示对应的字幕内容。             |
 
 ## 2 字幕核心组件 (subtitles目录)
 
@@ -443,12 +321,11 @@ AI语音通话实时字幕功能的代码结构如下，主要包含UI视图组�
 
 ## 3 使用流程
 
-1. 初始化 `ZegoAIAgentStatusView`和`ZegoAIAgentSubtitlesTableView`实例
+1. 初始化 `ZegoAIAgentSubtitlesTableView`实例
+
 ```objective-c
 @interface ZegoAIAgentAudioViewForegroundView()<ZegoAIAgentSubtitlesEventHandler>
 
-// 智能体状态
-@property (nonatomic, strong, readwrite) ZegoAIAgentStatusView *agentStatus;
 // 智能体字幕
 @property (nonatomic, strong, readwrite) ZegoAIAgentSubtitlesTableView *chatView;
 
@@ -459,7 +336,7 @@ AI语音通话实时字幕功能的代码结构如下，主要包含UI视图组�
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        [self setupUI];
+        [self setupSubtitles];
         [self registerEventHandler];
     }
     return self;
@@ -469,25 +346,6 @@ AI语音通话实时字幕功能的代码结构如下，主要包含UI视图组�
     [self unregisterEventHandler];
 }
 
-- (void)setupUI {
-    [self setupStatus];
-    [self setupSubtitles];
-}
-
-- (void)setupStatus {
-    // 智能体状态
-    self.agentStatus = [[ZegoAIAgentStatusView alloc] initWithFrame:CGRectZero];
-    [self addSubview:self.agentStatus];
-    
-    [self.agentStatus updateStatusText:@"等待连接..."];
-    [self.agentStatus mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.width.mas_equalTo(104);
-        make.height.mas_equalTo(30);
-        make.top.equalTo(self).offset(50);
-        make.centerX.equalTo(self);
-    }];
-}
-
 - (void)setupSubtitles {
     // 添加聊天视图 - 占据屏幕下半部分
     CGRect chatFrame = CGRectMake(0,
@@ -495,9 +353,9 @@ AI语音通话实时字幕功能的代码结构如下，主要包含UI视图组�
                                  self.bounds.size.width,
                                  self.bounds.size.height / 2);
     self.chatView = [[ZegoAIAgentSubtitlesTableView alloc] initWithFrame:chatFrame style:UITableViewStylePlain];
-    
+  
     [self addSubview:self.chatView];
-    
+  
     // 使用Masonry添加约束
     [self.chatView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.right.bottom.equalTo(self);
@@ -506,11 +364,12 @@ AI语音通话实时字幕功能的代码结构如下，主要包含UI视图组�
 }
 ```
 
-2. 在`ZegoAIAgentSubtitlesEventHandler`的消息回调中会自动处理各类消息并更新UI显示，包括：
+2. 在 `ZegoAIAgentSubtitlesEventHandler`的消息回调中会自动处理各类消息并更新UI显示，包括：
    - 用户/AI的说话状态变化
    - ASR实时识别结果展示
    - LLM增量文本展示
    - 会话状态的转换与显示
+
 ```objective-c
 #pragma mark - ZegoAIAgentSubtitlesEventHandler
 
@@ -520,10 +379,6 @@ AI语音通话实时字幕功能的代码结构如下，主要包含UI视图组�
 
 - (void)unregisterEventHandler {
     [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] unregisterEventHandler:self];
-}
-
-- (void)onRecvChatStateChange:(ZegoAIAgentSessionState)state {
-    [self.agentStatus updateTextByState:state];
 }
 
 - (void)onRecvAsrChatMsg:(ZegoAIAgentAudioSubtitlesMessage *)message {
@@ -540,8 +395,7 @@ AI语音通话实时字幕功能的代码结构如下，主要包含UI视图组�
 
 ```mermaid
 graph TD
-    ForegroundView[ZegoAIAgentAudioSubtitlesForegroundView] --> StatusView[ZegoAIAgentStatusView]
-    ForegroundView --> SubtitlesTableView[ZegoAIAgentSubtitlesTableView]
+    ForegroundView[ZegoAIAgentAudioSubtitlesForegroundView] --> SubtitlesTableView[ZegoAIAgentSubtitlesTableView]
   
     SubtitlesTableView --> TableViewCell[ZegoAIAgentSubtitlesTableViewCell]
     TableViewCell --> CellLabelView[ZegoAIAgentSubtitlesCellLabelView]

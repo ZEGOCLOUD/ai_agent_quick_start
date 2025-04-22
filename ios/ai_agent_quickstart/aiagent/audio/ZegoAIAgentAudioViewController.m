@@ -134,10 +134,6 @@
             
             if (success) {
                 NSLog(@"音频聊天开始成功");
-                
-                if(nil != strongSelf.foregroundView) {
-                    [strongSelf.foregroundView updateStatusText:@"已连接"];
-                }
             } else {
                 NSLog(@"音频聊天开始失败：%@", errorMessage);
             }
