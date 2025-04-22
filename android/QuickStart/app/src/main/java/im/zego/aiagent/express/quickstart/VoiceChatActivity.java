@@ -70,7 +70,7 @@ public class VoiceChatActivity extends AppCompatActivity {
 
         initExpressSDK();
 
-        initTTS();
+       // initTTS();
 
         requestZegoToken(userId);
     }
