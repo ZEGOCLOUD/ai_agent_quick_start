@@ -48,8 +48,9 @@
     
     // 使用Masonry添加约束
     [self.chatView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.right.bottom.equalTo(self);
-        make.height.equalTo(self.mas_height).multipliedBy(0.5);
+        make.left.right.equalTo(self);
+        make.bottom.equalTo(self).offset(-120); // 底部留出空间给关闭按钮
+        make.height.equalTo(self.mas_height).multipliedBy(0.4);
     }];
 }
 
