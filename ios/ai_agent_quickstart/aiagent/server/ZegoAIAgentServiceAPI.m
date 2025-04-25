@@ -293,7 +293,7 @@ static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 
     
     NSLog(@"启用ANS（噪声抑制），模式：ZegoANSModeAggressive");
     [[ZegoExpressEngine sharedEngine] enableANS:TRUE];
-    [[ZegoExpressEngine sharedEngine] setANSMode:ZegoANSModeAggressive];
+    [[ZegoExpressEngine sharedEngine] setANSMode:ZegoANSModeAIBalanced];
 }
 
 -(void)startPushlishStream{
