@@ -25,6 +25,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// 注册的智能体名称
 @property (nonatomic, copy) NSString *agentName;
 
+/// 注册的智能体robot id(zim user id)
+@property (nonatomic, copy) NSString *agentRobotId;
+
 /**
  * 从服务响应创建实例
  * @param response 通用服务响应对象

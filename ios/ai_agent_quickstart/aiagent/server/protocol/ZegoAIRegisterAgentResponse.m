@@ -18,6 +18,7 @@
     if (response.data && [response.data isKindOfClass:[NSDictionary class]]) {
         registerResponse.agentId = response.data[@"agent_id"];
         registerResponse.agentName = response.data[@"agent_name"];
+        registerResponse.agentRobotId = response.data[@"agent_robot_id"];
     }
     
     return registerResponse;

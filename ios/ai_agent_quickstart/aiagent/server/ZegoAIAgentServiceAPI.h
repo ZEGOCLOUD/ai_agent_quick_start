@@ -33,6 +33,30 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)sharedInstance;
 
 /**
+ * 获取当前智能体ID
+ * @return 智能体ID
+ */
+- (NSString *)getAgentId;
+
+/**
+ * 获取当前智能体名称
+ * @return 智能体名称
+ */
+- (NSString *)getAgentName;
+
+/**
+ * 获取当前智能体robot id
+ * @return 智能体robot id
+ */
+- (NSString *)getAgentRotbotId;
+
+/**
+ * 获取当前用户ID
+ * @return 用户ID
+ */
+- (NSString *)getUserId;
+
+/**
  * 初始化方法
  * 会去创建智能体
  * @param completion 初始化完成的回调
@@ -68,6 +92,11 @@ NS_ASSUME_NONNULL_BEGIN
  * 4. 回调通知会话终止结果
  */
 - (void)stopChatWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
+
+/**
+ * 获取Token
+ */
+- (void)getTokenWithCompletion:(void (^)(ZegoAIGetTokenResponse *response))completion;
 
 @end
 

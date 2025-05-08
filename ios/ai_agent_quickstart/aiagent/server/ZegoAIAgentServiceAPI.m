@@ -31,6 +31,8 @@ static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 
 
 @property (nonatomic, copy) NSString *currentBaseURL;
 @property (nonatomic, copy) NSString *agentId;
+@property (nonatomic, copy) NSString *agentName;
+@property (nonatomic, copy) NSString *agentRobotId;
 @property (nonatomic, copy) NSString *agentInstanceId;
 
 @property (nonatomic, copy) NSString *userId;
@@ -57,6 +59,22 @@ static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 
 }
 
 #pragma mark - Public Methods
+
+- (NSString *)getAgentId {
+    return self.agentId;
+}
+
+- (NSString *)getAgentName {
+    return self.agentName;
+}
+
+- (NSString *)getAgentRotbotId {
+    return self.agentRobotId;
+}
+
+- (NSString *)getUserId {
+    return self.userId;
+}
 
 - (void)getTokenWithCompletion:(void (^)(ZegoAIGetTokenResponse *response))completion {
     NSString *baseUrl = [NSString stringWithFormat:@"%@/api/zegotoken", self.currentBaseURL];
@@ -166,6 +184,9 @@ static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 
         if (registerResponse.code == 0) {
             // 注册成功，保存agentId
             self.agentId = registerResponse.agentId;
+            self.agentName = registerResponse.agentName;
+            self.agentRobotId = registerResponse.agentRobotId;
+            
             if (completion) {
                 completion(YES, nil);
             }
