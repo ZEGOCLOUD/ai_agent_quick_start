@@ -17,8 +17,8 @@
 @property (nonatomic, strong) NSMutableDictionary<NSNumber*,ZegoAIAgentSubtitlesMessageModel*>* chatMsgList;       // 存储所有聊天消息的字典，键为消息索引
 @property (nonatomic, strong) NSMutableArray<ZegoAIAgentSubtitlesMessageModel*>* sortedChatMsgList;                // 按seqId排序的消息数组，用于展示
 @property (nonatomic, strong) NSMutableDictionary<NSString*,ZegoAIAgentSubtitlesMessageModel*>* tempAsrMsgList;    // 临时存储ASR(语音识别)消息的字典，键为message_id
-@property (nonatomic, strong) NSMutableDictionary<NSString*,NSMutableDictionary<NSNumber*, ZegoAIAgentSubtitlesMessageModel*>*>* tempLLMMsgList;  // 临时存储LLM(大语言模型)消息的嵌套字典，外层键为message_id，内层键为seqId
-@property (nonatomic, strong) NSMutableArray<NSString*>* tempDelayRemoveLLMsgList;                     // 延迟移除LLM消息的临时列表
+@property (nonatomic, strong) NSMutableDictionary<NSNumber*,NSMutableDictionary<NSNumber*, ZegoAIAgentSubtitlesMessageModel*>*>* tempLLMMsgList;  // 临时存储LLM(大语言模型)消息的嵌套字典，外层键为message_id，内层键为round id
+@property (nonatomic, strong) NSMutableOrderedSet<NSNumber*>* roundEndFlag;
 
 @end
 
@@ -40,7 +40,7 @@
         self.msgTotalCount = 0;
         self.tempAsrMsgList = [[NSMutableDictionary alloc] initWithCapacity:5];
         self.tempLLMMsgList = [[NSMutableDictionary alloc] initWithCapacity:5];
-        self.tempDelayRemoveLLMsgList = [[NSMutableArray alloc] initWithCapacity:5];
+        self.roundEndFlag = [[NSMutableOrderedSet alloc] initWithCapacity:5];
 
         // 设置表格视图属性
         self.separatorStyle = UITableViewCellSeparatorStyleNone;
@@ -67,39 +67,39 @@
 }
 
 // 处理接收到的ASR(语音识别)文本，更新聊天信息
--(void)handleRecvAsrMessage:(ZegoAIAgentAudioSubtitlesMessage*)msgDict{
-    int cmd =msgDict.cmd;
-    long long seqId =msgDict.seq_id;
-    long long round =msgDict.round;
-    long timeStamp =msgDict.timestamp;
+-(void)handleRecvAsrMessage:(ZegoAIAgentAudioSubtitlesMessage*)message{
+    int messageCommand =message.cmd;
+    long long messageSeqId =message.seq_id;
+    long long messageRound =message.round;
+    long messageTimeStamp =message.timestamp;
     
-    NSString* content = msgDict.data.text;
-    NSString* message_id = msgDict.data.message_id;
-    BOOL end_flag = msgDict.data.end_flag;
+    NSString* messageContent = message.data.text;
+    NSString* messageId = message.data.message_id;
+    BOOL messageEndFlag = message.data.end_flag;
     
-    if (content && content.length > 0) {
-        NSNumber* objSeq = [NSNumber numberWithLongLong:seqId];
-        ZegoAIAgentSubtitlesMessageModel* existAsrMsgModel = [self.tempAsrMsgList objectForKey:message_id];
+    if (messageContent && messageContent.length > 0) {
+        NSNumber* objSeq = [NSNumber numberWithLongLong:messageSeqId];
+        ZegoAIAgentSubtitlesMessageModel* existAsrMsgModel = [self.tempAsrMsgList objectForKey:messageId];
         if (existAsrMsgModel == nil) {
             // 如果是新消息，创建一个新的消息模型并添加到临时列表和聊天列表中
             existAsrMsgModel =  [[ZegoAIAgentSubtitlesMessageModel alloc]init];
-            existAsrMsgModel.seqId = seqId;
+            existAsrMsgModel.seqId = messageSeqId;
             existAsrMsgModel.isMine = YES;  // 标记为用户自己的消息
-            existAsrMsgModel.content = content;
-            existAsrMsgModel.round = round;
-            existAsrMsgModel.end_flag = end_flag;
-            existAsrMsgModel.message_id = message_id;
-            existAsrMsgModel.messageTimeStamp = timeStamp;
-            [self.tempAsrMsgList setObject:existAsrMsgModel forKey:message_id];
-            [self insertCurMsgModel:cmd withMsgModel:existAsrMsgModel];
-        }else if(existAsrMsgModel.message_id && [existAsrMsgModel.message_id isEqualToString: message_id]){
-            if (seqId < existAsrMsgModel.seqId) {
+            existAsrMsgModel.content = messageContent;
+            existAsrMsgModel.round = messageRound;
+            existAsrMsgModel.end_flag = messageEndFlag;
+            existAsrMsgModel.message_id = messageId;
+            existAsrMsgModel.messageTimeStamp = messageTimeStamp;
+            [self.tempAsrMsgList setObject:existAsrMsgModel forKey:messageId];
+            [self insertCurMsgModel:messageCommand withMsgModel:existAsrMsgModel];
+        }else if(existAsrMsgModel.message_id && [existAsrMsgModel.message_id isEqualToString: messageId]){
+            if (messageSeqId < existAsrMsgModel.seqId) {
                 // 如果当前显示的item的seqId已经是最新的了，就不需要再更新文本内容
-                 NSLog(@"recvasr curSeqId=%lld < existAsrMsgModel.seqId=%lld", seqId, existAsrMsgModel.seqId);
+                 NSLog(@"recvasr curSeqId=%lld < existAsrMsgModel.seqId=%lld", messageSeqId, existAsrMsgModel.seqId);
             }else{
                 // 更新现有消息的内容并刷新表格
-                existAsrMsgModel.content = content;
-                existAsrMsgModel.seqId = seqId; // 更新seqId
+                existAsrMsgModel.content = messageContent;
+                existAsrMsgModel.seqId = messageSeqId; // 更新seqId
                 [self resortAndReloadMessages]; // 重新排序并刷新
             }
         }
@@ -107,62 +107,112 @@
 }
 
 // 处理接收到的LLM(大语言模型)文本，更新聊天信息
--(void)handleRecvLLMMessage:(ZegoAIAgentAudioSubtitlesMessage*)msgDict{
-    int cmd =msgDict.cmd;
-    long long seqId =msgDict.seq_id;
-    long long round =msgDict.round;
-    long timeStamp =msgDict.timestamp;
+-(void)handleRecvLLMMessage:(ZegoAIAgentAudioSubtitlesMessage*)message{
+    int messageCmd =message.cmd;
+    long long messageSeqId =message.seq_id;
+    long long messageRound =message.round;
+    long messageTimeStamp =message.timestamp;
     
-    NSString* content = msgDict.data.text;
-    NSString* message_id = msgDict.data.message_id;
-    BOOL end_flag = msgDict.data.end_flag;
+    NSString* messageContent = message.data.text;
+    NSString* messageId = message.data.message_id;
+    BOOL messageEndFlag = message.data.end_flag;
     
-    if (content && content.length > 0) {
-        NSNumber* objSeq = [NSNumber numberWithLongLong:seqId];
+    if (messageContent && messageContent.length > 0) {
+        NSNumber* objSeqId = [NSNumber numberWithLongLong:messageSeqId];
         ZegoAIAgentSubtitlesMessageModel* existAsrMsgModel =  [[ZegoAIAgentSubtitlesMessageModel alloc]init];
-        existAsrMsgModel.seqId = seqId;
+        existAsrMsgModel.seqId = messageSeqId;
         existAsrMsgModel.isMine = NO;  // 标记为非用户自己的消息（AI回复）
-        existAsrMsgModel.content = content;
-        existAsrMsgModel.round = round;
-        existAsrMsgModel.message_id = message_id;
-        existAsrMsgModel.end_flag = end_flag;
-        existAsrMsgModel.messageTimeStamp = timeStamp;
+        existAsrMsgModel.content = messageContent;
+        existAsrMsgModel.round = messageRound;
+        existAsrMsgModel.message_id = messageId;
+        existAsrMsgModel.end_flag = messageEndFlag;
+        existAsrMsgModel.messageTimeStamp = messageTimeStamp;
         
-        NSMutableDictionary<NSNumber*,ZegoAIAgentSubtitlesMessageModel*>* existAsrMsgList = [self.tempLLMMsgList objectForKey:message_id];
+        NSMutableDictionary<NSNumber*,ZegoAIAgentSubtitlesMessageModel*>* existAsrMsgList = [self.tempLLMMsgList objectForKey:messageId];
         if (existAsrMsgList == nil) {
             // 如果是该消息id的第一条内容，创建新的存储容器
             existAsrMsgList = [[NSMutableDictionary alloc]initWithCapacity:5];
-            [existAsrMsgList setObject:existAsrMsgModel forKey:objSeq];
-            [self.tempLLMMsgList setObject:existAsrMsgList forKey:message_id];
+            [existAsrMsgList setObject:existAsrMsgModel forKey:objSeqId];
+            [self.tempLLMMsgList setObject:existAsrMsgList forKey:@(messageRound)];
             
             // 创建一个新的消息模型添加到聊天列表中
             ZegoAIAgentSubtitlesMessageModel* chatTableCellModel =  [[ZegoAIAgentSubtitlesMessageModel alloc]init];
-            chatTableCellModel.seqId = seqId;
+            chatTableCellModel.seqId = messageSeqId;
             chatTableCellModel.isMine = NO;
-            chatTableCellModel.content = content;
-            chatTableCellModel.round = round;
-            chatTableCellModel.message_id = message_id;
-            chatTableCellModel.end_flag = end_flag;
-            chatTableCellModel.messageTimeStamp = timeStamp;
-            [self insertCurMsgModel:cmd withMsgModel:chatTableCellModel];
+            chatTableCellModel.content = messageContent;
+            chatTableCellModel.round = messageRound;
+            chatTableCellModel.message_id = messageId;
+            chatTableCellModel.end_flag = messageEndFlag;
+            chatTableCellModel.messageTimeStamp = messageTimeStamp;
+            [self insertCurMsgModel:messageCmd withMsgModel:chatTableCellModel];
         } else {
+            // 3. 判断message_id变化
+            id firstSeqIdKey = [existAsrMsgList allKeys].firstObject;
+            ZegoAIAgentSubtitlesMessageModel* firstValue = [existAsrMsgList objectForKey:firstSeqIdKey];
+            if (![messageId isEqualToString:firstValue.message_id]) {
+                NSLog(@"recvllmtts message_id变化: old=%@, new=%@, seqId=%lld, maxKey=%@", firstValue.message_id, messageId, messageSeqId, firstSeqIdKey);
+                //1.同个round来了一条messageId不同的消息，则判断seqId，如果当前的seqId比保存的更大，
+                //则把原来保存的全部删除，用新的messageId及后续的同messageId消息
+                
+                // 遍历所有键，找到最大值
+                NSArray *seqIDKeys = [existAsrMsgList allKeys];
+                NSNumber *maxSeqIdKey = [seqIDKeys firstObject];
+                for (NSNumber *seqIdKey in seqIDKeys) {
+                    if ([seqIdKey compare:maxSeqIdKey] == NSOrderedDescending) {
+                        maxSeqIdKey = seqIdKey;
+                    }
+                }
+                
+                // 如果新消息的seqId大于已保存消息的最大seqId，则删除所有旧消息
+                if (messageSeqId > [maxSeqIdKey longLongValue]) {
+                    NSLog(@"recvllmtts remove all message_id=%@", messageId);
+                    [existAsrMsgList removeAllObjects];
+                    
+                    // 同时需要从chatMsgList中删除对应的消息
+                    ZegoAIAgentSubtitlesMessageModel* oldMsgModel = [self queryMsgModelWithMessageId:firstValue.message_id];
+                    if (oldMsgModel) {
+                        NSArray* keysArray = [self.chatMsgList allKeys];
+                        for (NSNumber* key in keysArray) {
+                            ZegoAIAgentSubtitlesMessageModel* msgModel = [self.chatMsgList objectForKey:key];
+                            if ([msgModel.message_id isEqualToString:firstValue.message_id]) {
+                                [self.chatMsgList removeObjectForKey:key];
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // 创建新的消息模型并添加到显示列表
+                    ZegoAIAgentSubtitlesMessageModel* newMsgModel = [[ZegoAIAgentSubtitlesMessageModel alloc] init];
+                    newMsgModel.seqId = messageSeqId;
+                    newMsgModel.isMine = NO;
+                    newMsgModel.content = messageContent;
+                    newMsgModel.round = messageRound;
+                    newMsgModel.message_id = messageId;
+                    newMsgModel.end_flag = messageEndFlag;
+                    newMsgModel.messageTimeStamp = messageTimeStamp;
+                    [self insertCurMsgModel:messageCmd withMsgModel:newMsgModel];
+                }
+            }
+            
             // 如果已有该消息id的记录，添加新的片段到现有记录中
             // 注意：即使之前收到过end_flag=1的消息，这里也会继续处理同一message_id的新内容
             // 这是为了应对网络延迟导致的消息乱序到达情况
-            [existAsrMsgList setObject:existAsrMsgModel forKey:objSeq];
+            [existAsrMsgList setObject:existAsrMsgModel forKey:objSeqId];
             
             // 获取所有键并按序列号排序
             // 这是第一处排序逻辑：将LLM消息片段按照seqId从小到大排序
-            NSArray *keysArray = [existAsrMsgList allKeys];
-            NSArray * sortedArray = [keysArray sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+            NSArray *seqIdKeysArray = [existAsrMsgList allKeys];
+            NSArray * sortedSeqIdsArray = [seqIdKeysArray sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
                 NSNumber* obj1N = (NSNumber*)obj1;
                 NSNumber* obj2N = (NSNumber*)obj2;
                 return [obj1N longLongValue] > [obj2N longLongValue];  // 返回大于表示将obj1放在obj2后面，实现升序排序
             }];
             
+            // 4. 拼接totalContent前
+            NSLog(@"recvllmtts 拼接前seqIds: %@", sortedSeqIdsArray);
             NSString* totalContent = @"";
 //            long long lastSeq = 0;
-            for (NSNumber* key in sortedArray) {
+            for (NSNumber* seqIdKey in sortedSeqIdsArray) {
                 // 注释的代码是实现等待逻辑，确保消息片段是连续的，例如2,3,4,6...，只会显示2,3,4
 //                long long curItemSeqId = [key longLongValue];
 //                if (lastSeq == 0) {
@@ -174,57 +224,45 @@
 //                }
                 
                 // 按照排序后的顺序拼接所有消息片段
-                ZegoAIAgentSubtitlesMessageModel* temp = [existAsrMsgList objectForKey:key];
+                ZegoAIAgentSubtitlesMessageModel* temp = [existAsrMsgList objectForKey:seqIdKey];
                 totalContent = [totalContent stringByAppendingString:temp.content];
             }
+            // 5. 拼接totalContent后
+            NSLog(@"recvllmtts 拼接后totalContent: %@", totalContent);
             
             // 更新现有消息模型的内容和属性
-            ZegoAIAgentSubtitlesMessageModel* curUserChatMsgModel = [self queryMsgModelWithMessageId:message_id];
-            curUserChatMsgModel.seqId = seqId;
+            ZegoAIAgentSubtitlesMessageModel* curUserChatMsgModel = [self queryMsgModelWithMessageId:messageId];
+            curUserChatMsgModel.seqId = messageSeqId;
             curUserChatMsgModel.isMine = NO;
-            curUserChatMsgModel.end_flag = end_flag;
-            curUserChatMsgModel.messageTimeStamp = timeStamp;
+            curUserChatMsgModel.end_flag = messageEndFlag;
+            curUserChatMsgModel.messageTimeStamp = messageTimeStamp;
             curUserChatMsgModel.content = totalContent;
             [self resortAndReloadMessages]; // 重新排序并刷新
         }
     }
     
-    // 处理消息结束标志
-    if (end_flag) {
-        // 这里不会立即清理当前message_id的缓存，而是将其加入延迟清理列表
-        // 这样设计是为了处理网络延迟导致的消息乱序到达情况，即使收到end_flag=1，
-        // 仍可能有该message_id的消息片段延迟到达
+    //end_flag标志不可靠不能依赖，同回合里可能有多个end_flag=true,且可能不是最后一条消息到达,这里采用延迟删除
+    if (self.roundEndFlag.count <3) {
+        [self.roundEndFlag addObject:@(messageRound)];
+    }else{
+        NSNumber* key = self.roundEndFlag.firstObject;
         
-        // 当延迟清理列表中累积了超过2条不同的已完成消息时，才进行批量清理
-        if (self.tempDelayRemoveLLMsgList.count > 2) {
-            // 遍历所有待清理的message_id（这些都是不同消息，每个都已收到end_flag=1）
-            for (NSString* item in  self.tempDelayRemoveLLMsgList) {
-                // 记录日志前再次对消息片段进行排序，用于生成完整的seqId序列日志
-                // 这是第二处排序逻辑：同样按照seqId从小到大排序
-                NSMutableDictionary<NSNumber*,ZegoAIAgentSubtitlesMessageModel*>* tempLLMMsgList = [self.tempLLMMsgList objectForKey:item];
-                NSArray *keysArray = [tempLLMMsgList allKeys];
-                NSArray * sortedArray = [keysArray sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
-                    NSNumber* obj1N = (NSNumber*)obj1;
-                    NSNumber* obj2N = (NSNumber*)obj2;
-                    return [obj1N longLongValue] > [obj2N longLongValue];  // 返回大于表示将obj1放在obj2后面，实现升序排序
-                }];
-                
-                // 生成用于日志记录的seqId序列字符串
-                NSString* roundSeqId=@"";
-                for (int i=0; i<sortedArray.count; i++) {
-                    roundSeqId = [roundSeqId stringByAppendingFormat:@"%lld,", [[sortedArray objectAtIndex:i] longLongValue]];
-                }
-                
-                // 记录日志并从临时存储中移除该message_id的所有消息片段
-                 NSLog(@"recvllmtts remove round=%lld, totalSeqStr=%@, message_id=%@", round, roundSeqId, item);
-                [self.tempLLMMsgList removeObjectForKey:item];
-            }
-            // 清空延迟清理列表，开始新一轮的累积
-            [self.tempDelayRemoveLLMsgList removeAllObjects];
+        //下面代码主要用来打日志
+        NSMutableDictionary<NSNumber*,ZegoAIAgentSubtitlesMessageModel*>* tempLLMMsgList = [self.tempLLMMsgList objectForKey:key];
+        NSArray *keysArray = [tempLLMMsgList allKeys];
+        NSArray * sortedArray = [keysArray sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+            NSNumber* obj1N = (NSNumber*)obj1;
+            NSNumber* obj2N = (NSNumber*)obj2;
+            return [obj1N longLongValue] > [obj2N longLongValue];
+        }];
+        NSString* roundSeqId=@"";
+        for (int i=0; i<sortedArray.count; i++) {
+            roundSeqId = [roundSeqId stringByAppendingFormat:@"%lld,", [[sortedArray objectAtIndex:i] longLongValue]];
         }
-        // 将当前收到end_flag=1的message_id添加到延迟清理列表中
-        // 注意：这不会立即清理其缓存，而是等待累积足够数量后再批量清理
-        [self.tempDelayRemoveLLMsgList addObject:message_id];
+        NSLog(@"recvllmtts remove round=%lld, totalSeqStr=%@", [key longLongValue], roundSeqId);
+        
+        [self.tempLLMMsgList removeObjectForKey:key];
+        [self.roundEndFlag removeObject:key];
     }
 }
 

@@ -36,6 +36,7 @@
             [strongSelf startAudioChat];
         } else {
             NSLog(@"初始化错误");
+            [self showToast:[NSString stringWithFormat:@"初始化错误"]];
         }
     }];
 }
@@ -121,6 +122,7 @@
     [self requestAudioPermission:^(BOOL granted) {
         if (!granted) {
             NSLog(@"未获得音频权限");
+            [self showToast:[NSString stringWithFormat:@"未获得音频权限"]];
             return;
         }
         
@@ -136,6 +138,7 @@
                 NSLog(@"音频聊天开始成功");
             } else {
                 NSLog(@"音频聊天开始失败：%@", errorMessage);
+                [self showToast:[NSString stringWithFormat:@"音频聊天开始失败：%@", errorMessage]];
             }
         }];
     }];
@@ -163,6 +166,18 @@
 // 关闭按钮点击事件处理
 - (void)closeButtonClicked {
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)showToast:(NSString *)message {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil
+                                                                 message:message
+                                                          preferredStyle:UIAlertControllerStyleAlert];
+    
+    [self presentViewController:alert animated:YES completion:^{
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        });
+    }];
 }
 
 @end

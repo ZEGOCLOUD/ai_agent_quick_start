@@ -30,8 +30,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) ZegoAIAgentSubtitlesColors *colors;
 
--(void)handleRecvAsrMessage:(ZegoAIAgentAudioSubtitlesMessage*)msgDict;
--(void)handleRecvLLMMessage:(ZegoAIAgentAudioSubtitlesMessage*)msgDict;
+-(void)handleRecvAsrMessage:(ZegoAIAgentAudioSubtitlesMessage*)message;
+-(void)handleRecvLLMMessage:(ZegoAIAgentAudioSubtitlesMessage*)message;
 @end
 
 NS_ASSUME_NONNULL_END
