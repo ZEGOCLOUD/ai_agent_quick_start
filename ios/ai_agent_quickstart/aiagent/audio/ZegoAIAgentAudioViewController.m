@@ -72,12 +72,14 @@
     self.userIdLabel.text = [NSString stringWithFormat:@"%@", [[ZegoAIAgentServiceAPI sharedInstance] getUserId]];
     self.userIdLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
     self.userIdLabel.textAlignment = NSTextAlignmentCenter;
+    self.userIdLabel.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1];
+    self.userIdLabel.layer.cornerRadius = 80;
     self.userIdLabel.layer.masksToBounds = YES;
     [self.view addSubview:self.userIdLabel];
     [self.userIdLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(self.roomIdLabel.mas_bottom).offset(10);
         make.left.equalTo(self.view.mas_left).offset(10);
-        make.width.height.mas_equalTo(180);
+        make.width.height.mas_equalTo(160);
     }];
 
     // AgentId
@@ -85,13 +87,15 @@
     self.agentIdLabel.text = [NSString stringWithFormat:@"%@", [[ZegoAIAgentServiceAPI sharedInstance] getAgentId]];
     self.agentIdLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
     self.agentIdLabel.textAlignment = NSTextAlignmentCenter;
+    self.agentIdLabel.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1];
+    self.agentIdLabel.layer.cornerRadius = 80;
     self.agentIdLabel.layer.masksToBounds = YES;
     self.agentIdLabel.adjustsFontSizeToFitWidth = YES;
     [self.view addSubview:self.agentIdLabel];
     [self.agentIdLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(self.roomIdLabel.mas_bottom).offset(10);
         make.right.equalTo(self.view.mas_right).offset(-10);
-        make.width.height.mas_equalTo(180);
+        make.width.height.mas_equalTo(160);
     }];
 
     // Login/Logout 按钮
@@ -143,7 +147,7 @@
         make.height.mas_equalTo(44);
     }];
     self.subtitlesTabLabel = [[UILabel alloc] init];
-    self.subtitlesTabLabel.text = @"subtitles (Click to expand/collapse)";
+    self.subtitlesTabLabel.text = @"subtitles (Click to expand)";
     self.subtitlesTabLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
     self.subtitlesTabLabel.textColor = [UIColor blackColor];
     self.subtitlesTabLabel.textAlignment = NSTextAlignmentLeft;
@@ -234,9 +238,11 @@
             make.bottom.equalTo(self.view.mas_bottom).offset(-2);
         }];
         self.subtitlesExpanded = YES;
+        self.subtitlesTabLabel.text = @"subtitles (Click to collapse)";
     } else {
         [self.subtitlesTableView removeFromSuperview];
         self.subtitlesExpanded = NO;
+        self.subtitlesTabLabel.text = @"subtitles (Click to expand)";
     }
 }
 
