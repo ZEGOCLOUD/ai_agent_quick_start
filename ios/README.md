@@ -17,10 +17,9 @@
 ai_agent_quickstart/
 ├── AppDelegate.h/m           # 应用程序代理
 ├── SceneDelegate.h/m         # 场景代理 
-├── ViewController.h/m        # 主视图控制器（入口界面）
 ├── aiagent/                  # AI Agent核心模块
 │   ├── audio/                # 音频相关模块
-│   │   ├── ZegoAIAgentAudioViewController.h/m  # 音频智能体对话视图控制器
+│   │   ├── ZegoAIAgentAudioViewController.h/m  # 音频智能体对话视图控制器（主界面）
 │   │   └── views/            # 音频UI组件
 │   │       ├── ZegoAIAgentAudioSubtitlesForegroundView.h/m  # 前景UI
 │   │       ├── ZegoAIAgentStatusView.h/m                    # 状态显示UI
@@ -46,20 +45,19 @@ ai_agent_quickstart/
 ### 应用启动流程
 
 1. 应用启动，初始化AppDelegate和SceneDelegate
-2. 加载主界面ViewController，显示音频聊天按钮
+2. SceneDelegate直接加载ZegoAIAgentAudioViewController为根视图控制器，进入主界面
+
 
 ### 音频对话流程
 
 ```mermaid
 sequenceDiagram
     participant User as 用户
-    participant VC as ViewController
-    participant AudioVC as AudioViewController
+    participant AudioVC as ZegoAIAgentAudioViewController
     participant ServiceAPI as ZegoAIAgentServiceAPI
     participant PassServer as AI服务
     participant Express as ZEGO EXPRESS SDK
 
-    VC->>AudioVC: 点击"开始音频聊天"按钮
     AudioVC->>ServiceAPI: initWithCompletion
     ServiceAPI->>PassServer: 创建智能体
     AudioVC->>AudioVC: 请求麦克风权限
@@ -82,11 +80,10 @@ sequenceDiagram
        Express->>User: 播放AI回复
     end
   
-    User->>AudioVC: 点击关闭按钮
+    User->>AudioVC: 点击LogoutRoom按钮
     AudioVC->>ServiceAPI: stopChatWithCompletion
     ServiceAPI->>Express: 退出房间/停止拉流/停止推流/销毁引擎
     ServiceAPI->>PassServer: 终止智能体实例
-    AudioVC->>VC: 返回主界面
 ```
 
 ## 主要组件说明
@@ -97,11 +94,11 @@ sequenceDiagram
 
 ### 2. ZegoAIAgentAudioViewController
 
-音频对话界面控制器，负责处理用户交互、权限请求和音频流程管理。
+音频对话主界面控制器，负责处理用户交互、权限请求和音频流程管理。应用启动后直接进入本界面。
 
 ### 3. ZegoAIAgentSubtitlesTableView
 
-字幕显示组件，实现对话内容的实时显示，包括用户输入和AI回复。
+字幕显示组件，实现对话内容的实时显示，包括用户输入和AI回复。可通过主界面subtitles tab展开/收起。
 
 ## 使用说明
 
@@ -113,7 +110,8 @@ sequenceDiagram
    - 复制`ZegoKey.template.m`（位于`ai_agent_quickstart/aiagent/server/`目录）文件并重命名为`ZegoKey.m`
    - 使用自己的密钥信息填充该文件
 4. 构建并运行项目
-5. 在主界面点击"开始音频聊天"按钮开始体验
+5. 启动后直接进入主界面体验
+
 ## 注意事项
 
 - 使用前需要在Info.plist中添加麦克风权限声明
