@@ -1,1 +1,0 @@
-export const SIGNATURE_VERSION = '2.0' // paas接口签名版本

@@ -1,22 +1,18 @@
 <template>
   <div class="app-container">
-    <Quickstart />
+    <VoiceChat />
   </div>
 </template>
 <script setup lang="ts">
-import Quickstart from './components/Quickstart.vue'
+import VoiceChat from './components/VoiceChat.vue'
 
 </script>
 <style scoped>
 .app-container {
-  max-width: 800px;
+  width: 100%;
+  height: 100vh;
   margin: 0 auto;
-  font-family: Arial, sans-serif;
-}
-
-h1 {
-  color: #2c3e50;
-  text-align: center;
-  margin-bottom: 30px;
+  padding: 0;
+  overflow: hidden;
 }
 </style>

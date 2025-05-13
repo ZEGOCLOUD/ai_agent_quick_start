@@ -1,36 +1,25 @@
 import { get, post } from '../utils/http';
-import type { CreateAgentInstanceReq, CreateAgentInstanceRes, CreateAgentReq, CreateAgentRes, DeleteAgentInstanceReq, Response } from '../types/http';
+import type { Response } from '../types/http';
 
 const ActionCmd = {
-  RegisterAgent: "/api/agent/register", // 注册智能体
-  CreateAgentInstance: "/api/agent/create", // 创建智能体实例
-  DeleteAgentInstance: "/api/agent/delete", // 删除智能体实例
-  GetZegoToken: "/api/zegotoken", // 获取ZEGO Token
+  GetZegoToken: "/api/zego-token", // 获取ZEGO Token
+  Start: "/api/start", // 开始
+  Stop: "/api/stop", // 停止
 }
 
 /**
- * 注册智能体
- * @param params 注册智能体参数
+ * 进房
  */
-export function RegisterAgent(params: CreateAgentReq): Promise<CreateAgentRes> {
-  return post(ActionCmd.RegisterAgent, params);
+export function Start(): Promise<Response> {
+  return post(ActionCmd.Start);
 }
 
 
 /**
- * 创建智能体实例
- * @param params 创建智能体实例参数
+ * 退房
  */
-export function CreateAgentInstance(params: CreateAgentInstanceReq): Promise<CreateAgentInstanceRes> {
-  return post(ActionCmd.CreateAgentInstance, params);
-}
-
-/**
- * 删除智能体实例
- * @param params 删除智能体实例参数
- */
-export function DeleteAgentInstance(params: DeleteAgentInstanceReq): Promise<Response> {
-  return post(ActionCmd.DeleteAgentInstance, params);
+export function Stop(): Promise<Response> {
+  return post(ActionCmd.Stop);
 }
 
 /**

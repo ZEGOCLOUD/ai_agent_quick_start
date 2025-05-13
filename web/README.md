@@ -36,11 +36,12 @@ pnpm dev
     ├── api
     │   └── agent       # AI Agent API
     ├── components
-    │   ├── Quickstart  # 快速开始组件
+    │   ├── VoiceChat  # 语音聊天组件
     │   ├── ChatMessage # 聊天消息组件
-    │   └── InteractStatus # 互动状态组件
+    │   └── RemoteSteamView # 远程流容器组件
     ├── hooks
     │   └── useChat     # 聊天相关的 hooks
+    │   └── useRoom     # 房间相关的 hooks
     ├── solution
     │   └── ExpressManager # Express SDK 管理类
     ├── utils

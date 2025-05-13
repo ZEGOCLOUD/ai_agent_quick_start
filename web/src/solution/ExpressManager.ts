@@ -15,18 +15,19 @@ export enum ZegoScenario {
   StandardChatroom = 6,
   HighQualityChatroom = 7,
   Broadcast = 8,
-  UNKNOWN = 100
+  UNKNOWN = 100,
 }
 
 export enum AiDenoiseMode {
   AI = 0,
   AIBalanced = 1,
-  AIAggressive = 2
+  AIAggressive = 2,
 }
 
 export class ExpressManager {
   private static instance: ExpressManager;
   public express: ZegoExpressEngine | null = null;
+  public roomID = "";
 
   private constructor() {}
 
@@ -37,20 +38,21 @@ export class ExpressManager {
     return ExpressManager.instance;
   }
 
-  public async initSDK(
-    appID: number,
-    server: string,
-  ): Promise<void> {
+  public async initSDK(appID: number, server: string): Promise<void> {
     ZegoExpressEngine.use(VoiceChanger);
-    this.express = new ZegoExpressEngine(appID, server);
-    this.express.setRoomScenario(ZegoScenario.HighQualityChatroom);
+    this.express = new ZegoExpressEngine(appID, server, {
+      scenario: ZegoScenario.HighQualityChatroom,
+    });
   }
 
   public callExperimentalAPI(params: Record<string, any>) {
     this.express?.callExperimentalAPI(params);
   }
 
-  public on<K extends keyof ZegoEvent>(eventName: keyof ZegoEvent, callback: ZegoEvent[K]) {
+  public on<K extends keyof ZegoEvent>(
+    eventName: keyof ZegoEvent,
+    callback: ZegoEvent[K]
+  ) {
     this.express?.on(eventName, callback);
   }
 
@@ -68,14 +70,23 @@ export class ExpressManager {
 
   public async loginRoom(roomID: string, token: string, config: UserConfig) {
     console.log("loginRoom", roomID, token, config);
+    if (!this.express) {
+      console.error("Express 未初始化");
+      return false;
+    }
+    this.roomID = roomID;
 
-    return await this.express?.loginRoom(roomID, token, config, {
+    return await this.express.loginRoom(roomID, token, config, {
       userUpdate: true,
     });
   }
 
-  public logoutRoom(roomID: string) {
-    return this.express?.logoutRoom(roomID);
+  public async logoutRoom() {
+    if (!this.express || this.roomID) {
+      return;
+    }
+    await this.express.logoutRoom(this.roomID);
+    this.roomID = "";
   }
 
   // ai 降噪
@@ -86,11 +97,17 @@ export class ExpressManager {
     if (!this.express) {
       return;
     }
-    const enableResult = await this.express.enableAiDenoise(zegoLocalStream, enable);
+    const enableResult = await this.express.enableAiDenoise(
+      zegoLocalStream,
+      enable
+    );
     if (enable && enableResult.errorCode === 0) {
-      return this.express?.setAiDenoiseMode(zegoLocalStream, AiDenoiseMode.AIBalanced);
+      return this.express?.setAiDenoiseMode(
+        zegoLocalStream,
+        AiDenoiseMode.AIBalanced
+      );
     }
-    return enableResult
+    return enableResult;
   }
 
   public createAudioStream() {
@@ -100,7 +117,7 @@ export class ExpressManager {
         audio: true,
       },
     };
-    return this.express?.createZegoStream(custom);
+    return this.express!.createZegoStream(custom);
   }
 
   public async destroyLocalStream(localStream: ZegoLocalStream) {
@@ -126,9 +143,7 @@ export class ExpressManager {
   }
 
   public startPlayingStream(streamID: string) {
-    if (this.express) {
-      return this.express.startPlayingStream(streamID);
-    }
+    return this.express!.startPlayingStream(streamID);
   }
 
   public createRemoteStreamView(remoteStream: MediaStream) {

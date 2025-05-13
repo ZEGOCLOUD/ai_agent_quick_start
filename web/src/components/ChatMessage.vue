@@ -71,16 +71,14 @@ onUpdated(scrollToBottom);
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
   scroll-behavior: smooth;
-  font-family: "PingFang SC", sans-serif;
   font-size: 14px;
   font-weight: 400;
   line-height: 22px;
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 200px;
+  height: 100%;
   box-sizing: border-box;
-  background-color: #f0f2f5;
 }
 
 .chat-message {
