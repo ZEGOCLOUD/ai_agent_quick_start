@@ -2124,6 +2124,22 @@ class IZegoScreenCaptureSourceEventHandler {
     virtual void onExceptionOccurred(IZegoScreenCaptureSource * /*source*/,
                                      ZegoScreenCaptureSourceExceptionType /*exceptionType*/) {}
 
+    /// The callback triggered when a screen capture source capture type exception occurred
+    ///
+    /// Available since: 3.21.0
+    /// Description: The callback triggered when a screen capture source capture type exception occurred.
+    /// Trigger: This callback is triggered when an exception occurs after the screen start capture.
+    /// Caution: The callback does not actually take effect until call [setEventHandler] to set.
+    /// Restrictions: Only available on Windows/macOS.
+    ///
+    /// @param source Callback screen capture source object.
+    /// @param sourceType Capture source type.
+    /// @param exceptionType Capture source exception type.
+    virtual void
+    onCaptureTypeExceptionOccurred(IZegoScreenCaptureSource * /*source*/,
+                                   ZegoScreenCaptureSourceType /*sourceType*/,
+                                   ZegoScreenCaptureSourceExceptionType /*exceptionType*/) {}
+
     /// The callback will be triggered when the state of the capture target window change.
     ///
     /// Available since: 3.4.0

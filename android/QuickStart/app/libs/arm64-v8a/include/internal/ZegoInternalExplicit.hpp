@@ -1337,6 +1337,9 @@
                              zego_register_screen_capture_rect_changed_callback)                    \
     ZEGOEXP_DECLARE_FUNC_PTR(pfnzego_register_screen_capture_source_available_frame_callback,       \
                              zego_register_screen_capture_source_available_frame_callback)          \
+    ZEGOEXP_DECLARE_FUNC_PTR(                                                                       \
+        pfnzego_register_screen_capture_source_capture_type_exception_occurred_callback,            \
+        zego_register_screen_capture_source_capture_type_exception_occurred_callback)               \
     ZEGOEXP_DECLARE_FUNC_PTR(pfnzego_register_screen_capture_source_exception_occurred_callback,    \
                              zego_register_screen_capture_source_exception_occurred_callback)       \
     ZEGOEXP_DECLARE_FUNC_PTR(pfnzego_register_screen_capture_window_state_changed_callback,         \
@@ -2685,6 +2688,9 @@
                                   zego_register_screen_capture_rect_changed_callback)               \
             ZEGOEXP_LOAD_FUNC_PTR(pfnzego_register_screen_capture_source_available_frame_callback,  \
                                   zego_register_screen_capture_source_available_frame_callback)     \
+            ZEGOEXP_LOAD_FUNC_PTR(                                                                  \
+                pfnzego_register_screen_capture_source_capture_type_exception_occurred_callback,    \
+                zego_register_screen_capture_source_capture_type_exception_occurred_callback)       \
             ZEGOEXP_LOAD_FUNC_PTR(                                                                  \
                 pfnzego_register_screen_capture_source_exception_occurred_callback,                 \
                 zego_register_screen_capture_source_exception_occurred_callback)                    \

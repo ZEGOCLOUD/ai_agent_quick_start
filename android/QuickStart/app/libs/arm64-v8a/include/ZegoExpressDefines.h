@@ -2707,6 +2707,9 @@ struct ZegoPublisherConfig {
     /// Codec capability negotiation type. By default, no reference to the outcome of the capability negotiation. If you want to use this function, contact ZEGO technical support.
     ZegoCapabilityNegotiationType codecNegotiationType;
 
+    /// Stream title, a utf8 string with a maximum length of 255 bytes or less.
+    std::string streamTitle;
+
     ZegoPublisherConfig()
         : roomID(""), forceSynchronousNetworkTime(0),
           streamCensorshipMode(ZEGO_STREAM_CENSORSHIP_MODE_NONE), streamCensorFlag(0),

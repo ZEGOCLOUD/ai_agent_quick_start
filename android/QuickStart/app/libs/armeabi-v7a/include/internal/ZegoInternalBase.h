@@ -582,6 +582,8 @@ class ZegoExpressConvert {
         _config.stream_censor_flag = config.streamCensorFlag;
         _config.codec_negotiation_type =
             (zego_capability_negotiation_type)config.codecNegotiationType;
+        strncpy(_config.stream_title, config.streamTitle.c_str(),
+                ZEGO_EXPRESS_MAX_STREAM_TITLE_LEN);
         return _config;
     }
 

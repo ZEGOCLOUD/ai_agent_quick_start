@@ -98,6 +98,24 @@ class ZegoExpressScreenCaptureSourceImp : public IZegoScreenCaptureSource {
         }
     }
 
+    void zego_on_screen_capture_source_capture_type_exception_occurred(
+        enum zego_screen_capture_source_type source_type,
+        enum zego_screen_capture_source_exception_type exception_type) {
+        std::lock_guard<std::mutex> lock(event_handler_mutex_);
+        if (event_handler_) {
+            auto weakEventHandler =
+                std::weak_ptr<IZegoScreenCaptureSourceEventHandler>(event_handler_);
+            ZEGO_SWITCH_THREAD_PRE
+            auto handlerInMain = weakEventHandler.lock();
+            if (handlerInMain) {
+                handlerInMain->onCaptureTypeExceptionOccurred(
+                    this, (ZegoScreenCaptureSourceType)source_type,
+                    (ZegoScreenCaptureSourceExceptionType)exception_type);
+            }
+            ZEGO_SWITCH_THREAD_ING
+        }
+    }
+
     void zego_on_screen_capture_source_window_state_changed(
         enum zego_screen_capture_window_state window_state, zego_rect rect) {
         std::lock_guard<std::mutex> lock(event_handler_mutex_);

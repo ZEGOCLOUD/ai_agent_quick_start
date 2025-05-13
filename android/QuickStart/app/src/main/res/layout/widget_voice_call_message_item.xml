@@ -45,15 +45,9 @@
             android:textColor="#FFFFFFFF"
             android:textSize="12sp"
             android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@id/empty_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:id="@+id/empty_margin"
-            android:layout_width="match_parent"
-            android:layout_height="16dp"
-            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

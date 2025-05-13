@@ -2985,6 +2985,13 @@ class ZegoExpressEngineBridge {
             zego_on_screen_capture_source_exception_occurred(callback_func), user_context);
     }
 
+    void registerScreenCaptureSourceCaptureTypeExceptionOccurredCallback(void *callback_func,
+                                                                         void *user_context) {
+        zego_register_screen_capture_source_capture_type_exception_occurred_callback(
+            zego_on_screen_capture_source_capture_type_exception_occurred(callback_func),
+            user_context);
+    }
+
     void registerScreenCaptureSourceWindowStateCallback(void *callback_func, void *user_context) {
         zego_register_screen_capture_window_state_changed_callback(
             zego_on_screen_capture_window_state_changed(callback_func), user_context);

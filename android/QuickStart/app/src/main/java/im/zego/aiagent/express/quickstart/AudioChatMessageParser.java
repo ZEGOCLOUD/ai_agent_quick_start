@@ -34,6 +34,9 @@ public class AudioChatMessageParser {
     private Map<String, Long> messageTimes = new HashMap<>();
 
     private AudioChatMessageListListener listener;
+
+    private int lastCMD1Seq;
+
     private static final String TAG = "AudioChatMessageParser";
 
     /**
@@ -44,8 +47,7 @@ public class AudioChatMessageParser {
      */
     public void parseAudioChatMessage(String message) {
         AudioChatMessage chatMessage = gson.fromJson(message, AudioChatMessage.class);
-
-         if (chatMessage.cmd == 3) {
+        if (chatMessage.cmd == 3) {
             updateASRChatMessage(chatMessage);
         } else if (chatMessage.cmd == 4) {
             addOrUpdateLLMChatMessage(chatMessage);
@@ -63,7 +65,7 @@ public class AudioChatMessageParser {
         if (findMessage.isPresent()) {
             AudioChatMessage existedMessage = findMessage.get();
             if (existedMessage.seqId < newMessage.seqId) {
-                Log.d(TAG,"本地seq_id 比较小，更新消息 = [" + newMessage + "]");
+                Log.d(TAG, "本地seq_id 比较小，更新消息 = [" + newMessage + "]");
                 existedMessage.seqId = newMessage.seqId;
                 existedMessage.timestamp = newMessage.timestamp;
                 existedMessage.round = newMessage.round;
@@ -72,10 +74,10 @@ public class AudioChatMessageParser {
                     listener.onMessageListUpdated(rtcMessageList);
                 }
             } else {
-                Log.d(TAG,"本地seq_id 比较大，不用更新 = [" + newMessage + "]");
+                Log.d(TAG, "本地seq_id 比较大，不用更新 = [" + newMessage + "]");
             }
         } else {
-            Log.d(TAG,"新消息，直接插入 = [" + newMessage + "]");
+            Log.d(TAG, "新消息，直接插入 = [" + newMessage + "]");
             rtcMessageList.add(newMessage);
             if (listener != null) {
                 listener.onMessageListUpdated(rtcMessageList);
@@ -93,9 +95,9 @@ public class AudioChatMessageParser {
 
         String mergedLLMText = mergeLLMMessages(newMessage);
 
-        Log.d(TAG,"addOrUpdateLLMChatMessage() called with: mergedLLMText = [" + mergedLLMText + "]");
+        Log.d(TAG, "addOrUpdateLLMChatMessage() called with: mergedLLMText = [" + mergedLLMText + "]");
         if (TextUtils.isEmpty(mergedLLMText)) {
-            Log.d(TAG,"合并排序后文本为空，忽略");
+            Log.d(TAG, "合并排序后文本为空，忽略");
             return;
         }
 
@@ -117,7 +119,7 @@ public class AudioChatMessageParser {
         if (roundLLMMessages.isEmpty()) {
             // 如果这一轮round 在消息列表中还没有message,那么就直接插入这条消息。
             rtcMessageList.add(newLLMMessage);
-            Log.d(TAG,"插入新消息 ： [" + mergedLLMText + "]");
+            Log.d(TAG, "插入新消息 ： [" + mergedLLMText + "]");
         } else {
             //如果已经有了,rtcMessageList 中的这一轮round应该只有一条
             AudioChatMessage inListMessage = roundLLMMessages.get(0);
@@ -125,7 +127,7 @@ public class AudioChatMessageParser {
                 //  如果不是同一条消息，比较seqId，如果新消息seqId比较小，则忽略
                 if (inListMessage.seqId > newMessage.seqId && !Objects.equals(newMessage.data.messageId,
                     inListMessage.data.messageId)) {
-                    Log.d(TAG,"同一 round 已存在更大 seq_id 的消息，忽略当前 message_id: " + newMessage.data.messageId
+                    Log.d(TAG, "同一 round 已存在更大 seq_id 的消息，忽略当前 message_id: " + newMessage.data.messageId
                         + ", seq_id: " + newMessage.seqId);
                 } else {
                     // 否则，更新消息
@@ -195,30 +197,29 @@ public class AudioChatMessageParser {
      */
     public static class AudioChatMessage {
 
-        @SerializedName("Timestamp")
+        @SerializedName(value = "Timestamp", alternate = "timestamp")
         public long timestamp;
-        @SerializedName("SeqId")
+        @SerializedName(value = "SeqId", alternate = "seq_id")
         public int seqId;
-        @SerializedName("Round")
+        @SerializedName(value = "Round", alternate = "round")
         public int round;
-        @SerializedName("Cmd")
+        @SerializedName(value = "Cmd", alternate = "cmd")
         public int cmd;
-        @SerializedName("Data")
+        @SerializedName(value = "Data", alternate = "data")
         public Data data;
 
         public static class Data {
 
-            @SerializedName("SpeakStatus")
+            @SerializedName(value = "SpeakStatus", alternate = "speak_status")
             public int speakStatus;
-            @SerializedName("Text")
+            @SerializedName(value = "Text", alternate = "text")
             public String text;
-            @SerializedName("MessageId")
+            @SerializedName(value = "MessageId", alternate = "message_id")
             public String messageId;
-            @SerializedName("EndFlag")
+            @SerializedName(value = "EndFlag", alternate = "end_flag")
             public boolean endFlag;
-
-
+            @SerializedName(value = "UserId", alternate = "user_id")
+            public String userId;
         }
-
     }
 }

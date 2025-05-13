@@ -68,6 +68,7 @@
 #define ZEGO_EXPRESS_MAX_ROOM_EXTRA_INFO_VALUE_LEN (4096)
 #define ZEGO_EXPRESS_MAX_ROOM_TOKEN_VALUE_LEN (2048)
 #define ZEGO_EXPRESS_MAX_SET_CONFIG_VALUE_LEN (2048)
+#define ZEGO_EXPRESS_MAX_STREAM_TITLE_LEN (256)
 
 /// Room scenario.
 enum zego_scenario {
@@ -2851,6 +2852,9 @@ struct zego_publisher_config {
 
     /// Codec capability negotiation type. By default, no reference to the outcome of the capability negotiation. If you want to use this function, contact ZEGO technical support.
     enum zego_capability_negotiation_type codec_negotiation_type;
+
+    /// Stream title, a utf8 string with a maximum length of 255 bytes or less.
+    char stream_title[ZEGO_EXPRESS_MAX_STREAM_TITLE_LEN];
 };
 
 /// Advanced scene publisher configuration.
@@ -4230,7 +4234,7 @@ struct zego_media_player_resource {
     enum zego_multimedia_load_type load_type;
 
     /// The progress at which the plaback started.
-    long start_position;
+    long long start_position;
 
     /// If the specified resource has a transparent effect, you need to specify the layout position of the alpha data.
     enum zego_alpha_layout_type alpha_layout;
@@ -4341,7 +4345,7 @@ struct zego_unity_texture {
     void *texture;
 
     /// Texture timestamp.
-    long timestamp;
+    long long timestamp;
 
     /// Texture width.
     int width;

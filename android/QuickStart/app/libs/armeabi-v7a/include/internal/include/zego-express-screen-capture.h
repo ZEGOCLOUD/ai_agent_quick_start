@@ -307,6 +307,35 @@ typedef void(EXP_CALL *pfnzego_register_screen_capture_source_exception_occurred
     zego_on_screen_capture_source_exception_occurred callback_func, void *user_context);
 #endif
 
+/// The callback triggered when a screen capture source capture type exception occurred
+///
+/// Available since: 3.21.0
+/// Description: The callback triggered when a screen capture source capture type exception occurred.
+/// Trigger: This callback is triggered when an exception occurs after the screen start capture.
+/// Caution: The callback does not actually take effect until call [setEventHandler] to set.
+/// Restrictions: Only available on Windows/macOS.
+///
+/// @param source_type Capture source type.
+/// @param exception_type Capture source exception type.
+/// @param instance_index Screen capture source instance index.
+/// @param user_context Context of user.
+typedef void (*zego_on_screen_capture_source_capture_type_exception_occurred)(
+    enum zego_screen_capture_source_type source_type,
+    enum zego_screen_capture_source_exception_type exception_type, int instance_index,
+    void *user_context);
+
+#ifndef ZEGOEXP_EXPLICIT
+ZEGOEXP_API void EXP_CALL
+zego_register_screen_capture_source_capture_type_exception_occurred_callback(
+    zego_on_screen_capture_source_capture_type_exception_occurred callback_func,
+    void *user_context);
+#else
+typedef void(
+    EXP_CALL *pfnzego_register_screen_capture_source_capture_type_exception_occurred_callback)(
+    zego_on_screen_capture_source_capture_type_exception_occurred callback_func,
+    void *user_context);
+#endif
+
 /// The callback will be triggered when the state of the capture target window change.
 ///
 /// Available since: 3.4.0

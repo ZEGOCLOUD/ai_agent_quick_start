@@ -607,6 +607,10 @@ class ZegoInternalCallbackCenter {
             ZegoVoidPtr(
                 &ZegoInternalCallbackCenter::zego_on_screen_capture_source_exception_occurred),
             ZegoVoidPtr(this));
+        oInternalOriginBridge->registerScreenCaptureSourceCaptureTypeExceptionOccurredCallback(
+            ZegoVoidPtr(&ZegoInternalCallbackCenter::
+                            zego_on_screen_capture_source_capture_type_exception_occurred),
+            ZegoVoidPtr(this));
         oInternalOriginBridge->registerScreenCaptureSourceWindowStateCallback(
             ZegoVoidPtr(
                 &ZegoInternalCallbackCenter::zego_on_screen_capture_source_window_state_changed),
@@ -925,6 +929,8 @@ class ZegoInternalCallbackCenter {
         oInternalOriginBridge->registerScreenCaptureSourceAvailableFrameCallback(nullptr, nullptr);
         oInternalOriginBridge->registerScreenCaptureSourceExceptionOccurredCallback(nullptr,
                                                                                     nullptr);
+        oInternalOriginBridge->registerScreenCaptureSourceCaptureTypeExceptionOccurredCallback(
+            nullptr, nullptr);
         oInternalOriginBridge->registerScreenCaptureSourceWindowStateCallback(nullptr, nullptr);
 
         oInternalOriginBridge->registerNetworkTimeSynchronizedCallback(nullptr, nullptr);
@@ -3193,6 +3199,20 @@ class ZegoInternalCallbackCenter {
 
         if (screenCaptureSource) {
             screenCaptureSource->zego_on_screen_capture_source_exception_occurred(exception_type);
+        }
+    }
+
+    static void zego_on_screen_capture_source_capture_type_exception_occurred(
+        enum zego_screen_capture_source_type source_type,
+        enum zego_screen_capture_source_exception_type exception_type, int instance_index,
+        void *user_context) {
+        ZEGO_UNUSED_VARIABLE(user_context);
+        auto screenCaptureSource =
+            oInternalCallbackCenter->getZegoExpressScreenCaptureSourceImp(instance_index);
+
+        if (screenCaptureSource) {
+            screenCaptureSource->zego_on_screen_capture_source_capture_type_exception_occurred(
+                source_type, exception_type);
         }
     }
 
