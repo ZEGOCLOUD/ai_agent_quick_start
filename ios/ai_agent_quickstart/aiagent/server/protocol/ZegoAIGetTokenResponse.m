@@ -17,7 +17,7 @@
     
     if (response.data && [response.data isKindOfClass:[NSDictionary class]]) {
         tokenResponse.token = response.data[@"token"];
-        tokenResponse.userId = response.data[@"userId"];
+        tokenResponse.userId = response.data[@"user_id"];
         
         id expireTimeObj = response.data[@"expire_time"];
         if (expireTimeObj && [expireTimeObj isKindOfClass:[NSNumber class]]) {

@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		410B350D2DA7CE0A00CFA563 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B350C2DA7CE0A00CFA563 /* AppDelegate.m */; };
 		410B35102DA7CE0A00CFA563 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B350F2DA7CE0A00CFA563 /* SceneDelegate.m */; };
-		410B35132DA7CE0A00CFA563 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B35122DA7CE0A00CFA563 /* ViewController.m */; };
 		410B35162DA7CE0A00CFA563 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 410B35152DA7CE0A00CFA563 /* Base */; };
 		410B35182DA7CE0D00CFA563 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 410B35172DA7CE0D00CFA563 /* Assets.xcassets */; };
 		410B351B2DA7CE0D00CFA563 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 410B351A2DA7CE0D00CFA563 /* Base */; };
@@ -23,30 +22,21 @@
 		419158A62DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4191589A2DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableViewCell.m */; };
 		419158A72DB782ED009BAA71 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 4191589C2DB782ED009BAA71 /* README.md */; };
 		419158A82DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4191589E2DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableView.m */; };
-		41A72B152DB74CAE00D921D0 /* ZegoAIAgentAudioViewForegroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A72B142DB74CAE00D921D0 /* ZegoAIAgentAudioViewForegroundView.m */; };
 		41A8630F2DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863032DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m */; };
 		41A863212DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */; };
-		41CD42B52DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42A52DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.m */; };
-		41CD42B62DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42A72DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.m */; };
-		41CD42B72DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42A92DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.m */; };
-		41CD42BA2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42AF2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.m */; };
-		41CD42BB2DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42B12DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.m */; };
 		41CD42BC2DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42B32DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m */; };
 		41CD42C42DB1014F008F13F4 /* ZegoKey.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42C22DB1014F008F13F4 /* ZegoKey.m */; };
 		41CD42C92DB104F5008F13F4 /* ZegoAIGetTokenResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42C62DB104F5008F13F4 /* ZegoAIGetTokenResponse.m */; };
 		41CD42CA2DB104F5008F13F4 /* ZegoAIGetTokenRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42C82DB104F5008F13F4 /* ZegoAIGetTokenRequest.m */; };
-		994E4C380DE5CD27D691850B /* Pods_ai_agent_quickstart.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 47C796174EF6FCC7EACFC4DE /* Pods_ai_agent_quickstart.framework */; };
+		B7A0E32150EA6585986D6DA4 /* Pods_ai_agent_quickstart.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD7DBC0F763F357DC3BD209B /* Pods_ai_agent_quickstart.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		3EE465397784B4ABB6270D64 /* Pods-ai_agent_quickstart.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ai_agent_quickstart.release.xcconfig"; path = "Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart.release.xcconfig"; sourceTree = "<group>"; };
 		410B35082DA7CE0A00CFA563 /* ai_agent_quickstart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ai_agent_quickstart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		410B350B2DA7CE0A00CFA563 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		410B350C2DA7CE0A00CFA563 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		410B350E2DA7CE0A00CFA563 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
 		410B350F2DA7CE0A00CFA563 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
-		410B35112DA7CE0A00CFA563 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		410B35122DA7CE0A00CFA563 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		410B35152DA7CE0A00CFA563 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		410B35172DA7CE0D00CFA563 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		410B351A2DA7CE0D00CFA563 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -70,23 +60,11 @@
 		4191589C2DB782ED009BAA71 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		4191589D2DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesTableView.h; sourceTree = "<group>"; };
 		4191589E2DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesTableView.m; sourceTree = "<group>"; };
-		41A72B132DB74CAE00D921D0 /* ZegoAIAgentAudioViewForegroundView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentAudioViewForegroundView.h; sourceTree = "<group>"; };
-		41A72B142DB74CAE00D921D0 /* ZegoAIAgentAudioViewForegroundView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentAudioViewForegroundView.m; sourceTree = "<group>"; };
 		41A863022DA7E51400B1A58B /* ZegoAIAgentServiceAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentServiceAPI.h; sourceTree = "<group>"; };
 		41A863032DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentServiceAPI.m; sourceTree = "<group>"; };
 		41A8631F2DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentAudioViewController.h; sourceTree = "<group>"; };
 		41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentAudioViewController.m; sourceTree = "<group>"; };
 		41A863282DA7EF2A00B1A58B /* ZegoExpressEngine.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ZegoExpressEngine.xcframework; path = libs/Express/Library/ZegoExpressEngine.xcframework; sourceTree = "<group>"; };
-		41CD42A42DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAICreateAgentInstanceRequest.h; sourceTree = "<group>"; };
-		41CD42A52DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAICreateAgentInstanceRequest.m; sourceTree = "<group>"; };
-		41CD42A62DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAICreateAgentInstanceResponse.h; sourceTree = "<group>"; };
-		41CD42A72DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAICreateAgentInstanceResponse.m; sourceTree = "<group>"; };
-		41CD42A82DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIDeleteAgentInstanceRequest.h; sourceTree = "<group>"; };
-		41CD42A92DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIDeleteAgentInstanceRequest.m; sourceTree = "<group>"; };
-		41CD42AE2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIRegisterAgentRequest.h; sourceTree = "<group>"; };
-		41CD42AF2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIRegisterAgentRequest.m; sourceTree = "<group>"; };
-		41CD42B02DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIRegisterAgentResponse.h; sourceTree = "<group>"; };
-		41CD42B12DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIRegisterAgentResponse.m; sourceTree = "<group>"; };
 		41CD42B22DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIServiceCommonResponse.h; sourceTree = "<group>"; };
 		41CD42B32DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIServiceCommonResponse.m; sourceTree = "<group>"; };
 		41CD42C22DB1014F008F13F4 /* ZegoKey.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZegoKey.m; path = ai_agent_quickstart/aiagent/server/ZegoKey.m; sourceTree = SOURCE_ROOT; };
@@ -95,8 +73,9 @@
 		41CD42C62DB104F5008F13F4 /* ZegoAIGetTokenResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIGetTokenResponse.m; sourceTree = "<group>"; };
 		41CD42C72DB104F5008F13F4 /* ZegoAIGetTokenResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIGetTokenResponse.h; sourceTree = "<group>"; };
 		41CD42C82DB104F5008F13F4 /* ZegoAIGetTokenRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIGetTokenRequest.m; sourceTree = "<group>"; };
-		47C796174EF6FCC7EACFC4DE /* Pods_ai_agent_quickstart.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ai_agent_quickstart.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		DDC0A4DEA925D0CF2BE3E972 /* Pods-ai_agent_quickstart.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ai_agent_quickstart.debug.xcconfig"; path = "Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart.debug.xcconfig"; sourceTree = "<group>"; };
+		8A3C3906B1D5E898D3D4C810 /* Pods-ai_agent_quickstart.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ai_agent_quickstart.debug.xcconfig"; path = "Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart.debug.xcconfig"; sourceTree = "<group>"; };
+		BD7DBC0F763F357DC3BD209B /* Pods_ai_agent_quickstart.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ai_agent_quickstart.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0E9C7BE5DC591A03CF8F2AC /* Pods-ai_agent_quickstart.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ai_agent_quickstart.release.xcconfig"; path = "Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,7 +83,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				994E4C380DE5CD27D691850B /* Pods_ai_agent_quickstart.framework in Frameworks */,
+				B7A0E32150EA6585986D6DA4 /* Pods_ai_agent_quickstart.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,8 +116,6 @@
 				410B350C2DA7CE0A00CFA563 /* AppDelegate.m */,
 				410B350E2DA7CE0A00CFA563 /* SceneDelegate.h */,
 				410B350F2DA7CE0A00CFA563 /* SceneDelegate.m */,
-				410B35112DA7CE0A00CFA563 /* ViewController.h */,
-				410B35122DA7CE0A00CFA563 /* ViewController.m */,
 				410B35142DA7CE0A00CFA563 /* Main.storyboard */,
 				410B35172DA7CE0D00CFA563 /* Assets.xcassets */,
 				410B35192DA7CE0D00CFA563 /* LaunchScreen.storyboard */,
@@ -224,8 +201,6 @@
 				4191589F2DB782ED009BAA71 /* subtitles */,
 				41A8631F2DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.h */,
 				41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */,
-				41A72B132DB74CAE00D921D0 /* ZegoAIAgentAudioViewForegroundView.h */,
-				41A72B142DB74CAE00D921D0 /* ZegoAIAgentAudioViewForegroundView.m */,
 			);
 			path = audio;
 			sourceTree = "<group>";
@@ -237,16 +212,6 @@
 				41CD42C82DB104F5008F13F4 /* ZegoAIGetTokenRequest.m */,
 				41CD42C72DB104F5008F13F4 /* ZegoAIGetTokenResponse.h */,
 				41CD42C62DB104F5008F13F4 /* ZegoAIGetTokenResponse.m */,
-				41CD42A42DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.h */,
-				41CD42A52DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.m */,
-				41CD42A62DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.h */,
-				41CD42A72DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.m */,
-				41CD42A82DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.h */,
-				41CD42A92DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.m */,
-				41CD42AE2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.h */,
-				41CD42AF2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.m */,
-				41CD42B02DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.h */,
-				41CD42B12DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.m */,
 				41CD42B22DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.h */,
 				41CD42B32DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m */,
 			);
@@ -256,8 +221,8 @@
 		9CA74BF5EE6BCF7EB51765FF /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				DDC0A4DEA925D0CF2BE3E972 /* Pods-ai_agent_quickstart.debug.xcconfig */,
-				3EE465397784B4ABB6270D64 /* Pods-ai_agent_quickstart.release.xcconfig */,
+				8A3C3906B1D5E898D3D4C810 /* Pods-ai_agent_quickstart.debug.xcconfig */,
+				D0E9C7BE5DC591A03CF8F2AC /* Pods-ai_agent_quickstart.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -266,7 +231,7 @@
 			isa = PBXGroup;
 			children = (
 				41A863282DA7EF2A00B1A58B /* ZegoExpressEngine.xcframework */,
-				47C796174EF6FCC7EACFC4DE /* Pods_ai_agent_quickstart.framework */,
+				BD7DBC0F763F357DC3BD209B /* Pods_ai_agent_quickstart.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -278,11 +243,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 410B35372DA7CE0E00CFA563 /* Build configuration list for PBXNativeTarget "ai_agent_quickstart" */;
 			buildPhases = (
-				3C6F7153714B50D410A97996 /* [CP] Check Pods Manifest.lock */,
+				8C6939A73D4A8B4678166915 /* [CP] Check Pods Manifest.lock */,
 				410B35042DA7CE0A00CFA563 /* Sources */,
 				410B35052DA7CE0A00CFA563 /* Frameworks */,
 				410B35062DA7CE0A00CFA563 /* Resources */,
-				CE215F5DDC37F600E8F7EE4D /* [CP] Embed Pods Frameworks */,
+				07223FD6C1516011AE4FCB37 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -340,7 +305,28 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		3C6F7153714B50D410A97996 /* [CP] Check Pods Manifest.lock */ = {
+		07223FD6C1516011AE4FCB37 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8C6939A73D4A8B4678166915 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -362,23 +348,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		CE215F5DDC37F600E8F7EE4D /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -392,24 +361,17 @@
 				41A8630F2DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m in Sources */,
 				419158A22DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageDispatcher.m in Sources */,
 				419158A12DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.m in Sources */,
-				410B35132DA7CE0A00CFA563 /* ViewController.m in Sources */,
 				410B350D2DA7CE0A00CFA563 /* AppDelegate.m in Sources */,
 				41CD42BC2DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m in Sources */,
 				419158A32DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageProtocol.m in Sources */,
 				419158A62DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableViewCell.m in Sources */,
-				41CD42BA2DB0F87B008F13F4 /* ZegoAIRegisterAgentRequest.m in Sources */,
-				41CD42B72DB0F87B008F13F4 /* ZegoAIDeleteAgentInstanceRequest.m in Sources */,
 				410B351E2DA7CE0D00CFA563 /* main.m in Sources */,
 				419158A52DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageModel.m in Sources */,
 				419158A42DB782ED009BAA71 /* ZegoAIAgentSubtitlesCellLabelView.m in Sources */,
 				41CD42C42DB1014F008F13F4 /* ZegoKey.m in Sources */,
-				41CD42B52DB0F87B008F13F4 /* ZegoAICreateAgentInstanceRequest.m in Sources */,
-				41CD42BB2DB0F87B008F13F4 /* ZegoAIRegisterAgentResponse.m in Sources */,
 				41CD42CA2DB104F5008F13F4 /* ZegoAIGetTokenRequest.m in Sources */,
 				41A863212DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m in Sources */,
-				41CD42B62DB0F87B008F13F4 /* ZegoAICreateAgentInstanceResponse.m in Sources */,
 				410B35102DA7CE0A00CFA563 /* SceneDelegate.m in Sources */,
-				41A72B152DB74CAE00D921D0 /* ZegoAIAgentAudioViewForegroundView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -553,7 +515,7 @@
 		};
 		410B35382DA7CE0E00CFA563 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DDC0A4DEA925D0CF2BE3E972 /* Pods-ai_agent_quickstart.debug.xcconfig */;
+			baseConfigurationReference = 8A3C3906B1D5E898D3D4C810 /* Pods-ai_agent_quickstart.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -582,7 +544,7 @@
 		};
 		410B35392DA7CE0E00CFA563 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3EE465397784B4ABB6270D64 /* Pods-ai_agent_quickstart.release.xcconfig */;
+			baseConfigurationReference = D0E9C7BE5DC591A03CF8F2AC /* Pods-ai_agent_quickstart.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

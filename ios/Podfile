@@ -3,6 +3,9 @@ platform :ios, '13.0'
 target 'ai_agent_quickstart' do
   # 使用 use_frameworks! 确保生成动态框架
   use_frameworks!
+  
+  # 添加 modular_headers
+  use_modular_headers!
 
   # 修改路径到正确的 podspec 位置
   pod 'ZegoExpressEngine', :path => 'libs/Express'

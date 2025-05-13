@@ -14,30 +14,24 @@
 #import "ZegoKey.h"
 
 #import "ZegoAIAgentSubtitlesMessageDispatcher.h"
-#import "ZegoAIRegisterAgentRequest.h"
-#import "ZegoAIRegisterAgentResponse.h"
-#import "ZegoAICreateAgentInstanceRequest.h"
-#import "ZegoAICreateAgentInstanceResponse.h"
-#import "ZegoAIDeleteAgentInstanceRequest.h"
 #import "ZegoAIGetTokenRequest.h"
 #import "ZegoAIGetTokenResponse.h"
 
 typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
 
 // 环境 URL
-static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 实际URL需要替换
+static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app";  // 实际URL需要替换
 
 @interface ZegoAIAgentServiceAPI () <ZegoEventHandler>
 
 @property (nonatomic, copy) NSString *currentBaseURL;
+
 @property (nonatomic, copy) NSString *agentId;
-@property (nonatomic, copy) NSString *agentName;
-@property (nonatomic, copy) NSString *agentRobotId;
-@property (nonatomic, copy) NSString *agentInstanceId;
+@property (nonatomic, copy) NSString *agentStreamId;
 
 @property (nonatomic, copy) NSString *userId;
+@property (nonatomic, copy) NSString *userStreamId;
 @property (nonatomic, copy) NSString *roomId;
-@property (nonatomic, copy) NSString *streamToPlay;
 
 @end
 
@@ -51,9 +45,12 @@ static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 
     dispatch_once(&onceToken, ^{
         instance = [[ZegoAIAgentServiceAPI alloc] init];
         instance.currentBaseURL = kBaseURL;
+        instance.userId = @"user_id_1";
+        instance.roomId = @"room_id_1";
+        instance.userStreamId = @"user_stream_id_1";
         
-        instance.userId = [self generateRandomUserId];
-        instance.roomId = [self generateRandomRoomId];
+        instance.agentId = @"agent_user_id_1";
+        instance.agentStreamId = @"agent_stream_id_1";
     });
     return instance;
 }
@@ -64,20 +61,16 @@ static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 
     return self.agentId;
 }
 
-- (NSString *)getAgentName {
-    return self.agentName;
-}
-
-- (NSString *)getAgentRotbotId {
-    return self.agentRobotId;
-}
-
 - (NSString *)getUserId {
     return self.userId;
 }
 
+- (NSString *)getRoomId {
+    return self.roomId;
+}
+
 - (void)getTokenWithCompletion:(void (^)(ZegoAIGetTokenResponse *response))completion {
-    NSString *baseUrl = [NSString stringWithFormat:@"%@/api/zegotoken", self.currentBaseURL];
+    NSString *baseUrl = [NSString stringWithFormat:@"%@/api/zego-token", self.currentBaseURL];
     
     // 将userId作为URL参数拼接
     NSString *url = [NSString stringWithFormat:@"%@?userId=%@", baseUrl, self.userId];
@@ -89,14 +82,6 @@ static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 
         
         if (completion) {
             completion(tokenResponse);
-        }
-    }];
-}
-
-- (void)initWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
-    [self registerAgentWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
-        if (completion) {
-            completion(success, errorMessage);
         }
     }];
 }
@@ -128,15 +113,12 @@ static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 
         //进房后开始推流
         [strongSelf startPushlishStream];
         
-        /// 记录智能体流信息
-        strongSelf.streamToPlay = [strongSelf getAgentStreamID];
-        
         // 创建Agent实例
-        [strongSelf createAgentInstanceWithCompletion:^(ZegoAICreateAgentInstanceResponse *response) {
+        [strongSelf createAgentInstanceWithCompletion:^(ZegoAIServiceCommonResponse *response) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) { return; }
             
-            if (response.code == 0 && response.agentInstanceId) {
+            if (response.code == 0) {
                 if (completion) {
                     completion(YES, nil);
                 }
@@ -166,81 +148,26 @@ static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 
     }];
 }
 
-#pragma mark - Agent API Methods
-
-- (void)registerAgentWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
-    NSString *url = [NSString stringWithFormat:@"%@/api/agent/register", self.currentBaseURL];
-    
-    // 创建请求
-    ZegoAIRegisterAgentRequest *request = [[ZegoAIRegisterAgentRequest alloc] init];
-    request.agentId = @"zg_agent_t_i";
-    request.agentName = @"小智";
-    
-    NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:[request toDictionary] method:@"POST"];
-    
-    [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
-        ZegoAIRegisterAgentResponse *registerResponse = [ZegoAIRegisterAgentResponse fromServiceResponse:response];
-        
-        if (registerResponse.code == 0) {
-            // 注册成功，保存agentId
-            self.agentId = registerResponse.agentId;
-            self.agentName = registerResponse.agentName;
-            self.agentRobotId = registerResponse.agentRobotId;
-            
-            if (completion) {
-                completion(YES, nil);
-            }
-        } else {
-            if (completion) {
-                completion(NO, registerResponse.message);
-            }
-        }
-    }];
-}
-
 #pragma mark - Agent Instance API Methods
 
--(NSString*)getAgentStreamID {
-    return [NSString stringWithFormat:@"%@_%@_agent", self.roomId, self.userId];
-}
-
--(NSString*)getUserStreamID {
-    return [NSString stringWithFormat:@"%@_%@_main", self.roomId, self.userId];
-}
-
-- (void)createAgentInstanceWithCompletion:(void (^)(ZegoAICreateAgentInstanceResponse *response))completion {
-    NSString *url = [NSString stringWithFormat:@"%@/api/agent/create", self.currentBaseURL];
+- (void)createAgentInstanceWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
+    NSString *url = [NSString stringWithFormat:@"%@/api/start", self.currentBaseURL];
     
-    // 创建请求
-    ZegoAICreateAgentInstanceRequest *request = [[ZegoAICreateAgentInstanceRequest alloc] init];
-    request.agentId = self.agentId;
-    request.userId = self.userId;
-    request.roomId = self.roomId;
-    request.agentStreamId = [self getAgentStreamID];
-    request.agentUserId = self.agentId;
-    request.userStreamId = [self getUserStreamID];
-    
-    NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:[request toDictionary] method:@"POST"];
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
     
     [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
-        ZegoAICreateAgentInstanceResponse *instanceResponse = [ZegoAICreateAgentInstanceResponse fromServiceResponse:response];
-        if(instanceResponse.code == 0){
-            self.agentInstanceId = instanceResponse.agentInstanceId;
-        }
-        
         if (completion) {
-            completion(instanceResponse);
+            completion(response);
         }
     }];
 }
 
 - (void)deleteAgentInstanceWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
-    NSString *url = [NSString stringWithFormat:@"%@/api/agent/delete", self.currentBaseURL];
+    NSString *url = [NSString stringWithFormat:@"%@/api/stop", self.currentBaseURL];
     
-    ZegoAIDeleteAgentInstanceRequest *request = [[ZegoAIDeleteAgentInstanceRequest alloc] init];
-    request.agentInstanceId = self.agentInstanceId;
-    
-    NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:[request toDictionary] method:@"POST"];
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
     
     [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
         if (completion) {
@@ -287,8 +214,8 @@ static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 
     NSLog(@"停止音量监控");
     [[ZegoExpressEngine sharedEngine] stopSoundLevelMonitor];
     
-    NSLog(@"停止播放流：streamID=%@", self.streamToPlay);
-    [[ZegoExpressEngine sharedEngine] stopPlayingStream:self.streamToPlay];
+    NSLog(@"停止播放流：streamID=%@", self.agentStreamId);
+    [[ZegoExpressEngine sharedEngine] stopPlayingStream:self.agentStreamId];
     
     NSLog(@"停止推流");
     [[ZegoExpressEngine sharedEngine] stopPublishingStream];
@@ -318,9 +245,9 @@ static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 
 }
 
 -(void)startPushlishStream{
-    NSLog(@"开始推流：streamID=%@", [self getUserStreamID]);
+    NSLog(@"开始推流：streamID=%@", self.userStreamId);
     [[ZegoExpressEngine sharedEngine] muteMicrophone:NO];
-    [[ZegoExpressEngine sharedEngine] startPublishingStream:[self getUserStreamID]
+    [[ZegoExpressEngine sharedEngine] startPublishingStream:self.userStreamId
                                                     channel:ZegoPublishChannelMain];
 }
 
@@ -412,9 +339,9 @@ static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 
             ZegoStream* item = [streamList objectAtIndex:i];
             NSLog(@"检测到新增流: streamID=%@, 用户=%@", item.streamID, item.user.userID);
             
-            if ([item.streamID isEqualToString: self.streamToPlay]) {
-                NSLog(@"匹配到目标流，准备播放: streamID=%@", self.streamToPlay);
-                [self startPlayStream:self.streamToPlay];
+            if ([item.streamID isEqualToString: self.agentStreamId]) {
+                NSLog(@"匹配到目标流，准备播放: streamID=%@", self.agentStreamId);
+                [self startPlayStream:self.agentStreamId];
                 break;
             }
         }
@@ -529,24 +456,5 @@ static NSString *const kBaseURL = @"https://cute-dango-81ced0.netlify.app";  // 
     [task resume];
 }
 
-#pragma mark - Utility Methods
-
-+ (NSString *)generateRandomUserId {
-    NSString *letters = @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    NSMutableString *randomString = [NSMutableString stringWithCapacity:10];
-    for (int i = 0; i < 10; i++) {
-        [randomString appendFormat:@"%C", [letters characterAtIndex:arc4random_uniform((uint32_t)[letters length])]];
-    }
-    return [NSString stringWithFormat:@"user_%@", randomString];
-}
-
-+ (NSString *)generateRandomRoomId {
-    NSString *letters = @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    NSMutableString *randomString = [NSMutableString stringWithCapacity:10];
-    for (int i = 0; i < 10; i++) {
-        [randomString appendFormat:@"%C", [letters characterAtIndex:arc4random_uniform((uint32_t)[letters length])]];
-    }
-    return [NSString stringWithFormat:@"room_%@", randomString];
-}
 
 @end

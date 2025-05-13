@@ -7,8 +7,6 @@
 
 #import <Foundation/Foundation.h>
 #import "ZegoAIServiceCommonResponse.h"
-#import "ZegoAIRegisterAgentResponse.h"
-#import "ZegoAICreateAgentInstanceResponse.h"
 #import "ZegoAIGetTokenResponse.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -39,35 +37,16 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)getAgentId;
 
 /**
- * 获取当前智能体名称
- * @return 智能体名称
- */
-- (NSString *)getAgentName;
-
-/**
- * 获取当前智能体robot id
- * @return 智能体robot id
- */
-- (NSString *)getAgentRotbotId;
-
-/**
  * 获取当前用户ID
  * @return 用户ID
  */
 - (NSString *)getUserId;
 
 /**
- * 初始化方法
- * 会去创建智能体
- * @param completion 初始化完成的回调
- *
- * 此方法执行服务API的初始化流程，包括：
- * 1. 准备必要的认证信息
- * 2. 建立与ZEGO服务器的连接
- * 3. 注册智能体并创建实例
- * 4. 回调通知初始化结果
+ * 获取当前房间ID
+ * @return 房间ID
  */
-- (void)initWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
+- (NSString *)getRoomId;
 
 /**
  * 开始与智能体聊天
