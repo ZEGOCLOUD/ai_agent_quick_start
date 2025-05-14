@@ -119,8 +119,8 @@ export function useRoom() {
    * 退出房间
    */
   async function logoutRoom() {
-    await destroy();
     isLogin.value && (await Stop());
+    await destroy();
     isLogin.value = false;
   }
 
