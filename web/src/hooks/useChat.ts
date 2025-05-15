@@ -22,6 +22,7 @@ export interface Message {
   seqId: number;
   content: string;
   type: string;
+  round: number;
 }
 
 export function useChat(zg: ExpressManager) {
@@ -42,12 +43,12 @@ export function useChat(zg: ExpressManager) {
 
       // 用户说话文本处理
       case 3:
-        handleUserMessage(SeqId, Data);
+        handleUserMessage(SeqId, Data, Round);
         break;
 
       // 智能体说话文本处理
       case 4:
-        handleAgentMessage(SeqId, Data);
+        handleAgentMessage(SeqId, Data, Round);
         break;
 
       default:
@@ -55,7 +56,7 @@ export function useChat(zg: ExpressManager) {
     }
   }
   // 处理用户消息
-  function handleUserMessage(seqId: number, data: MessageData) {
+  function handleUserMessage(seqId: number, data: MessageData, round: number) {
     console.log(`"mytag 用户说话文本内容：", ${seqId}, ${data.Text}`);
     if (seqId > userMsgSeq) {
       if (data.EndFlag) {
@@ -67,7 +68,7 @@ export function useChat(zg: ExpressManager) {
       userMsgSeq = seqId;
       if (!content) return;
       const index = messages.value.findIndex(
-        (message) => message.messageId === messageId
+        (message) => message.sender === 'user' && message.round === round
       );
       const newMessage = {
         sender: "user",
@@ -75,6 +76,7 @@ export function useChat(zg: ExpressManager) {
         seqId: seqId,
         content: content,
         type: "message",
+        round,
       };
 
       if (index !== -1) {
@@ -88,18 +90,15 @@ export function useChat(zg: ExpressManager) {
   // 处理智能体消息
   function handleAgentMessage(
     seqId: number,
-    data: MessageData
+    data: MessageData,
+    round: number
   ) {
-    const llmEndFlag = data.EndFlag;
     console.log(`"mytag 智能体说话文本内容：", ${seqId}, ${data.Text}`);
-    if (llmEndFlag) {
-      console.log(`"mytag 智能体回答完毕", ${seqId}`);
-    }
     const content = data.Text.trim();
     const llmMessageId = data.MessageId;
     if (!content) return;
     const index = messages.value.findIndex(
-      (message) => message.messageId === llmMessageId
+      (message) => message.sender === 'bot' && message.round === round
     );
     const newMessage = {
       sender: "bot",
@@ -107,14 +106,15 @@ export function useChat(zg: ExpressManager) {
       seqId: seqId,
       content: content,
       type: "message",
+      round,
     };
-    if (!agentMsgMap[newMessage.messageId]) {
-      agentMsgMap[newMessage.messageId] = [];
+    if (!agentMsgMap[round]) {
+      agentMsgMap[round] = [];
     }
-    agentMsgMap[newMessage.messageId].push({ ...newMessage });
+    agentMsgMap[round].push({ ...newMessage });
 
     if (index !== -1) {
-      const newMessages = agentMsgMap[newMessage.messageId];
+      const newMessages = agentMsgMap[round];
       const sortedMessages = newMessages
         .sort((a, b) => a.seqId - b.seqId)
         .map(({ content }) => content)
@@ -124,6 +124,14 @@ export function useChat(zg: ExpressManager) {
       }
     } else {
       messages.value.push(newMessage);
+    }
+    const llmEndFlag = data.EndFlag;
+    if (llmEndFlag) {
+      console.log(`"mytag 智能体回答完毕", ${seqId}`);
+      // 清除缓存中比seqId小的消息
+      agentMsgMap[round] = agentMsgMap[round].filter(
+        (message) => message.seqId > seqId
+      );
     }
   }
 
