@@ -68,10 +68,6 @@ sequenceDiagram
     loop 实时对话过程
         User->>Express: 说话
         Express->>PassServer: 发送语音数据(ASR)
-        PassServer->>PassServer: 语音识别
-        PassServer->>PassServer: 调用LLM处理
-        PassServer->>Express: 返回LLM文本回复
-        PassServer->>Express: 返回语音合成结果(TTS)
        Express->>User: 播放AI回复
     end
   
