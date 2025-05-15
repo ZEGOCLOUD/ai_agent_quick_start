@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private AudioChatMessageParser audioChatMessageParser = new AudioChatMessageParser();
-    private long appId = 1723391556;
+    private long appId = ; // YOUR APPID from 即构
     private final String user_id = "user_id_1";
     private final String room_id = "room_id_1";
     private final String agent_stream_id = "agent_stream_id_1";
