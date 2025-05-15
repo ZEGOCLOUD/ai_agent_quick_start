@@ -124,7 +124,7 @@
 
     // 提示
     self.tipLabel = [[UILabel alloc] init];
-    self.tipLabel.text = @"注意：请先在服务端创建对应的智能体，并在Call时同步创建智能体实例";
+    self.tipLabel.text = @"注意：\n1.同一个AppID 内，需保证 “userID 全局唯一，否则会互踢。 \n2.请现在服务端创建对呀的智能体，并在Call时同步创建智能体实例。";
     self.tipLabel.font = [UIFont systemFontOfSize:14];
     self.tipLabel.textColor = [UIColor darkGrayColor];
     self.tipLabel.numberOfLines = 0;
@@ -193,7 +193,7 @@
             return;
         }
         __weak typeof(self) weakSelf = self;
-        [[ZegoAIAgentServiceAPI sharedInstance] startChatWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+        [[ZegoAIAgentServiceAPI sharedInstance] startCallWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) return;
             strongSelf.loginLogoutButton.enabled = YES;
@@ -213,7 +213,7 @@
     [self unregisterEventHandler];
     
     __weak typeof(self) weakSelf = self;
-    [[ZegoAIAgentServiceAPI sharedInstance] stopChatWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+    [[ZegoAIAgentServiceAPI sharedInstance] stopCallWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         strongSelf.loginLogoutButton.enabled = YES;
         [strongSelf.loginLogoutLoading stopAnimating];

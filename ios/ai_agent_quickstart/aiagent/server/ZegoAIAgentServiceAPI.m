@@ -86,16 +86,9 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
     }];
 }
 
-- (void)startChatWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
-    // 确保agentId已经设置
-    if (!self.agentId) {
-        if (completion) {
-            completion(NO, @"请先调用init方法初始化");
-        }
-        return;
-    }
-    
+- (void)startCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
     [self initZegoExpressEngine];
+    
     __weak typeof(self) weakSelf = self;
     [self loginRoom:^(int errorCode, NSDictionary *extendedData) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
@@ -114,10 +107,7 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
         [strongSelf startPushlishStream];
         
         // 创建Agent实例
-        [strongSelf createAgentInstanceWithCompletion:^(ZegoAIServiceCommonResponse *response) {
-            __strong typeof(weakSelf) strongSelf = weakSelf;
-            if (!strongSelf) { return; }
-            
+        [strongSelf doStartCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
             if (response.code == 0) {
                 if (completion) {
                     completion(YES, nil);
@@ -131,11 +121,11 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
     }];
 }
 
-- (void)stopChatWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
+- (void)stopCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
     [self unInitZegoExpressEngine];
     
-    // 删除Agent实例
-    [self deleteAgentInstanceWithCompletion:^(ZegoAIServiceCommonResponse *response) {
+    // 停止聊天
+    [self doStopCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
         if (response.code == 0) {
             if (completion) {
                 completion(YES, nil);
@@ -150,7 +140,7 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 
 #pragma mark - Agent Instance API Methods
 
-- (void)createAgentInstanceWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
+- (void)doStartCallWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
     NSString *url = [NSString stringWithFormat:@"%@/api/start", self.currentBaseURL];
     
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -163,7 +153,7 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
     }];
 }
 
-- (void)deleteAgentInstanceWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
+- (void)doStopCallWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
     NSString *url = [NSString stringWithFormat:@"%@/api/stop", self.currentBaseURL];
     
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -237,11 +227,11 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
     
     NSLog(@"启用AEC（回声消除），模式：ZegoAECModeAIAggressive");
     [[ZegoExpressEngine sharedEngine] enableAEC:TRUE];
-    [[ZegoExpressEngine sharedEngine] setAECMode:ZegoAECModeAIAggressive];
+    [[ZegoExpressEngine sharedEngine] setAECMode:ZegoAECModeAIAggressive2];
     
     NSLog(@"启用ANS（噪声抑制），模式：ZegoANSModeAggressive");
     [[ZegoExpressEngine sharedEngine] enableANS:TRUE];
-    [[ZegoExpressEngine sharedEngine] setANSMode:ZegoANSModeAIBalanced];
+    [[ZegoExpressEngine sharedEngine] setANSMode:ZegoANSModeMedium];
 }
 
 -(void)startPushlishStream{

@@ -21,8 +21,6 @@ ai_agent_quickstart/
 │   ├── audio/                # 音频相关模块
 │   │   ├── ZegoAIAgentAudioViewController.h/m  # 音频智能体对话视图控制器（主界面）
 │   │   └── views/            # 音频UI组件
-│   │       ├── ZegoAIAgentAudioSubtitlesForegroundView.h/m  # 前景UI
-│   │       ├── ZegoAIAgentStatusView.h/m                    # 状态显示UI
 │   │       └── subtitles/    # 字幕相关组件
 │   │           ├── ZegoAIAgentSubtitlesTableView.h/m        # 字幕视图
 │   │           ├── core/     # 字幕核心处理
@@ -32,10 +30,8 @@ ai_agent_quickstart/
 │       ├── ZegoAIAgentServiceAPI.h/m                # 服务API封装
 │       └── ZegoKey.h/m                              # 密钥管理
 │          └── protocol/      # 后台服务协议
-│              ├── ZegoAIRegisterAgentRequest.h/m         # 注册智能体请求
-│              ├── ZegoAICreateAgentInstanceRequest.h/m   # 创建智能体实例请求
-│              ├── ZegoAICreateAgentInstanceResponse.h/m  # 创建智能体实例响应
-│              └── ZegoAIDeleteAgentInstanceRequest.h/m   # 删除智能体实例请求
+│              ├── ZegoAIGetTokenRequest.h/m         # Token请求
+│              ├── ZegoAIGetTokenResponse.h/m        # Token回包
 └── libs/                     # 第三方库
     └── Express/              # ZEGO Express SDK
 ```
@@ -47,7 +43,6 @@ ai_agent_quickstart/
 1. 应用启动，初始化AppDelegate和SceneDelegate
 2. SceneDelegate直接加载ZegoAIAgentAudioViewController为根视图控制器，进入主界面
 
-
 ### 音频对话流程
 
 ```mermaid
@@ -55,17 +50,17 @@ sequenceDiagram
     participant User as 用户
     participant AudioVC as ZegoAIAgentAudioViewController
     participant ServiceAPI as ZegoAIAgentServiceAPI
+    participant BusinessServer as 业务后台服务
     participant PassServer as AI服务
     participant Express as ZEGO EXPRESS SDK
 
-    AudioVC->>ServiceAPI: initWithCompletion
-    ServiceAPI->>PassServer: 创建智能体
+    User->>AudioVC: 点击LoginRoom按钮
     AudioVC->>AudioVC: 请求麦克风权限
-    AudioVC->>ServiceAPI: startChatWithCompletion
+    AudioVC->>ServiceAPI:startCallWithCompletion
     ServiceAPI->>Express: 初始化引擎/进房/推流
     Express-->>ServiceAPI: 成功
-    ServiceAPI->>PassServer: 创建智能体实例
-    PassServer-->>ServiceAPI: 返回实例ID
+    ServiceAPI->>BusinessServer: start
+    BusinessServer-->>ServiceAPI: 返回
     ServiceAPI-->>AudioVC: 聊天开始成功
     Express-->>ServiceAPI: onRoomStreamUpdate回调(流更新)
     ServiceAPI->>Express: 开始拉流(订阅智能体流)
@@ -81,9 +76,11 @@ sequenceDiagram
     end
   
     User->>AudioVC: 点击LogoutRoom按钮
-    AudioVC->>ServiceAPI: stopChatWithCompletion
+    AudioVC->>ServiceAPI:stopCallWithCompletion
     ServiceAPI->>Express: 退出房间/停止拉流/停止推流/销毁引擎
-    ServiceAPI->>PassServer: 终止智能体实例
+    ServiceAPI->>BusinessServer: stop
+    BusinessServer-->>ServiceAPI: 返回
+    ServiceAPI-->>AudioVC: 聊天结束成功
 ```
 
 ## 主要组件说明
@@ -107,7 +104,7 @@ sequenceDiagram
 3. 配置AppID和密钥
    - 前往 [ZEGO 控制台](https://console.zegocloud.com/) 创建项目.
    - 获取 **AppID**，**AppSign** 和**AppSecret**
-   - 复制`ZegoKey.template.m`（位于`ai_agent_quickstart/aiagent/server/`目录）文件并重命名为`ZegoKey.m`
+   - 复制 `ZegoKey.template.m`（位于 `ai_agent_quickstart/aiagent/server/`目录）文件并重命名为 `ZegoKey.m`
    - 使用自己的密钥信息填充该文件
 4. 构建并运行项目
 5. 启动后直接进入主界面体验
