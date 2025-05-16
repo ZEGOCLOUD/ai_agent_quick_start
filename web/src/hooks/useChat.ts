@@ -94,6 +94,10 @@ export function useChat(zg: ExpressManager) {
     round: number
   ) {
     console.log(`"mytag 智能体说话文本内容：", ${seqId}, ${data.Text}`);
+    const llmEndFlag = data.EndFlag;
+    if (llmEndFlag) {
+      console.log(`"mytag 智能体回答完毕", ${seqId}`);
+    }
     const content = data.Text.trim();
     const llmMessageId = data.MessageId;
     if (!content) return;
@@ -114,7 +118,7 @@ export function useChat(zg: ExpressManager) {
     agentMsgMap[round].push({ ...newMessage });
 
     if (index !== -1) {
-      const newMessages = agentMsgMap[round];
+      const newMessages = agentMsgMap[round].filter(message => message.messageId === llmMessageId);
       const sortedMessages = newMessages
         .sort((a, b) => a.seqId - b.seqId)
         .map(({ content }) => content)
@@ -124,14 +128,6 @@ export function useChat(zg: ExpressManager) {
       }
     } else {
       messages.value.push(newMessage);
-    }
-    const llmEndFlag = data.EndFlag;
-    if (llmEndFlag) {
-      console.log(`"mytag 智能体回答完毕", ${seqId}`);
-      // 清除缓存中比seqId小的消息
-      agentMsgMap[round] = agentMsgMap[round].filter(
-        (message) => message.seqId > seqId
-      );
     }
   }
 
