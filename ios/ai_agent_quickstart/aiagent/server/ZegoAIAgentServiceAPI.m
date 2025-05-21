@@ -293,7 +293,8 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
             __strong typeof(weakSelf) strongSelf = weakSelf;
             NSLog(@"loginRoom 调用结果: code=%d, roomID=%@", errorCode, strongSelf.roomId);
             
-            if (errorCode != 0) {
+            if (errorCode != 0 || errorCode != 1002001) {
+                // 由于写死了房间ID，1002001(登录多个房间报错)默认认为成功
                 NSLog(@"loginRoom 失败: code=%d, extendedData=%@", errorCode, extendedData);
                 complete(errorCode, extendedData);
                 return;
