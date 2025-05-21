@@ -6,7 +6,7 @@
 //
 
 #import "SceneDelegate.h"
-#import "aiagent/audio/ZegoAIAgentAudioViewController.h"
+#import "aiagent/im/ZegoAIAgentIMChatViewController.h"
 
 @interface SceneDelegate ()
 
@@ -21,7 +21,7 @@
     // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
     UIWindowScene *windowScene = (UIWindowScene *)scene;
     self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
-    ZegoAIAgentAudioViewController *vc = [[ZegoAIAgentAudioViewController alloc] init];
+    ZegoAIAgentIMChatViewController *vc = [[ZegoAIAgentIMChatViewController alloc] init];
     self.window.rootViewController = vc;
     [self.window makeKeyAndVisible];
 }

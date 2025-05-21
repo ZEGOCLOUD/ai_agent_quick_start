@@ -27,6 +27,8 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 @property (nonatomic, copy) NSString *currentBaseURL;
 
 @property (nonatomic, copy) NSString *agentId;
+@property (nonatomic, copy) NSString *agentName;
+@property (nonatomic, copy) NSString *agentRobotId;
 @property (nonatomic, copy) NSString *agentStreamId;
 
 @property (nonatomic, copy) NSString *userId;
@@ -50,6 +52,8 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
         instance.userStreamId = @"user_stream_id_1";
         
         instance.agentId = @"agent_user_id_1";
+        instance.agentName = @"agent_user_name_1";
+        instance.agentRobotId = @"agent_rotbot_id_1";
         instance.agentStreamId = @"agent_stream_id_1";
     });
     return instance;
@@ -59,6 +63,14 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 
 - (NSString *)getAgentId {
     return self.agentId;
+}
+
+- (NSString *)getAgentName {
+    return self.agentName;
+}
+
+- (NSString *)getAgentRotbotId {
+    return self.agentRobotId;
 }
 
 - (NSString *)getUserId {

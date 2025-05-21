@@ -14,14 +14,14 @@
 @property (nonatomic, strong) UILabel *roomIdLabel;
 @property (nonatomic, strong) UILabel *userIdLabel;
 @property (nonatomic, strong) UILabel *agentIdLabel;
-@property (nonatomic, strong) UIButton *loginLogoutButton;
 @property (nonatomic, assign) BOOL isLoggedIn;
+@property (nonatomic, strong) UIButton *logoutButton;
 @property (nonatomic, strong) UIView *subtitlesTab;
 @property (nonatomic, strong) UILabel *subtitlesTabLabel;
 @property (nonatomic, strong) ZegoAIAgentSubtitlesTableView *subtitlesTableView;
 @property (nonatomic, assign) BOOL subtitlesExpanded;
 @property (nonatomic, strong) UILabel *tipLabel;
-@property (nonatomic, strong) UIActivityIndicatorView *loginLogoutLoading;
+@property (nonatomic, strong) UIActivityIndicatorView *loadingIndicator;
 
 @end
 
@@ -32,8 +32,22 @@
     self.view.backgroundColor = [UIColor whiteColor];
     self.isLoggedIn = NO;
     self.subtitlesExpanded = NO;
-    
+
     [self setupUI];
+
+    // 界面加载完成后自动登录
+    [self startAudioChat];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+}
+
+- (void)dealloc {
+    // 确保在控制器销毁时注销事件处理器
+    if (self.isLoggedIn) {
+        [self unregisterEventHandler];
+    }
 }
 
 - (void)setupUI {
@@ -98,28 +112,29 @@
         make.width.height.mas_equalTo(160);
     }];
 
-    // Login/Logout 按钮
-    self.loginLogoutButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [self.loginLogoutButton setTitle:@"LoginRoom" forState:UIControlStateNormal];
-    self.loginLogoutButton.backgroundColor = [UIColor colorWithRed:0.6 green:0.95 blue:0.2 alpha:1];
-    [self.loginLogoutButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    self.loginLogoutButton.titleLabel.font = [UIFont systemFontOfSize:18 weight:UIFontWeightMedium];
-    self.loginLogoutButton.layer.cornerRadius = 8;
-    [self.loginLogoutButton addTarget:self action:@selector(loginLogoutButtonTapped) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:self.loginLogoutButton];
-    [self.loginLogoutButton mas_makeConstraints:^(MASConstraintMaker *make) {
+    // Logout 按钮
+    self.logoutButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.logoutButton setTitle:@"LogoutRoom" forState:UIControlStateNormal];
+    self.logoutButton.backgroundColor = [UIColor colorWithRed:0.9 green:0.4 blue:0.4 alpha:1];
+    [self.logoutButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    self.logoutButton.titleLabel.font = [UIFont systemFontOfSize:18 weight:UIFontWeightMedium];
+    self.logoutButton.layer.cornerRadius = 8;
+    [self.logoutButton addTarget:self action:@selector(logoutButtonTapped) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:self.logoutButton];
+    [self.logoutButton mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(self.userIdLabel.mas_bottom).offset(40);
         make.centerX.equalTo(self.view);
         make.width.mas_equalTo(240);
         make.height.mas_equalTo(44);
     }];
-    // loading
-    self.loginLogoutLoading = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
-    self.loginLogoutLoading.hidesWhenStopped = YES;
-    [self.loginLogoutButton addSubview:self.loginLogoutLoading];
-    [self.loginLogoutLoading mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerY.equalTo(self.loginLogoutButton);
-        make.right.equalTo(self.loginLogoutButton.mas_right).offset(-16);
+
+    // Loading 指示器
+    self.loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleLarge];
+    self.loadingIndicator.hidesWhenStopped = YES;
+    self.loadingIndicator.color = [UIColor colorWithRed:0.7 green:0.5 blue:0.9 alpha:1]; // 淡紫色
+    [self.view addSubview:self.loadingIndicator];
+    [self.loadingIndicator mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.center.equalTo(self.view);
     }];
 
     // 提示
@@ -130,7 +145,7 @@
     self.tipLabel.numberOfLines = 0;
     [self.view addSubview:self.tipLabel];
     [self.tipLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(self.loginLogoutButton.mas_bottom).offset(30);
+        make.top.equalTo(self.logoutButton.mas_bottom).offset(30);
         make.left.equalTo(self.view.mas_left).offset(20);
         make.right.equalTo(self.view.mas_right).offset(-20);
     }];
@@ -171,37 +186,34 @@
     }];
 }
 
-- (void)loginLogoutButtonTapped {
-    if (self.loginLogoutButton.isEnabled == NO) return;
-    self.loginLogoutButton.enabled = NO;
-    [self.loginLogoutLoading startAnimating];
-    if (!self.isLoggedIn) {
-        [self startAudioChat];
-    } else {
-        [self stopChat];
-    }
-}
+
 
 - (void)startAudioChat {
     [self registerEventHandler];
-    
+
+    // 显示加载指示器
+    [self.loadingIndicator startAnimating];
+    self.logoutButton.enabled = NO;
+
     [self requestAudioPermission:^(BOOL granted) {
         if (!granted) {
             [self showToast:@"未获得音频权限"];
-            self.loginLogoutButton.enabled = YES;
-            [self.loginLogoutLoading stopAnimating];
+            [self.loadingIndicator stopAnimating];
+            self.logoutButton.enabled = YES;
             return;
         }
         __weak typeof(self) weakSelf = self;
         [[ZegoAIAgentServiceAPI sharedInstance] startCallWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) return;
-            strongSelf.loginLogoutButton.enabled = YES;
-            [strongSelf.loginLogoutLoading stopAnimating];
+            [strongSelf.loadingIndicator stopAnimating];
+            strongSelf.logoutButton.enabled = YES;
+
             if (success) {
                 strongSelf.isLoggedIn = YES;
-                [strongSelf.loginLogoutButton setTitle:@"LogoutRoom" forState:UIControlStateNormal];
-                strongSelf.loginLogoutButton.backgroundColor = [UIColor colorWithRed:0.9 green:0.4 blue:0.4 alpha:1];
+                // 登录成功后更新按钮状态
+                [strongSelf.logoutButton setTitle:@"LogoutRoom" forState:UIControlStateNormal];
+                strongSelf.logoutButton.backgroundColor = [UIColor colorWithRed:0.9 green:0.4 blue:0.4 alpha:1];
             } else {
                 [strongSelf showToast:[NSString stringWithFormat:@"音频聊天开始失败：%@", errorMessage]];
             }
@@ -209,19 +221,47 @@
     }];
 }
 
+- (void)logoutButtonTapped {
+    if (!self.isLoggedIn) return;
+
+    self.logoutButton.enabled = NO;
+    [self.loadingIndicator startAnimating];
+
+    // 调用stopChat并在完成后返回上一个界面
+    [self stopChatWithCompletion:^(BOOL success) {
+        if (success) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if (self.presentingViewController) {
+                    [self dismissViewControllerAnimated:YES completion:nil];
+                } else {
+                    [self.navigationController popViewControllerAnimated:YES];
+                }
+            });
+        }
+    }];
+}
+
 - (void)stopChat {
+    [self stopChatWithCompletion:nil];
+}
+
+- (void)stopChatWithCompletion:(void(^)(BOOL success))completion {
     [self unregisterEventHandler];
-    
+
     __weak typeof(self) weakSelf = self;
     [[ZegoAIAgentServiceAPI sharedInstance] stopCallWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
-        strongSelf.loginLogoutButton.enabled = YES;
-        [strongSelf.loginLogoutLoading stopAnimating];
+        if (!strongSelf) return;
+        [strongSelf.loadingIndicator stopAnimating];
+        strongSelf.logoutButton.enabled = YES;
         strongSelf.isLoggedIn = NO;
-        [strongSelf.loginLogoutButton setTitle:@"LoginRoom" forState:UIControlStateNormal];
-        strongSelf.loginLogoutButton.backgroundColor = [UIColor colorWithRed:0.6 green:0.95 blue:0.2 alpha:1];
+
         if (!success) {
             [strongSelf showToast:[NSString stringWithFormat:@"音频聊天停止失败：%@", errorMessage]];
+        }
+
+        if (completion) {
+            completion(success);
         }
     }];
 }
@@ -251,7 +291,7 @@
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil
                                                                      message:message
                                                               preferredStyle:UIAlertControllerStyleAlert];
-        
+
         [self presentViewController:alert animated:YES completion:^{
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [alert dismissViewControllerAnimated:YES completion:nil];

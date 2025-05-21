@@ -24,6 +24,7 @@
 		419158A82DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4191589E2DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableView.m */; };
 		41A8630F2DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863032DA7E51400B1A58B /* ZegoAIAgentServiceAPI.m */; };
 		41A863212DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */; };
+		41CAE98E2DDDBFBC00F97983 /* ZegoAIAgentIMChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CAE98C2DDDBFBC00F97983 /* ZegoAIAgentIMChatViewController.m */; };
 		41CD42BC2DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42B32DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m */; };
 		41CD42C42DB1014F008F13F4 /* ZegoKey.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42C22DB1014F008F13F4 /* ZegoKey.m */; };
 		41CD42C92DB104F5008F13F4 /* ZegoAIGetTokenResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42C62DB104F5008F13F4 /* ZegoAIGetTokenResponse.m */; };
@@ -65,6 +66,8 @@
 		41A8631F2DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentAudioViewController.h; sourceTree = "<group>"; };
 		41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentAudioViewController.m; sourceTree = "<group>"; };
 		41A863282DA7EF2A00B1A58B /* ZegoExpressEngine.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ZegoExpressEngine.xcframework; path = libs/Express/Library/ZegoExpressEngine.xcframework; sourceTree = "<group>"; };
+		41CAE98B2DDDBFBC00F97983 /* ZegoAIAgentIMChatViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentIMChatViewController.h; sourceTree = "<group>"; };
+		41CAE98C2DDDBFBC00F97983 /* ZegoAIAgentIMChatViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentIMChatViewController.m; sourceTree = "<group>"; };
 		41CD42B22DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIServiceCommonResponse.h; sourceTree = "<group>"; };
 		41CD42B32DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIServiceCommonResponse.m; sourceTree = "<group>"; };
 		41CD42C22DB1014F008F13F4 /* ZegoKey.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ZegoKey.m; path = ai_agent_quickstart/aiagent/server/ZegoKey.m; sourceTree = SOURCE_ROOT; };
@@ -190,6 +193,7 @@
 			isa = PBXGroup;
 			children = (
 				41A863062DA7E51400B1A58B /* server */,
+				41CAE98D2DDDBFBC00F97983 /* im */,
 				41A863112DA7E67800B1A58B /* audio */,
 			);
 			path = aiagent;
@@ -203,6 +207,15 @@
 				41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */,
 			);
 			path = audio;
+			sourceTree = "<group>";
+		};
+		41CAE98D2DDDBFBC00F97983 /* im */ = {
+			isa = PBXGroup;
+			children = (
+				41CAE98B2DDDBFBC00F97983 /* ZegoAIAgentIMChatViewController.h */,
+				41CAE98C2DDDBFBC00F97983 /* ZegoAIAgentIMChatViewController.m */,
+			);
+			path = im;
 			sourceTree = "<group>";
 		};
 		41CD42B42DB0F87B008F13F4 /* protocol */ = {
@@ -365,6 +378,7 @@
 				41CD42BC2DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m in Sources */,
 				419158A32DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageProtocol.m in Sources */,
 				419158A62DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableViewCell.m in Sources */,
+				41CAE98E2DDDBFBC00F97983 /* ZegoAIAgentIMChatViewController.m in Sources */,
 				410B351E2DA7CE0D00CFA563 /* main.m in Sources */,
 				419158A52DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageModel.m in Sources */,
 				419158A42DB782ED009BAA71 /* ZegoAIAgentSubtitlesCellLabelView.m in Sources */,

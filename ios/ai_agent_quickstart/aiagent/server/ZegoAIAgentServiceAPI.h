@@ -37,6 +37,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)getAgentId;
 
 /**
+ * 获取当前智能体名称
+ * @return 智能体名称
+ */
+- (NSString *)getAgentName;
+
+/**
+ * 获取当前智能体robot id
+ * @return 智能体robot id
+ */
+- (NSString *)getAgentRotbotId;
+
+/**
  * 获取当前用户ID
  * @return 用户ID
  */

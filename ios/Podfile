@@ -9,6 +9,8 @@ target 'ai_agent_quickstart' do
 
   # 修改路径到正确的 podspec 位置
   pod 'ZegoExpressEngine', :path => 'libs/Express'
+  pod 'ZIM'
+  
   pod 'Masonry', '1.1.0'
 end
 
