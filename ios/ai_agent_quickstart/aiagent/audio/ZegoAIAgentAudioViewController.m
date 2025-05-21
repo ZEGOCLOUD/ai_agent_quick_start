@@ -31,23 +31,16 @@
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor whiteColor];
     self.isLoggedIn = NO;
-    self.subtitlesExpanded = NO;
+
+    self.subtitlesExpanded = YES; // 默认展开字幕
 
     [self setupUI];
 
+    // 默认展开字幕视图
+    [self expandSubtitlesView];
+
     // 界面加载完成后自动登录
     [self startAudioChat];
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-    [super viewWillDisappear:animated];
-}
-
-- (void)dealloc {
-    // 确保在控制器销毁时注销事件处理器
-    if (self.isLoggedIn) {
-        [self unregisterEventHandler];
-    }
 }
 
 - (void)setupUI {
@@ -162,7 +155,7 @@
         make.height.mas_equalTo(44);
     }];
     self.subtitlesTabLabel = [[UILabel alloc] init];
-    self.subtitlesTabLabel.text = @"subtitles (Click to expand)";
+    self.subtitlesTabLabel.text = @"subtitles (Click to collapse)"; // 默认显示折叠文本
     self.subtitlesTabLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
     self.subtitlesTabLabel.textColor = [UIColor blackColor];
     self.subtitlesTabLabel.textAlignment = NSTextAlignmentLeft;
@@ -185,8 +178,6 @@
         });
     }];
 }
-
-
 
 - (void)startAudioChat {
     [self registerEventHandler];
@@ -241,10 +232,6 @@
     }];
 }
 
-- (void)stopChat {
-    [self stopChatWithCompletion:nil];
-}
-
 - (void)stopChatWithCompletion:(void(^)(BOOL success))completion {
     [self unregisterEventHandler];
 
@@ -266,17 +253,21 @@
     }];
 }
 
+- (void)expandSubtitlesView {
+    if (!self.subtitlesTableView) {
+        self.subtitlesTableView = [[ZegoAIAgentSubtitlesTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
+    }
+    [self.view addSubview:self.subtitlesTableView];
+    [self.subtitlesTableView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.subtitlesTab.mas_bottom);
+        make.left.right.equalTo(self.view);
+        make.bottom.equalTo(self.view.mas_bottom).offset(-2);
+    }];
+}
+
 - (void)subtitlesTabTapped {
     if (!self.subtitlesExpanded) {
-        if (!self.subtitlesTableView) {
-            self.subtitlesTableView = [[ZegoAIAgentSubtitlesTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
-        }
-        [self.view addSubview:self.subtitlesTableView];
-        [self.subtitlesTableView mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.top.equalTo(self.subtitlesTab.mas_bottom);
-            make.left.right.equalTo(self.view);
-            make.bottom.equalTo(self.view.mas_bottom).offset(-2);
-        }];
+        [self expandSubtitlesView];
         self.subtitlesExpanded = YES;
         self.subtitlesTabLabel.text = @"subtitles (Click to collapse)";
     } else {

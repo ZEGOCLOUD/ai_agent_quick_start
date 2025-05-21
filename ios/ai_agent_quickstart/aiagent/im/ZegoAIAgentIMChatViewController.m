@@ -88,9 +88,9 @@
     
     // 输入框样式优化
     self.inputTextField = [[UITextField alloc] init];
-    self.inputTextField.placeholder = @"请输入消息...";
-    self.inputTextField.attributedPlaceholder = [[NSAttributedString alloc] 
-        initWithString:@"请输入消息..." 
+    self.inputTextField.placeholder = @"随便问...";
+    self.inputTextField.attributedPlaceholder = [[NSAttributedString alloc]
+        initWithString:@"随便问..."
         attributes:@{
             NSForegroundColorAttributeName: [UIColor colorWithWhite:0.6 alpha:1.0]  // 灰色占位符
         }];
