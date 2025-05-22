@@ -1,8 +1,8 @@
 <template>
-  <div class="container">
+  <div class="container" v-loading="fullscreenLoading">
     <!-- 语音聊天区域 -->
     <div class="voice-chat-section">
-      <div class="header">VoiceChat</div>
+      <PageHeader title="VoiceChat" :showBack="fromIM" @back="handleLogout" />
 
       <!-- 房间信息区域 -->
       <div class="room-info">
@@ -32,7 +32,7 @@
           <!-- 登录/退出按钮 -->
           <div class="controls-container">
             <el-button
-              v-if="!isLogin"
+              v-if="!fromIM && !isLogin"
               :loading="loading"
               type="primary"
               class="login-btn"
@@ -41,7 +41,7 @@
               LoginRoom
             </el-button>
             <el-button
-              v-else
+              v-if="isLogin"
               type="danger"
               :loading="loading"
               class="logout-btn"
@@ -54,7 +54,7 @@
 
         <div class="note">
           注意: <br />
-          1.同一个 AppID 内，需保证“userlD”全局唯一，否则会互踢。<br />
+          1.同一个 AppID 内，需保证"userlD"全局唯一，否则会互踢。<br />
           2.请先在服务端创建对应的智能体，并在Call时同步创建智能体实例
         </div>
       </div>
@@ -76,11 +76,17 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import ChatMessage from "./ChatMessage.vue";
-import RemoteSteamView from "./RemoteSteamView.vue";
-import { useChat } from "../hooks/useChat";
-import { useRoom } from "../hooks/useRoom";
+import ChatMessage from "@/components/ChatMessage.vue";
+import RemoteSteamView from "@/components/RemoteSteamView.vue";
+import { useVoiceChat } from "@/hooks/useVoiceChat";
+import { useRoom } from "@/hooks/useRoom";
 import { ElMessage } from "element-plus";
+import PageHeader from '@/components/PageHeader.vue'
+import { useRouter, useRoute } from "vue-router";
+
+const router = useRouter();
+const route = useRoute();
+const fromIM = ref(route.query.fromIM === 'true');
 
 const {
   zg,
@@ -95,8 +101,9 @@ const {
   messages,
   setupEventListeners: setupChatEventListeners,
   clearMessages,
-} = useChat(zg);
-// 用户信息
+} = useVoiceChat(zg);
+
+// 用户信息 - 可根据实际需求修改
 const roomId = ref("room_id_1");
 const userId = ref("user_id_1");
 const userName = ref("user_name_1");
@@ -105,6 +112,7 @@ const userStreamId = ref("user_stream_id_1");
 // const agentStreamId = ref("agent_stream_id_1");
 
 // 状态管理
+const fullscreenLoading = ref(false);
 const loading = ref(false);
 const activeCollapse = ref(["chat"]);
 
@@ -128,9 +136,11 @@ const handleLogin = async () => {
 
 // 处理退出房间
 const handleLogout = async () => {
+  if (loading.value) return;
   try {
     loading.value = true;
     await logoutRoom();
+    fromIM.value && router.back();
   } catch (error: any) {
     console.error("退出失败", error);
     ElMessage.error(error.message || "退出失败");
@@ -140,11 +150,24 @@ const handleLogout = async () => {
   }
 };
 
+const init = async () => {
+  try {
+    fullscreenLoading.value = true;
+    await initSDK();
+    setupEventListeners();
+    setupChatEventListeners();
+    await checkPermission();
+    fromIM.value && await handleLogin();
+  } catch (error: any) {
+    console.error("初始化失败", error);
+    ElMessage.error(error.message || "初始化失败");
+  } finally {
+    fullscreenLoading.value = false;
+  }
+}
+
 onMounted(async () => {
-  await initSDK();
-  setupEventListeners();
-  setupChatEventListeners();
-  checkPermission();
+  init();
 });
 </script>
 
@@ -167,13 +190,6 @@ onMounted(async () => {
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-}
-
-.header {
-  background-color: #e4e7ed;
-  padding: 12px 20px;
-  font-size: 18px;
-  font-weight: 600;
 }
 
 .room-info {

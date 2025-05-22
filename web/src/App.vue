@@ -1,11 +1,9 @@
 <template>
   <div class="app-container">
-    <VoiceChat />
+    <router-view />
   </div>
 </template>
 <script setup lang="ts">
-import VoiceChat from './components/VoiceChat.vue'
-
 </script>
 <style scoped>
 .app-container {

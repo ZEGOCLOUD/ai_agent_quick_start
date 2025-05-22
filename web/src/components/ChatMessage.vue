@@ -20,12 +20,12 @@
 </template>
 
 <script setup lang="ts">
+import type { ChatMessage } from '@/types/chat';
 import { ref, onMounted, onUpdated } from 'vue';
-import type { Message } from '../hooks/useChat';
 
 const props = withDefaults(
   defineProps<{
-    messages: Message[];
+    messages: ChatMessage[];
   }>(),
   {
     messages: () => [],
@@ -68,9 +68,6 @@ onUpdated(scrollToBottom);
   border-radius: 14px;
   padding: 0 16px;
   overflow: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
-  scroll-behavior: smooth;
   font-size: 14px;
   font-weight: 400;
   line-height: 22px;
@@ -88,12 +85,12 @@ onUpdated(scrollToBottom);
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 16px 4px;
+  padding: 16px 10px;
 }
 
 /* Webkit 浏览器滚动条样式 */
 .chat-message::-webkit-scrollbar {
-  width: 6px;
+  width: 1px;
 }
 
 .chat-message::-webkit-scrollbar-track {

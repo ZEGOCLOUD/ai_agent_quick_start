@@ -31,20 +31,24 @@ pnpm dev
 
 ### 4. 目录结构
 ```
-├── lib                 # 第三方库
+├── lib                      # 第三方库
 └── src
     ├── api
-    │   └── agent       # AI Agent API
+    │   └── agent            # AI Agent API
     ├── components
-    │   ├── VoiceChat  # 语音聊天组件
-    │   ├── ChatMessage # 聊天消息组件
-    │   └── RemoteSteamView # 远程流容器组件
+    │   ├── ChatMessage      # 聊天消息组件
+    │   └── RemoteSteamView  # 远程流容器组件
     ├── hooks
-    │   └── useChat     # 聊天相关的 hooks
-    │   └── useRoom     # 房间相关的 hooks
+    │   └── useVoiceChat     # 语音聊天相关的 hook
+    │   └── useImChat        # 文字聊天相关的 hook
+    │   └── useRoom          # 房间相关的 hook
     ├── solution
-    │   └── ExpressManager # Express SDK 管理类
+    │   └── ExpressManager   # Express SDK 管理类
+    │   └── ZIMManage        # ZIM SDK 管理类
+    ├── views
+    │   └── ImChat             # 文字聊天页面
+    │   └── VoiceChat          # 语音聊天页面
     ├── utils
-    │   └── http        # http 请求工具
-    └── config          # 配置文件
+    │   └── http             # http 请求工具
+    └── config               # 配置文件
 ```

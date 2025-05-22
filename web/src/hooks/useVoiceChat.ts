@@ -1,5 +1,6 @@
 import { ref } from "vue";
 import type { ExpressManager } from "../solution/ExpressManager";
+import type { ChatMessage } from "@/types/chat";
 
 interface MessageData {
   MessageId: string;
@@ -16,20 +17,11 @@ interface RoomMessage {
   Data: MessageData;
 }
 
-export interface Message {
-  sender: string;
-  messageId: string;
-  seqId: number;
-  content: string;
-  type: string;
-  round: number;
-}
-
-export function useChat(zg: ExpressManager) {
+export function useVoiceChat(zg: ExpressManager) {
   // 状态管理
-  const messages = ref<Message[]>([]);
+  const messages = ref<ChatMessage[]>([]);
   let userMsgSeq = 0;
-  let agentMsgMap: Record<string, Message[]> = {};
+  let agentMsgMap: Record<string, ChatMessage[]> = {};
 
   /**
    * 处理房间命令消息
@@ -70,7 +62,7 @@ export function useChat(zg: ExpressManager) {
       const index = messages.value.findIndex(
         (message) => message.sender === 'user' && message.round === round
       );
-      const newMessage = {
+      const newMessage: ChatMessage = {
         sender: "user",
         messageId: messageId,
         seqId: seqId,
@@ -104,7 +96,7 @@ export function useChat(zg: ExpressManager) {
     const index = messages.value.findIndex(
       (message) => message.sender === 'bot' && message.round === round
     );
-    const newMessage = {
+    const newMessage: ChatMessage = {
       sender: "bot",
       messageId: llmMessageId,
       seqId: seqId,
