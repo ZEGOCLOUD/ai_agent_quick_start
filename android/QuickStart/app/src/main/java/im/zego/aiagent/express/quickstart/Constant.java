@@ -2,7 +2,7 @@ package im.zego.aiagent.express.quickstart;
 
 public class Constant {
 
-    public static final long appId = ;
+    public static final long appId = ; // 你部署的业务后台用到的参数
     public static final String user_id = "user_id_1";    // 你部署的业务后台用到的参数
     public static final String userName = "user_android";
     public static final String user_stream_id = "user_stream_id_1";  // 你部署的业务后台用到的参数
