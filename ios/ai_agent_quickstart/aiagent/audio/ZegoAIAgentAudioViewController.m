@@ -13,7 +13,7 @@
 // 前景UI组件
 @property (nonatomic, strong) UILabel *roomIdLabel;
 @property (nonatomic, strong) UILabel *userIdLabel;
-@property (nonatomic, strong) UILabel *agentIdLabel;
+@property (nonatomic, strong) UILabel *agentUserIdLabel;
 @property (nonatomic, assign) BOOL isLoggedIn;
 @property (nonatomic, strong) UIButton *logoutButton;
 @property (nonatomic, strong) UIView *subtitlesTab;
@@ -90,16 +90,16 @@
     }];
 
     // AgentId
-    self.agentIdLabel = [[UILabel alloc] init];
-    self.agentIdLabel.text = [NSString stringWithFormat:@"%@", [[ZegoAIAgentServiceAPI sharedInstance] getAgentId]];
-    self.agentIdLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
-    self.agentIdLabel.textAlignment = NSTextAlignmentCenter;
-    self.agentIdLabel.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1];
-    self.agentIdLabel.layer.cornerRadius = 80;
-    self.agentIdLabel.layer.masksToBounds = YES;
-    self.agentIdLabel.adjustsFontSizeToFitWidth = YES;
-    [self.view addSubview:self.agentIdLabel];
-    [self.agentIdLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+    self.agentUserIdLabel = [[UILabel alloc] init];
+    self.agentUserIdLabel.text = [NSString stringWithFormat:@"%@", [[ZegoAIAgentServiceAPI sharedInstance] getAgentUserId]];
+    self.agentUserIdLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
+    self.agentUserIdLabel.textAlignment = NSTextAlignmentCenter;
+    self.agentUserIdLabel.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1];
+    self.agentUserIdLabel.layer.cornerRadius = 80;
+    self.agentUserIdLabel.layer.masksToBounds = YES;
+    self.agentUserIdLabel.adjustsFontSizeToFitWidth = YES;
+    [self.view addSubview:self.agentUserIdLabel];
+    [self.agentUserIdLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(self.roomIdLabel.mas_bottom).offset(10);
         make.right.equalTo(self.view.mas_right).offset(-10);
         make.width.height.mas_equalTo(160);

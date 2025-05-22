@@ -20,13 +20,14 @@
 typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
 
 // 环境 URL
-static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app";  // 实际URL需要替换
+static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/";  // 实际URL需要替换
 
 @interface ZegoAIAgentServiceAPI () <ZegoEventHandler>
 
 @property (nonatomic, copy) NSString *currentBaseURL;
 
 @property (nonatomic, copy) NSString *agentId;
+@property (nonatomic, copy) NSString *agentUserId;
 @property (nonatomic, copy) NSString *agentName;
 @property (nonatomic, copy) NSString *agentRobotId;
 @property (nonatomic, copy) NSString *agentStreamId;
@@ -51,9 +52,10 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
         instance.roomId = @"room_id_1";
         instance.userStreamId = @"user_stream_id_1";
         
-        instance.agentId = @"agent_user_id_1";
-        instance.agentName = @"agent_user_name_1";
-        instance.agentRobotId = @"agent_rotbot_id_1";
+        instance.agentId = @"ai_agent_example_1";
+        instance.agentUserId = @"agent_user_id_1";
+        instance.agentName = @"李浩然";
+        instance.agentRobotId = @"@RBT#AIAgentExample1";
         instance.agentStreamId = @"agent_stream_id_1";
     });
     return instance;
@@ -61,8 +63,8 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 
 #pragma mark - Public Methods
 
-- (NSString *)getAgentId {
-    return self.agentId;
+- (NSString *)getAgentUserId {
+    return self.agentUserId;
 }
 
 - (NSString *)getAgentName {

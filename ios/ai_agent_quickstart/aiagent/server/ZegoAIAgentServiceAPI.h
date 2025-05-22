@@ -31,10 +31,10 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)sharedInstance;
 
 /**
- * 获取当前智能体ID
- * @return 智能体ID
+ * 获取当前智能体UserID
+ * @return 智能体UserID
  */
-- (NSString *)getAgentId;
+- (NSString *)getAgentUserId;
 
 /**
  * 获取当前智能体名称
