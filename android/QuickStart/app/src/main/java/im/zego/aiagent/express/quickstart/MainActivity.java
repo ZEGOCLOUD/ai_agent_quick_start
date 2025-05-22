@@ -33,9 +33,16 @@ import im.zego.zegoexpress.entity.ZegoUser;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,13 +50,12 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private AudioChatMessageParser audioChatMessageParser = new AudioChatMessageParser();
-    private long appId = ; // YOUR APPID from 即构
-    private final String user_id = "user_id_1";
-    private final String room_id = "room_id_1";
-    private final String agent_stream_id = "agent_stream_id_1";
-    private final String agent_user_id = "agent_user_id_1";
-    private final String user_stream_id = "user_stream_id_1";
     private boolean login = false;
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private static final OkHttpClient client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor(new HttpLoggingInterceptor().setLevel(Level.BASIC)).build();
+    private TextView loadingText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,12 +73,19 @@ public class MainActivity extends AppCompatActivity {
 
         TextView userId = findViewById(R.id.user_id);
         TextView userName = findViewById(R.id.user_name);
-        userId.setText(user_id);
-        userName.setText(user_id);
+        userId.setText(Constant.user_id);
+        userName.setText(Constant.userName);
+
+        loadingText = findViewById(R.id.loading_text);
 
         findViewById(R.id.login_room).setOnClickListener(v -> {
             requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO);
         });
+
+        boolean fromTextChat = getIntent().getBooleanExtra("fromTextChat", false);
+        if (fromTextChat) {
+            requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO);
+        }
     }
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
@@ -82,9 +95,11 @@ public class MainActivity extends AppCompatActivity {
                 if (isGranted) {
                     if (login) {
                         showLoading(true);
+                        loadingText.setText("正在退出");
                         stop();
                     } else {
                         showLoading(true);
+                        loadingText.setText("正在登录");
                         requestZegoToken();
                     }
                 } else {
@@ -95,7 +110,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void start() {
-        ZegoQuickStartApi.start(new Callback() {
+        RequestBody body = RequestBody.create("", JSON);
+        Request request = new Request.Builder().url(Constant.BASE_URL + "/api/start").post(body).build();
+
+        client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 System.err.println("Request failed: " + e.getMessage());
@@ -114,10 +132,9 @@ public class MainActivity extends AppCompatActivity {
                         int errorCode = (int) json.get("code");
                         String message = (String) json.get("message");
                         String agent_id = (String) json.get("agent_id");
-                        String agent_name = (String) json.get("agent_name");
                         if (errorCode == 0) {
-                            ZegoExpressEngine.getEngine().startPlayingStream(agent_stream_id);
-                            updateUI(agent_name);
+                            ZegoExpressEngine.getEngine().startPlayingStream(Constant.agent_stream_id);
+                            updateUI();
                         } else {
                             ZegoExpressEngine.getEngine().logoutRoom();
                             resetUI("start 失败");
@@ -135,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void updateUI(String agent_name) {
+    private void updateUI() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -147,8 +164,8 @@ public class MainActivity extends AppCompatActivity {
 
                 TextView agentUserId = findViewById(R.id.agent_user_id);
                 TextView agentUserName = findViewById(R.id.agent_user_name);
-                agentUserId.setText(agent_user_id);
-                agentUserName.setText(agent_name);
+                agentUserId.setText(Constant.agent_zim_uid);
+                agentUserName.setText(Constant.agent_name);
             }
         });
     }
@@ -172,7 +189,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stop() {
-        ZegoQuickStartApi.stop(new Callback() {
+        RequestBody body = RequestBody.create("", JSON);
+        Request request = new Request.Builder().url(Constant.BASE_URL + "/api/stop").post(body).build();
+
+        client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 System.err.println("Request failed: " + e.getMessage());
@@ -195,6 +215,10 @@ public class MainActivity extends AppCompatActivity {
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
+                    boolean fromTextChat = getIntent().getBooleanExtra("fromTextChat", false);
+                    if (fromTextChat) {
+                        finish();
+                    }
                 } else {
                     System.err.println("Request failed with status: " + response.code());
                 }
@@ -204,8 +228,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestZegoToken() {
-
-        ZegoQuickStartApi.getZegoToken(user_id, new Callback() {
+        Request request = new Request.Builder().url(Constant.BASE_URL + "/api/zego-token?userId=" + Constant.user_id).get()
+            .build();
+        client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 System.err.println("Request failed: " + e.getMessage());
@@ -223,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
                         long expireTime = (long) json.get("expire_time");
 
                         if (!TextUtils.isEmpty(token)) {
-                            loginRoom(user_id, user_id, token, new IZegoRoomLoginCallback() {
+                            loginRoom(Constant.user_id, Constant.user_id, token, new IZegoRoomLoginCallback() {
                                 @Override
                                 public void onRoomLoginResult(int errorCode, JSONObject extendedData) {
                                     if (errorCode == 0) {
@@ -251,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initExpressSDK() {
         ZegoEngineProfile zegoEngineProfile = new ZegoEngineProfile();
-        zegoEngineProfile.appID = appId;
+        zegoEngineProfile.appID = Constant.appId;
         zegoEngineProfile.scenario = ZegoScenario.HIGH_QUALITY_CHATROOM;
         zegoEngineProfile.application = getApplication();
         ZegoExpressEngine.createEngine(zegoEngineProfile, null);
@@ -323,11 +348,11 @@ public class MainActivity extends AppCompatActivity {
         roomConfig.token = token;
 
         ZegoExpressEngine.getEngine()
-            .loginRoom(room_id, new ZegoUser(userId, userName), roomConfig, (errorCode, extendedData) -> {
+            .loginRoom(Constant.room_id, new ZegoUser(userId, userName), roomConfig, (errorCode, extendedData) -> {
                 Log.d(TAG,
                     "loginRoom() called with: errorCode = [" + errorCode + "], extendedData = [" + extendedData + "]");
                 if (errorCode == 0) {
-                    ZegoExpressEngine.getEngine().startPublishingStream(user_stream_id);
+                    ZegoExpressEngine.getEngine().startPublishingStream(Constant.user_stream_id);
                     ZegoExpressEngine.getEngine().muteMicrophone(false);
                 }
                 if (callback != null) {
@@ -338,7 +363,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showLoading(boolean show) {
-        findViewById(R.id.loading_progress).setVisibility(show ? View.VISIBLE : View.GONE);
+        findViewById(R.id.loading_layout).setVisibility(show ? View.VISIBLE : View.GONE);
         findViewById(R.id.login_room).setEnabled(!show);
+    }
+
+    private boolean finishedInOnPauseLifeCycle = false;
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (isFinishing()) {
+            // 正常 finish,直接 clear
+            // 比如反复进出此页面，不会引起时序的问题。
+            finishedInOnPauseLifeCycle = true;
+            onActivityStartDestroy();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (!finishedInOnPauseLifeCycle) {
+            onActivityStartDestroy();
+        }
+    }
+
+    // 由于 onDestroy 是一个异步的过程，同一个界面反复进出可能会导致
+    // 当前activity 的 oncreate 先执行，然后上一个activity的onDestroy后执行
+    // 如果是正常的finish, 这里在 onPause 里面去判断，如果是 finish 状态，则先执行清理。
+    protected void onActivityStartDestroy() {
+        if (ZegoExpressEngine.getEngine() != null) {
+            ZegoExpressEngine.getEngine().logoutRoom();
+            ZegoExpressEngine.getEngine().setEventHandler(null);
+            ZegoExpressEngine.destroyEngine(null);
+        }
     }
 }

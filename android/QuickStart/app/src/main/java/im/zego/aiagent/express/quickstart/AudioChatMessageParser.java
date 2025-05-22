@@ -46,6 +46,7 @@ public class AudioChatMessageParser {
      * @return
      */
     public void parseAudioChatMessage(String message) {
+        Log.d(TAG, "parseAudioChatMessage() called with: message = [" + message + "]");
         AudioChatMessage chatMessage = gson.fromJson(message, AudioChatMessage.class);
         if (chatMessage.cmd == 3) {
             updateASRChatMessage(chatMessage);
@@ -157,7 +158,7 @@ public class AudioChatMessageParser {
             rtcRoomMessages.add(newMessage);
         }
 
-        return rtcRoomMessages.stream().sorted(Comparator.comparingInt(message -> message.seqId))
+        return rtcRoomMessages.stream().sorted(Comparator.comparingLong(message -> message.seqId))
             .map(message -> message.data.text != null ? message.data.text : "").collect(Collectors.joining());
     }
 
@@ -200,9 +201,9 @@ public class AudioChatMessageParser {
         @SerializedName(value = "Timestamp", alternate = "timestamp")
         public long timestamp;
         @SerializedName(value = "SeqId", alternate = "seq_id")
-        public int seqId;
+        public long seqId;
         @SerializedName(value = "Round", alternate = "round")
-        public int round;
+        public long round;
         @SerializedName(value = "Cmd", alternate = "cmd")
         public int cmd;
         @SerializedName(value = "Data", alternate = "data")
