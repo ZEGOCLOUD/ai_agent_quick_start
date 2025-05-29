@@ -107,7 +107,7 @@
     android:layout_height="wrap_content"
     android:layout_marginStart="16dp"
     android:layout_marginTop="16dp"
-    android:text="注意：\n1.同一个AppID 内，需保证 “userID 全局唯一，否则会互踢。 \n2.请现在服务端创建对呀的智能体，并在Call时同步创建智能体实例。"
+    android:text="Note: \n1. Within the same AppID, ensure that the userID is globally unique; otherwise, users will be kicked off mutually. \n2. Please create the intelligent agent on the server first."
     android:textSize="12sp"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/login_room" />
