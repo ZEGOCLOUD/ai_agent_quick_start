@@ -95,15 +95,15 @@ public class MainActivity extends AppCompatActivity {
                 if (isGranted) {
                     if (login) {
                         showLoading(true);
-                        loadingText.setText("正在退出");
+                        loadingText.setText("Logout");
                         stop();
                     } else {
                         showLoading(true);
-                        loadingText.setText("正在登录");
+                        loadingText.setText("Login");
                         requestZegoToken();
                     }
                 } else {
-                    Toast.makeText(MainActivity.this, "请先开启录音权限", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "please enable audio permission", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
                             updateUI();
                         } else {
                             ZegoExpressEngine.getEngine().logoutRoom();
-                            resetUI("start 失败");
+                            resetUI("start failed");
                         }
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     System.err.println("Request failed with status: " + response.code());
                     ZegoExpressEngine.getEngine().logoutRoom();
-                    resetUI("start 失败");
+                    resetUI("start failed");
                 }
 
             }
@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 System.err.println("Request failed: " + e.getMessage());
-                resetUI("获取token失败");
+                resetUI("get token failed");
             }
 
             @Override
@@ -254,20 +254,20 @@ public class MainActivity extends AppCompatActivity {
                                     if (errorCode == 0) {
                                         start();
                                     } else {
-                                        resetUI("加入房间失败");
+                                        resetUI("join room failed");
                                     }
                                 }
                             });
 
                         } else {
-                            resetUI("获取token失败");
+                            resetUI("get token failed");
                         }
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
                 } else {
                     System.err.println("Request failed with status: " + response.code());
-                    resetUI("获取token失败");
+                    resetUI("get token failed");
                 }
 
             }
