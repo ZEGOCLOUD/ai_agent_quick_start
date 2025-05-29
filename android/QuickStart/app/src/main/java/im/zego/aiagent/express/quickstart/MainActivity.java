@@ -95,11 +95,11 @@ public class MainActivity extends AppCompatActivity {
                 if (isGranted) {
                     if (login) {
                         showLoading(true);
-                        loadingText.setText("logout");
+                        loadingText.setText("Logout");
                         stop();
                     } else {
                         showLoading(true);
-                        loadingText.setText("login");
+                        loadingText.setText("Login");
                         requestZegoToken();
                     }
                 } else {
@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 System.err.println("Request failed: " + e.getMessage());
-                resetUI("获取token失败");
+                resetUI("get token failed");
             }
 
             @Override
@@ -267,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     System.err.println("Request failed with status: " + response.code());
-                    resetUI("gei token failed");
+                    resetUI("get token failed");
                 }
 
             }
