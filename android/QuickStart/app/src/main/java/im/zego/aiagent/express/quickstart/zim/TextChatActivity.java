@@ -54,7 +54,7 @@ public class TextChatActivity extends AppCompatActivity {
 
         loadingText = findViewById(R.id.loading_text);
         showLoading(true);
-        loadingText.setText("正在登录...");
+        loadingText.setText("Login...");
 
         ZIMAppConfig zimAppConfig = new ZIMAppConfig();
         zimAppConfig.appID = Constant.appId;
@@ -119,7 +119,7 @@ public class TextChatActivity extends AppCompatActivity {
         findViewById(R.id.send_text).setOnClickListener(v -> {
             String string = chatText.getText().toString();
             if (TextUtils.isEmpty(string)) {
-                Toast.makeText(TextChatActivity.this, "请输入文本", Toast.LENGTH_SHORT).show();
+                Toast.makeText(TextChatActivity.this, "Please input text", Toast.LENGTH_SHORT).show();
                 return;
             }
             ZIMTextMessage zimMessage = new ZIMTextMessage();
