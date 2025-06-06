@@ -101,45 +101,62 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
 }
 
 - (void)startCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
-    [self initZegoExpressEngine];
-    
     __weak typeof(self) weakSelf = self;
-    [self loginRoom:^(int errorCode, NSDictionary *extendedData) {
+    
+    // 先创建Agent实例
+    [self doStartCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) { return; }
         
-        if (errorCode!=0) {
-            NSString* errorMsg =[NSString stringWithFormat:@"进入语音房间失败:%d", errorCode];
-            completion(NO, errorMsg);
+        if (response.code != 0) {
+            if (completion) {
+                completion(NO, response.message ?: @"创建Agent实例失败");
+            }
             return;
         }
         
-        /**下面用来做应答延迟优化的，需要集成对应版本的ZegoExpressEngine sdk，请联系即构同学**/
-        NSString *params_publish = @"{\"method\":\"liveroom.audio.set_publish_latency_mode\",\"params\":{\"mode\":1,\"channel\":0}}";
-        [[ZegoExpressEngine sharedEngine] callExperimentalAPI:params_publish];
-        //进房后开始推流
-        [strongSelf startPushlishStream];
+        // 创建Agent实例成功后，初始化RTC引擎
+        [strongSelf initZegoExpressEngine];
         
-        // 创建Agent实例
-        [strongSelf doStartCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
-            if (response.code == 0) {
-                if (completion) {
-                    completion(YES, nil);
-                }
-            } else {
-                if (completion) {
-                    completion(NO, response.message ?: @"创建Agent实例失败");
-                }
+        // 登录房间
+        [strongSelf loginRoom:^(int errorCode, NSDictionary *extendedData) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) { return; }
+            
+            if (errorCode != 0) {
+                NSString* errorMsg = [NSString stringWithFormat:@"进入语音房间失败:%d", errorCode];
+                completion(NO, errorMsg);
+                return;
+            }
+            
+            /**下面用来做应答延迟优化的，需要集成对应版本的ZegoExpressEngine sdk，请联系即构同学**/
+            NSString *params_publish = @"{\"method\":\"liveroom.audio.set_publish_latency_mode\",\"params\":{\"mode\":1,\"channel\":0}}";
+            [[ZegoExpressEngine sharedEngine] callExperimentalAPI:params_publish];
+            
+            // 进房后开始推流
+            [strongSelf startPushlishStream];
+            
+            // 开始播放Agent的流
+            [strongSelf startPlayStream:strongSelf.agentStreamId];
+            
+            if (completion) {
+                completion(YES, nil);
             }
         }];
     }];
 }
 
 - (void)stopCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
-    [self unInitZegoExpressEngine];
+    __weak typeof(self) weakSelf = self;
     
-    // 停止聊天
+    // 先停止聊天
     [self doStopCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) { return; }
+        
+        // 无论停止聊天是否成功，都释放RTC资源
+        [strongSelf unInitZegoExpressEngine];
+        
         if (response.code == 0) {
             if (completion) {
                 completion(YES, nil);
@@ -191,10 +208,6 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
     
     ZegoEngineConfig* engineConfig = [[ZegoEngineConfig alloc] init];
     engineConfig.advancedConfig = @{
-        @"set_audio_dump_mode":@1,//取消录制文件大小限制
-        @"notify_remote_device_unknown_status": @"true",
-        @"notify_remote_device_init_status":@"true",
-        @"enforce_audio_loopback_in_sync": @"true", /**该配置用来做应答延迟优化的，需要集成对应版本的ZegoExpressEngine sdk，请联系即构同学**/
         @"set_audio_volume_ducking_mode":@1,/**该配置是用来做音量闪避的**/
         @"enable_rnd_volume_adaptive":@"true",/**该配置是用来做播放音量自适用**/
     };
@@ -239,11 +252,11 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
     NSLog(@"启用AGC（自动增益控制）");
     [[ZegoExpressEngine sharedEngine] enableAGC:TRUE];
     
-    NSLog(@"启用AEC（回声消除），模式：ZegoAECModeAIAggressive");
+    NSLog(@"启用AEC（回声消除），模式：ZegoAECModeAIAggressive2");
     [[ZegoExpressEngine sharedEngine] enableAEC:TRUE];
     [[ZegoExpressEngine sharedEngine] setAECMode:ZegoAECModeAIAggressive2];
     
-    NSLog(@"启用ANS（噪声抑制），模式：ZegoANSModeAggressive");
+    NSLog(@"启用ANS（噪声抑制），模式：ZegoANSModeMedium");
     [[ZegoExpressEngine sharedEngine] enableANS:TRUE];
     [[ZegoExpressEngine sharedEngine] setANSMode:ZegoANSModeMedium];
 }
@@ -332,32 +345,6 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
 }
 
 #pragma mark - delegate ZegoEventHandler
-//监听房间流信息更新状态，调用智能体流播放
-- (void)onRoomStreamUpdate:(ZegoUpdateType)updateType
-                streamList:(NSArray<ZegoStream *> *)streamList
-              extendedData:(nullable NSDictionary *)extendedData
-                    roomID:(NSString *)roomID{
-    NSLog(@"房间流更新: roomID=%@, 更新类型=%@, 流数量=%lu", roomID, updateType == ZegoUpdateTypeAdd ? @"新增" : @"移除", (unsigned long)streamList.count);
-    
-    if (updateType == ZegoUpdateTypeAdd) {
-        for (int i=0; i<streamList.count; i++) {
-            ZegoStream* item = [streamList objectAtIndex:i];
-            NSLog(@"检测到新增流: streamID=%@, 用户=%@", item.streamID, item.user.userID);
-            
-            if ([item.streamID isEqualToString: self.agentStreamId]) {
-                NSLog(@"匹配到目标流，准备播放: streamID=%@", self.agentStreamId);
-                [self startPlayStream:self.agentStreamId];
-                break;
-            }
-        }
-    } else if(updateType == ZegoUpdateTypeDelete) {
-        for (int i=0; i<streamList.count; i++) {
-            ZegoStream* item = [streamList objectAtIndex:i];
-            NSLog(@"检测到移除流: streamID=%@, 正在停止播放", item.streamID);
-            [[ZegoExpressEngine sharedEngine] stopPlayingStream:item.streamID];
-        }
-    }
-}
 
 //2. RTC房间事件消息协议
 //实时音视频 服务端 API 推送自定义消息 - 开发者中心 - ZEGO即构科技

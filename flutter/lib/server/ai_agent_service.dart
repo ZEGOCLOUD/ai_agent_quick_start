@@ -107,6 +107,16 @@ class ZegoAIAgentService {
   Future<bool> startCall() async {
     debugPrint('开始启动AI会话...');
 
+    /// 通知业务后台开始通话
+    debugPrint('通知业务后台开始通话...');
+    final url = '$_currentBaseUrl/api/start';
+    final response = await HttpUtil.post(url, fromJson: (json) => json);
+    if (!response.isSuccess) {
+      debugPrint('通知业务后台开始通话失败: ${response.message}');
+      return false;
+    }
+    debugPrint('通知业务后台开始通话成功');
+
     /// 获取Token
     final token = await getToken();
     if (token.isEmpty) {
@@ -178,19 +188,8 @@ class ZegoAIAgentService {
       await ZegoExpressEngine.instance.startPublishingStream(_userStreamId);
       debugPrint('推流启动成功');
 
-      /// 通知后台创建Agent实例（HTTP /api/start）
-      debugPrint('开始创建Agent实例...');
-      final url = '$_currentBaseUrl/api/start';
-      final response = await HttpUtil.post(url, fromJson: (json) => json);
-      if (!response.isSuccess) {
-        debugPrint('创建Agent实例失败: ${response.message}');
-        return false;
-      }
-      debugPrint('Agent实例创建成功');
-
       /// 拉流（播放AI语音）
       debugPrint('开始拉流$_agentStreamId...');
-
       if (kIsWeb) {
         await ZegoExpressEngine.instance.createCanvasView((viewID) {
           ZegoCanvas canvas = ZegoCanvas.view(viewID);
@@ -219,6 +218,17 @@ class ZegoAIAgentService {
   /// 停止与AI智能体的会话
   Future<bool> stopCall() async {
     debugPrint('开始停止AI会话...');
+
+    /// 通知业务后台停止通话
+    debugPrint('通知业务后台停止通话...');
+    final url = '$_currentBaseUrl/api/stop';
+    final response = await HttpUtil.post(url, fromJson: (json) => json);
+    if (!response.isSuccess) {
+      debugPrint('通知业务后台停止通话失败: ${response.message}');
+    } else {
+      debugPrint('通知业务后台停止通话成功');
+    }
+
     try {
       final engine = ZegoExpressEngine.instance;
 
@@ -237,15 +247,6 @@ class ZegoAIAgentService {
       await engine.logoutRoom(_roomId);
       debugPrint('房间已登出');
 
-      /// 通知后台停止Agent实例（HTTP /api/stop）
-      debugPrint('通知后台停止Agent实例...');
-      final url = '$_currentBaseUrl/api/stop';
-      final response = await HttpUtil.post(url, fromJson: (json) => json);
-      if (!response.isSuccess) {
-        debugPrint('停止Agent实例失败: ${response.message}');
-        return false;
-      }
-      debugPrint('Agent实例已停止');
       debugPrint('AI会话停止完成');
       return true;
     } catch (e, stackTrace) {
