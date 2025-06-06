@@ -1,0 +1,5 @@
+/// ZEGO密钥和配置参数管理类，参考iOS的ZegoKey.h/m
+class ZegoKey {
+  /// ZEGO分配的应用ID，用于身份认证
+  static const int appId = ; // TODO: 替换为你的AppId
+}
