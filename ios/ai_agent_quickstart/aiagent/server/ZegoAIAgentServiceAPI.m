@@ -87,45 +87,62 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 }
 
 - (void)startCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
-    [self initZegoExpressEngine];
-    
     __weak typeof(self) weakSelf = self;
-    [self loginRoom:^(int errorCode, NSDictionary *extendedData) {
+    
+    // 先创建Agent实例
+    [self doStartCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) { return; }
         
-        if (errorCode!=0) {
-            NSString* errorMsg =[NSString stringWithFormat:@"进入语音房间失败:%d", errorCode];
-            completion(NO, errorMsg);
+        if (response.code != 0) {
+            if (completion) {
+                completion(NO, response.message ?: @"创建Agent实例失败");
+            }
             return;
         }
         
-        /**下面用来做应答延迟优化的，需要集成对应版本的ZegoExpressEngine sdk，请联系即构同学**/
-        NSString *params_publish = @"{\"method\":\"liveroom.audio.set_publish_latency_mode\",\"params\":{\"mode\":1,\"channel\":0}}";
-        [[ZegoExpressEngine sharedEngine] callExperimentalAPI:params_publish];
-        //进房后开始推流
-        [strongSelf startPushlishStream];
+        // 创建Agent实例成功后，初始化RTC引擎
+        [strongSelf initZegoExpressEngine];
         
-        // 创建Agent实例
-        [strongSelf doStartCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
-            if (response.code == 0) {
-                if (completion) {
-                    completion(YES, nil);
-                }
-            } else {
-                if (completion) {
-                    completion(NO, response.message ?: @"创建Agent实例失败");
-                }
+        // 登录房间
+        [strongSelf loginRoom:^(int errorCode, NSDictionary *extendedData) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) { return; }
+            
+            if (errorCode != 0) {
+                NSString* errorMsg = [NSString stringWithFormat:@"进入语音房间失败:%d", errorCode];
+                completion(NO, errorMsg);
+                return;
+            }
+            
+            /**下面用来做应答延迟优化的，需要集成对应版本的ZegoExpressEngine sdk，请联系即构同学**/
+            NSString *params_publish = @"{\"method\":\"liveroom.audio.set_publish_latency_mode\",\"params\":{\"mode\":1,\"channel\":0}}";
+            [[ZegoExpressEngine sharedEngine] callExperimentalAPI:params_publish];
+            
+            // 进房后开始推流
+            [strongSelf startPushlishStream];
+            
+            // 开始播放Agent的流
+            [strongSelf startPlayStream:strongSelf.agentStreamId];
+            
+            if (completion) {
+                completion(YES, nil);
             }
         }];
     }];
 }
 
 - (void)stopCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
-    [self unInitZegoExpressEngine];
+    __weak typeof(self) weakSelf = self;
     
-    // 停止聊天
+    // 先停止聊天
     [self doStopCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) { return; }
+        
+        // 无论停止聊天是否成功，都释放RTC资源
+        [strongSelf unInitZegoExpressEngine];
+        
         if (response.code == 0) {
             if (completion) {
                 completion(YES, nil);
@@ -177,10 +194,6 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
     
     ZegoEngineConfig* engineConfig = [[ZegoEngineConfig alloc] init];
     engineConfig.advancedConfig = @{
-        @"set_audio_dump_mode":@1,//取消录制文件大小限制
-        @"notify_remote_device_unknown_status": @"true",
-        @"notify_remote_device_init_status":@"true",
-        @"enforce_audio_loopback_in_sync": @"true", /**该配置用来做应答延迟优化的，需要集成对应版本的ZegoExpressEngine sdk，请联系即构同学**/
         @"set_audio_volume_ducking_mode":@1,/**该配置是用来做音量闪避的**/
         @"enable_rnd_volume_adaptive":@"true",/**该配置是用来做播放音量自适用**/
     };
