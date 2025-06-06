@@ -132,7 +132,7 @@
 
     // 提示
     self.tipLabel = [[UILabel alloc] init];
-    self.tipLabel.text = @"Note:\n1.Within the same AppID, ensure "userID" is globally unique, otherwise users will be kicked out.\n2.Please create the corresponding agent on the server first, and create the agent instance synchronously during Call.";
+    self.tipLabel.text = @"Note:\n1.Within the same AppID, ensure 'userID' is globally unique, otherwise users will be kicked out.\n2.Please create the corresponding agent on the server first, and create the agent instance synchronously during Call.";
     self.tipLabel.font = [UIFont systemFontOfSize:14];
     self.tipLabel.textColor = [UIColor darkGrayColor];
     self.tipLabel.numberOfLines = 0;
@@ -188,7 +188,7 @@
 
     [self requestAudioPermission:^(BOOL granted) {
         if (!granted) {
-            [self showToast:@"未获得音频权限"];
+            [self showToast:@"No audio permission granted"];
             [self.loadingIndicator stopAnimating];
             self.logoutButton.enabled = YES;
             return;
@@ -206,7 +206,7 @@
                 [strongSelf.logoutButton setTitle:@"LogoutRoom" forState:UIControlStateNormal];
                 strongSelf.logoutButton.backgroundColor = [UIColor colorWithRed:0.9 green:0.4 blue:0.4 alpha:1];
             } else {
-                [strongSelf showToast:[NSString stringWithFormat:@"音频聊天开始失败：%@", errorMessage]];
+                [strongSelf showToast:[NSString stringWithFormat:@"Failed to start audio chat: %@", errorMessage]];
             }
         }];
     }];
@@ -244,7 +244,7 @@
         strongSelf.isLoggedIn = NO;
 
         if (!success) {
-            [strongSelf showToast:[NSString stringWithFormat:@"音频聊天停止失败：%@", errorMessage]];
+            [strongSelf showToast:[NSString stringWithFormat:@"Failed to stop audio chat: %@", errorMessage]];
         }
 
         if (completion) {

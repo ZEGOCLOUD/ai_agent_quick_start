@@ -76,7 +76,7 @@
 
     // 语音聊天按钮
     UIButton *audioChatButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [audioChatButton setTitle:@"语音" forState:UIControlStateNormal];
+    [audioChatButton setTitle:@"Voice" forState:UIControlStateNormal];
     [audioChatButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [audioChatButton addTarget:self action:@selector(audioChatButtonClicked) forControlEvents:UIControlEventTouchUpInside];
     audioChatButton.translatesAutoresizingMaskIntoConstraints = NO;
@@ -113,7 +113,7 @@
 
     // 发送按钮样式优化
     self.sendButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [self.sendButton setTitle:@"发送" forState:UIControlStateNormal];
+    [self.sendButton setTitle:@"Send" forState:UIControlStateNormal];
     [self.sendButton setTitleColor:[UIColor systemBlueColor] forState:UIControlStateNormal];
     [self.sendButton setTitleColor:[[UIColor systemBlueColor] colorWithAlphaComponent:0.6] forState:UIControlStateHighlighted];
     self.sendButton.titleLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
@@ -207,12 +207,12 @@
         // 使用用户ID登录
         [strongSelf.zim loginWithUserID:[[ZegoAIAgentServiceAPI sharedInstance] getUserId] config:config callback:^(ZIMError * _Nonnull errorInfo) {
             if (errorInfo.code == 0) {
-                NSLog(@"ZIM登录成功，用户ID: %@", [[ZegoAIAgentServiceAPI sharedInstance] getUserId]);
+                NSLog(@"ZIM login successful, userID: %@", [[ZegoAIAgentServiceAPI sharedInstance] getUserId]);
 
                 [self fetchHistoryMessagesIfNeeded];
             } else {
-                NSLog(@"ZIM登录失败：%@", errorInfo.message);
-                [strongSelf showToast:[NSString stringWithFormat:@"ZIM登录失败：%@", errorInfo.message]];
+                NSLog(@"ZIM login failed: %@", errorInfo.message);
+                [strongSelf showToast:[NSString stringWithFormat:@"ZIM login failed: %@", errorInfo.message]];
             }
         }];
     }];
@@ -257,10 +257,10 @@
             notification:notification
                callback:^(ZIMMessage * _Nonnull message, ZIMError * _Nonnull errorInfo) {
         if (errorInfo.code == 0) {
-            NSLog(@"消息发送成功");
+            NSLog(@"Message sent successfully");
         } else {
-            NSLog(@"消息发送失败：%@", errorInfo.message);
-            [self showToast:[NSString stringWithFormat:@"消息发送失败：%@", errorInfo.message]];
+            NSLog(@"Failed to send message: %@", errorInfo.message);
+            [self showToast:[NSString stringWithFormat:@"Failed to send message: %@", errorInfo.message]];
         }
     }];
 }
@@ -376,11 +376,11 @@
 }
 
 - (void)zim:(ZIM *)zim peerMessageReceived:(NSArray<ZIMMessage *> *)messageList info:(ZIMMessageReceivedInfo *)info fromUserID:(NSString *)fromUserID {
-    NSLog(@"收到单聊消息 - 发送者ID: %@, 消息数量: %lu, 消息详情:", fromUserID, (unsigned long)messageList.count);
+    NSLog(@"Received peer message - Sender ID: %@, Message count: %lu, Message details:", fromUserID, (unsigned long)messageList.count);
     for (ZIMMessage *message in messageList) {
         if ([message isKindOfClass:[ZIMTextMessage class]]) {
             ZIMTextMessage *textMessage = (ZIMTextMessage *)message;
-            NSLog(@"消息ID: %lld, 发送时间: %llu, 消息内容: %@", textMessage.messageID, textMessage.timestamp, textMessage.message);
+            NSLog(@"Message ID: %lld, Send time: %llu, Message content: %@", textMessage.messageID, textMessage.timestamp, textMessage.message);
         }
     }
 
@@ -604,7 +604,7 @@
                 [self scrollToBottom];
             });
         } else {
-            NSLog(@"拉取历史消息失败: %@", errorInfo.message);
+            NSLog(@"Failed to fetch history messages: %@", errorInfo.message);
         }
     }];
 }
