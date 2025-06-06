@@ -43,7 +43,7 @@ lib/
 ```mermaid
 sequenceDiagram
     participant User as 用户
-    participant AudioPage as AudioChatPage
+    participant AudioPage as ZegoAudioPage
     participant Service as ZegoAIAgentService
     participant BusinessServer as 业务后台服务
     participant PassServer as AI服务
@@ -80,7 +80,7 @@ sequenceDiagram
 
 提供与 ZEGO AI 服务交互的接口，包括初始化、创建智能体实例、开始聊天和结束聊天。负责管理 Token 获取和缓存、房间管理、音视频流控制等功能。
 
-### 2. AudioChatPage
+### 2. ZegoAudioPage
 
 音频对话主界面，负责处理用户交互、权限请求和音频流程管理。应用启动后直接进入本界面。
 
