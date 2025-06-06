@@ -127,7 +127,7 @@
 
     // 提示
     self.tipLabel = [[UILabel alloc] init];
-    self.tipLabel.text = @"注意：\n1.同一个AppID 内，需保证 “userID 全局唯一，否则会互踢。 \n2.请现在服务端创建对呀的智能体，并在Call时同步创建智能体实例。";
+    self.tipLabel.text = @"Note:\n1.Within the same AppID, ensure \"userID\" is globally unique, otherwise users will be kicked out.\n2.Please create the corresponding agent on the server first, and create the agent instance synchronously during Call.";
     self.tipLabel.font = [UIFont systemFontOfSize:14];
     self.tipLabel.textColor = [UIColor darkGrayColor];
     self.tipLabel.numberOfLines = 0;
@@ -190,7 +190,7 @@
     
     [self requestAudioPermission:^(BOOL granted) {
         if (!granted) {
-            [self showToast:@"未获得音频权限"];
+            [self showToast:@"No audio permission granted"];
             self.loginLogoutButton.enabled = YES;
             [self.loginLogoutLoading stopAnimating];
             return;
@@ -206,7 +206,7 @@
                 [strongSelf.loginLogoutButton setTitle:@"LogoutRoom" forState:UIControlStateNormal];
                 strongSelf.loginLogoutButton.backgroundColor = [UIColor colorWithRed:0.9 green:0.4 blue:0.4 alpha:1];
             } else {
-                [strongSelf showToast:[NSString stringWithFormat:@"音频聊天开始失败：%@", errorMessage]];
+                [strongSelf showToast:[NSString stringWithFormat:@"Failed to start audio chat: %@", errorMessage]];
             }
         }];
     }];
@@ -224,7 +224,7 @@
         [strongSelf.loginLogoutButton setTitle:@"LoginRoom" forState:UIControlStateNormal];
         strongSelf.loginLogoutButton.backgroundColor = [UIColor colorWithRed:0.6 green:0.95 blue:0.2 alpha:1];
         if (!success) {
-            [strongSelf showToast:[NSString stringWithFormat:@"音频聊天停止失败：%@", errorMessage]];
+            [strongSelf showToast:[NSString stringWithFormat:@"Failed to stop audio chat: %@", errorMessage]];
         }
     }];
 }
