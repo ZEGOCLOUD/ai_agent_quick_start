@@ -132,7 +132,7 @@
 
     // 提示
     self.tipLabel = [[UILabel alloc] init];
-    self.tipLabel.text = @"注意：\n1.同一个AppID 内，需保证 “userID 全局唯一，否则会互踢。 \n2.请现在服务端创建对呀的智能体，并在Call时同步创建智能体实例。";
+    self.tipLabel.text = @"Note:\n1.Within the same AppID, ensure "userID" is globally unique, otherwise users will be kicked out.\n2.Please create the corresponding agent on the server first, and create the agent instance synchronously during Call.";
     self.tipLabel.font = [UIFont systemFontOfSize:14];
     self.tipLabel.textColor = [UIColor darkGrayColor];
     self.tipLabel.numberOfLines = 0;

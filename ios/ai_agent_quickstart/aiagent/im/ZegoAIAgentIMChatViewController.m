@@ -91,9 +91,9 @@
 
     // 输入框样式优化
     self.inputTextField = [[UITextField alloc] init];
-    self.inputTextField.placeholder = @"随便问...";
+    self.inputTextField.placeholder = @"Ask anything...";
     self.inputTextField.attributedPlaceholder = [[NSAttributedString alloc]
-        initWithString:@"随便问..."
+        initWithString:@"Ask anything...."
         attributes:@{
             NSForegroundColorAttributeName: [UIColor colorWithWhite:0.6 alpha:1.0]  // 灰色占位符
         }];
