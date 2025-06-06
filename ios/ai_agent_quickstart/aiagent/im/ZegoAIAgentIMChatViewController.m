@@ -388,11 +388,11 @@
         // 将新消息添加到现有消息数组中
         [self.messages addObjectsFromArray:messageList];
 
-        // 根据时间戳对所有消息进行排序
+        // 根据orderKey对所有消息进行排序
         [self.messages sortUsingComparator:^NSComparisonResult(ZIMMessage *msg1, ZIMMessage *msg2) {
-            if (msg1.timestamp < msg2.timestamp) {
+            if (msg1.orderKey < msg2.orderKey) {
                 return NSOrderedAscending;
-            } else if (msg1.timestamp > msg2.timestamp) {
+            } else if (msg1.orderKey > msg2.orderKey) {
                 return NSOrderedDescending;
             }
             return NSOrderedSame;
