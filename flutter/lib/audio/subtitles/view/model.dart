@@ -21,7 +21,7 @@ class ZegoSubtitlesViewModel {
   final ValueNotifier<List<ZegoSubtitlesMessageModel>> historyNotifier =
       ValueNotifier([]);
 
-  /// 处理ASR消息（与iOS TableView一致）
+  /// 处理ASR消息
   void handleRecvAsrMessage(ZegoSubtitlesMessageProtocol message) {
     final asr = message.asrTextData;
     if (asr == null || asr.text.isEmpty) {

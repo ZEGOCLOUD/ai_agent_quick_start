@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'audio/page.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  Permission.microphone.request().then((status) {
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
