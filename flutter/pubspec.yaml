@@ -11,14 +11,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-  zego_express_engine: ^3.20.5
-  zego_zim: 2.20.0-custom3314
+  zego_express_engine:
+    path: 3rdparty/zego_express_engine
 
   permission_handler: ^11.3.0
   cupertino_icons: ^1.0.2
-  provider: ^6.0.5
-  shared_preferences: ^2.5.3
-  flutter_svg: ^2.1.0
   http: ^1.4.0
 
 dev_dependencies:
