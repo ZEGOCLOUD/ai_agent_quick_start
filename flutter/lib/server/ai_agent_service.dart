@@ -57,12 +57,15 @@ class ZegoAIAgentService {
 
     ZegoExpressEngine.onRecvExperimentalAPI = _onRecvExperimentalAPI;
     ZegoExpressEngine.onPlayerStateUpdate = _onPlayerStateUpdate;
+    ZegoExpressEngine.onRoomStreamUpdate = _onRoomStreamUpdate;
   }
 
   Future<void> uninit() async {
     webVideoWidgetNotifier.value = null;
 
     ZegoExpressEngine.onRecvExperimentalAPI = null;
+    ZegoExpressEngine.onPlayerStateUpdate = null;
+    ZegoExpressEngine.onRoomStreamUpdate = null;
 
     /// 销毁引擎
     await ZegoExpressEngine.destroyEngine();
@@ -131,7 +134,12 @@ class ZegoAIAgentService {
       /// 下面用来做应答延迟优化的，需要集成对应版本的ZegoExpressEngine sdk，请联系即构同学
       ZegoExpressEngine.setEngineConfig(
         ZegoEngineConfig(
-          advancedConfig: {'enforce_audio_loopback_in_sync': 'true'},
+          advancedConfig: {
+            /**该配置是用来做音量闪避的**/
+            'set_audio_volume_ducking_mode': '1',
+            /**该配置是用来做播放音量自适用**/
+            'enable_rnd_volume_adaptive': 'true'
+          },
         ),
       );
       debugPrint('引擎配置完成');
@@ -152,6 +160,7 @@ class ZegoAIAgentService {
 
       /// 启用AEC（回声消除）
       ZegoExpressEngine.instance.enableAEC(true);
+      ZegoExpressEngine.instance.setAECMode(ZegoAECMode.AIAggressive2);
       debugPrint('AEC已启用');
 
       /// 启用ANS（噪声抑制）
@@ -272,5 +281,20 @@ class ZegoAIAgentService {
         'state:$state, '
         'errorCode:$errorCode, '
         'extendedData:$extendedData');
+  }
+
+  void _onRoomStreamUpdate(
+    String roomID,
+    ZegoUpdateType updateType,
+    List<ZegoStream> streamList,
+    Map<String, dynamic> extendedData,
+  ) {
+    debugPrint('onRoomStreamUpdate, roomID:$roomID, update type:$updateType'
+        ", stream list:${streamList.map((e) => 'ZegoStreamExtension{'
+            'user:(${e.user.userID},${e.user.userName}), '
+            'streamID:${e.streamID}, '
+            'extraInfo:${e.extraInfo}, '
+            '}')},"
+        ' extended data:$extendedData');
   }
 }
