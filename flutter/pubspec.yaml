@@ -13,6 +13,7 @@ dependencies:
 
   zego_express_engine:
     path: 3rdparty/zego_express_engine
+  zego_zim: 2.20.0-custom3314
 
   permission_handler: ^11.3.0
   cupertino_icons: ^1.0.2
