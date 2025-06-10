@@ -25,7 +25,7 @@ class ZegoAIAgentService {
   final String _agentId = 'ai_agent_example_1';
   final String _agentUserId = 'agent_user_id_1';
   final String _agentName = '李浩然';
-  final String _agentRobotId = '@RBT#19574_xiaozhi_019670818747';
+  final String _agentRobotId = '@RBT#AIAgentExample1';
   final String _agentStreamId = 'agent_stream_id_1';
 
   /// 添加token缓存相关字段
