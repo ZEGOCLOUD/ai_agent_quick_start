@@ -144,13 +144,6 @@ class ZegoAIAgentService {
       );
       debugPrint('引擎配置完成');
 
-      /// 这个设置只影响AEC（回声消除），我们这里设置为ModeGeneral，是会走我们自研的回声消除，这比较可控，
-      /// 如果其他选项，可能会走系统的回声消除，这在iphone手机上效果可能会更好，但如果在一些android机上效果可能不好
-      ZegoExpressEngine.instance.setAudioDeviceMode(
-        ZegoAudioDeviceMode.General,
-      );
-      debugPrint('音频设备模式设置完成');
-
       /// 启用3A
       debugPrint('开始配置3A...');
 
@@ -160,12 +153,24 @@ class ZegoAIAgentService {
 
       /// 启用AEC（回声消除）
       ZegoExpressEngine.instance.enableAEC(true);
-      ZegoExpressEngine.instance.setAECMode(ZegoAECMode.AIAggressive2);
+      if (!kIsWeb) {
+        /// TODO: web尚未实现
+        // ZegoExpressEngine.instance.setAECMode(ZegoAECMode.AIAggressive2);
+
+        /// 这个设置只影响AEC（回声消除），我们这里设置为Mode General，是会走我们自研的回声消除，这比较可控，
+        /// 如果其他选项，可能会走系统的回声消除，这在iphone手机上效果可能会更好，但如果在一些android机上效果可能不好
+        ZegoExpressEngine.instance.setAudioDeviceMode(
+          ZegoAudioDeviceMode.General,
+        );
+      }
       debugPrint('AEC已启用');
 
       /// 启用ANS（噪声抑制）
       ZegoExpressEngine.instance.enableANS(true);
-      ZegoExpressEngine.instance.setANSMode(ZegoANSMode.Medium);
+      if (!kIsWeb) {
+        /// TODO: web尚未实现
+        ZegoExpressEngine.instance.setANSMode(ZegoANSMode.Medium);
+      }
       debugPrint('ANS已启用');
 
       /// 登录房间

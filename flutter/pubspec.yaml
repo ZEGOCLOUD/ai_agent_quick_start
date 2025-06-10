@@ -11,6 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # web请使用pub.dev版本，本地版本的web实现需要后续替换
+#  zego_express_engine: ^3.20.5
+  # 原生端请使用本地版本
   zego_express_engine:
     path: 3rdparty/zego_express_engine
 
