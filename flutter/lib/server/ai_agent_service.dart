@@ -34,9 +34,6 @@ class ZegoAIAgentService {
   /// 存储毫秒时间戳
   double? _tokenExpireTime;
 
-  /// TODO: 待删除，用来修复web音频失败问题，使用视频拉流方式
-  ValueNotifier<Widget?> webVideoWidgetNotifier = ValueNotifier<Widget?>(null);
-
   String getAgentUserId() => _agentUserId;
   String getAgentName() => _agentName;
   String getAgentRobotId() => _agentRobotId;
@@ -49,20 +46,12 @@ class ZegoAIAgentService {
       ZegoEngineProfile(ZegoKey.appId, ZegoScenario.HighQualityChatroom),
     );
 
-    if (kIsWeb) {
-      /// express web有bug，需要设置这个，否则会请求摄像头权限
-      ZegoExpressEngine.instance
-          .setRoomScenario(ZegoScenario.HighQualityChatroom);
-    }
-
     ZegoExpressEngine.onRecvExperimentalAPI = _onRecvExperimentalAPI;
     ZegoExpressEngine.onPlayerStateUpdate = _onPlayerStateUpdate;
     ZegoExpressEngine.onRoomStreamUpdate = _onRoomStreamUpdate;
   }
 
   Future<void> uninit() async {
-    webVideoWidgetNotifier.value = null;
-
     ZegoExpressEngine.onRecvExperimentalAPI = null;
     ZegoExpressEngine.onPlayerStateUpdate = null;
     ZegoExpressEngine.onRoomStreamUpdate = null;
@@ -153,9 +142,9 @@ class ZegoAIAgentService {
 
       /// 启用AEC（回声消除）
       ZegoExpressEngine.instance.enableAEC(true);
+      ZegoExpressEngine.instance.setAECMode(ZegoAECMode.AIAggressive2);
       if (!kIsWeb) {
         /// TODO: web尚未实现
-        // ZegoExpressEngine.instance.setAECMode(ZegoAECMode.AIAggressive2);
 
         /// 这个设置只影响AEC（回声消除），我们这里设置为Mode General，是会走我们自研的回声消除，这比较可控，
         /// 如果其他选项，可能会走系统的回声消除，这在iphone手机上效果可能会更好，但如果在一些android机上效果可能不好
@@ -204,17 +193,7 @@ class ZegoAIAgentService {
 
       /// 拉流（播放AI语音）
       debugPrint('开始拉流$_agentStreamId...');
-      if (kIsWeb) {
-        await ZegoExpressEngine.instance.createCanvasView((viewID) {
-          ZegoCanvas canvas = ZegoCanvas.view(viewID);
-          ZegoExpressEngine.instance
-              .startPlayingStream(_agentStreamId, canvas: canvas);
-        }).then((Widget? widget) {
-          webVideoWidgetNotifier.value = widget;
-        });
-      } else {
-        await ZegoExpressEngine.instance.startPlayingStream(_agentStreamId);
-      }
+      await ZegoExpressEngine.instance.startPlayingStream(_agentStreamId);
       await ZegoExpressEngine.instance.callExperimentalAPI(
         '{"method":"liveroom.audio.set_play_latency_mode","params":{"mode":1,"stream_id":"$_agentStreamId"}}',
       );

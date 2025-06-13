@@ -82,7 +82,6 @@ class _ZegoAudioPageState extends State<ZegoAudioPage>
             roomId(),
             const SizedBox(height: 2),
             userInfos(),
-            webBug(),
             const SizedBox(height: 10),
             logoutButton(),
             const SizedBox(height: 10),
@@ -91,21 +90,6 @@ class _ZegoAudioPageState extends State<ZegoAudioPage>
             subtitles(),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget webBug() {
-    return Center(
-      child: ValueListenableBuilder(
-        valueListenable: aiAgentService.webVideoWidgetNotifier,
-        builder: (context, widget, _) {
-          return SizedBox(
-            width: 1,
-            height: 1,
-            child: widget ?? Container(),
-          );
-        },
       ),
     );
   }

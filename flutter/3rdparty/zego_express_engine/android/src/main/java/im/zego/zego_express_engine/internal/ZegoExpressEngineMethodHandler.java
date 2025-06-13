@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
+import im.zego.zego_express_engine.ZegoAudioMixingDataManager;
 import im.zego.zego_express_engine.ZegoCustomVideoCaptureManager;
 import im.zego.zego_express_engine.ZegoCustomVideoProcessManager;
 import im.zego.zego_express_engine.ZegoCustomVideoRenderManager;
@@ -158,6 +159,7 @@ import im.zego.zegoexpress.constants.ZegoRangeAudioListenMode;
 import im.zego.zegoexpress.constants.ZegoRoomTransparentMessageMode;
 import im.zego.zegoexpress.constants.ZegoRoomTransparentMessageType;
 import im.zego.zegoexpress.constants.ZegoRoomStreamListType;
+import im.zego.zegoexpress.constants.ZegoVolumeType;
 import im.zego.zegoexpress.entity.ZegoAccurateSeekConfig;
 import im.zego.zegoexpress.entity.ZegoAudioConfig;
 import im.zego.zegoexpress.entity.ZegoAudioEffectPlayConfig;
@@ -768,6 +770,7 @@ public class ZegoExpressEngineMethodHandler {
             config.forceSynchronousNetworkTime = ZegoUtils.intValue((Number)configMap.get("forceSynchronousNetworkTime"));
             config.streamCensorshipMode = ZegoStreamCensorshipMode.getZegoStreamCensorshipMode(ZegoUtils.intValue((Number)configMap.get("streamCensorshipMode")));
             config.codecNegotiationType = ZegoCapabilityNegotiationType.getZegoCapabilityNegotiationType(ZegoUtils.intValue((Number)configMap.get("codecNegotiationType")));
+            config.streamTitle = (String) configMap.get("streamTitle");
         }
 
         if (config != null) {
@@ -1525,8 +1528,20 @@ public class ZegoExpressEngineMethodHandler {
         HashMap<String, Object> backgroundMap = (HashMap<String, Object>) configMap.get("backgroundConfig");
         backgroundConfig.processType = ZegoBackgroundProcessType.getZegoBackgroundProcessType(ZegoUtils.intValue((Number) backgroundMap.get("processType")));
         backgroundConfig.color = (ZegoUtils.intValue((Number) backgroundMap.get("color")));
-        backgroundConfig.imageURL = (String) backgroundMap.get("imageURL");
-        backgroundConfig.videoURL = (String) backgroundMap.get("videoURL");
+        String imageURL = (String) backgroundMap.get("imageURL");
+        if (imageURL != null && imageURL.startsWith("flutter-asset://")) {
+            String processedURL = imageURL.replace("flutter-asset://", "asset:flutter_assets/");
+            ZegoLog.log("[enableVideoObjectSegmentation] Flutter asset prefix detected, origin URL: '%s', processed URL: '%s'", imageURL, processedURL);
+            imageURL = processedURL;
+        }
+        String videoURL = (String) backgroundMap.get("videoURL");
+        if (videoURL != null && videoURL.startsWith("flutter-asset://")) {
+            String processedURL = videoURL.replace("flutter-asset://", "asset:flutter_assets/");
+            ZegoLog.log("[enableVideoObjectSegmentation] Flutter asset prefix detected, origin URL: '%s', processed URL: '%s'", videoURL, processedURL);
+            videoURL = processedURL;
+        }
+        backgroundConfig.imageURL = imageURL;
+        backgroundConfig.videoURL = videoURL;
         backgroundConfig.blurLevel = ZegoBackgroundBlurLevel.getZegoBackgroundBlurLevel(ZegoUtils.intValue((Number) backgroundMap.get("blurLevel")));
 
         config.backgroundConfig = backgroundConfig;
@@ -3524,6 +3539,37 @@ public class ZegoExpressEngineMethodHandler {
 
         ZegoExpressEngine.getEngine().fetchCustomAudioRenderPCMData(dataByteBuffer, dataLength, param);
 
+        result.success(null);
+    }
+
+    /* AudioMixing */
+
+    @SuppressWarnings("unused")
+    public static void enableAudioMixing(MethodCall call, Result result) {
+
+        boolean enable = ZegoUtils.boolValue(call.argument("enable"));
+        if (enable) {
+            ZegoExpressEngine.getEngine().setAudioMixingHandler(ZegoAudioMixingDataManager.getInstance());
+        } else {
+            ZegoExpressEngine.getEngine().setAudioMixingHandler(null);
+        }
+        ZegoExpressEngine.getEngine().enableAudioMixing(enable);
+        result.success(null);
+    }
+    
+    @SuppressWarnings("unused")
+    public static void setAudioMixingVolume(MethodCall call, Result result) {
+        int volume = ZegoUtils.intValue(call.argument("volume"));
+        int type = ZegoUtils.intValue(call.argument("type"));
+        ZegoVolumeType volumeType = ZegoVolumeType.getZegoVolumeType(type);
+        ZegoExpressEngine.getEngine().setAudioMixingVolume(volume, volumeType);
+        result.success(null);
+    }
+
+    @SuppressWarnings("unused")
+    public static void muteLocalAudioMixing(MethodCall call, Result result) {
+        boolean mute = ZegoUtils.boolValue(call.argument("mute"));
+        ZegoExpressEngine.getEngine().muteLocalAudioMixing(mute);
         result.success(null);
     }
 
