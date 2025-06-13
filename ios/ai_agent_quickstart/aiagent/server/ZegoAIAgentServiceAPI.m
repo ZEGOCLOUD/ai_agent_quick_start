@@ -215,9 +215,6 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
     [ZegoExpressEngine setEngineConfig:engineConfig];
     [ZegoExpressEngine createEngineWithProfile:profile eventHandler:self];
     NSLog(@"ZegoExpressEngine创建成功");
-    
-    [[ZegoExpressEngine sharedEngine] startSoundLevelMonitor];
-    NSLog(@"已启动音量监控");
 }
 
 -(void)unInitZegoExpressEngine{
@@ -227,9 +224,6 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
         NSLog(@"ZegoExpressEngine实例不存在，无需释放");
         return;
     }
-    
-    NSLog(@"停止音量监控");
-    [[ZegoExpressEngine sharedEngine] stopSoundLevelMonitor];
     
     NSLog(@"停止播放流：streamID=%@", self.agentStreamId);
     [[ZegoExpressEngine sharedEngine] stopPlayingStream:self.agentStreamId];
