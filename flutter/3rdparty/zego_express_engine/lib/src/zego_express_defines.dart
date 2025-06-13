@@ -2039,6 +2039,24 @@ enum ZegoLiveAudioEffectMode {
   All
 }
 
+/// AI voice changer event.
+enum ZegoAIVoiceChangerEvent {
+  /// Succeed.
+  Succeed,
+
+  /// Background performance insufficient.
+  BackgroundPerformanceInsufficient,
+
+  /// Foreground performance insufficient.
+  ForegroundPerformanceInsufficient,
+
+  /// Others.
+  Others,
+
+  /// Set speaker failed.
+  SetSpeakerFailed
+}
+
 /// Media stream type.
 enum ZegoMediaStreamType {
   /// Media audio stream.
@@ -2559,12 +2577,16 @@ class ZegoPublisherConfig {
   /// Codec capability negotiation type. By default, no reference to the outcome of the capability negotiation. If you want to use this function, contact ZEGO technical support.
   ZegoCapabilityNegotiationType? codecNegotiationType;
 
+  /// Stream title, a utf8 string with a maximum length of 255 bytes or less.
+  String? streamTitle;
+
   ZegoPublisherConfig(
       {this.roomID,
       this.forceSynchronousNetworkTime,
       this.streamCensorshipMode,
       this.streamCensorFlag,
-      this.codecNegotiationType});
+      this.codecNegotiationType,
+      this.streamTitle});
 }
 
 /// Published stream quality information.
@@ -2971,7 +2993,10 @@ class ZegoDeviceInfo {
   /// Device name
   String deviceName;
 
-  ZegoDeviceInfo(this.deviceID, this.deviceName);
+  /// Device extra info, Format: key="value"\nkey2="value2"..., use line break \n to separate key-value pairs, and use equal sign = to separate key and "value", and there are double quotes around the value
+  String deviceExtraInfo;
+
+  ZegoDeviceInfo(this.deviceID, this.deviceName, this.deviceExtraInfo);
 }
 
 /// System performance monitoring status
@@ -4084,8 +4109,14 @@ class ZegoCopyrightedMusicGetSharedConfig {
   /// The room ID, the single-room mode can not be passed, and the corresponding room ID must be passed in the multi-room mode. Indicates which room to get resources from.
   String? roomID;
 
+  /// VOD billing mode.It is only required when using on the Web platform and using vendorID value is ZegoCopyrightedMusicVendor1.
+  int? mode;
+
+  /// The master ID, which must be passed when the billing mode is billed by host.
+  String? masterID;
+
   ZegoCopyrightedMusicGetSharedConfig(this.songID,
-      {this.vendorID, this.roomID});
+      {this.vendorID, this.roomID, this.mode, this.masterID});
 }
 
 /// The configuration of getting shared resource.
@@ -4102,8 +4133,18 @@ class ZegoCopyrightedMusicGetSharedConfigV2 {
   /// The resource type of music.
   int? resourceType;
 
+  /// VOD billing mode.It is only required when using on the Web platform and using vendorID value is ZegoCopyrightedMusicVendor1.
+  int? mode;
+
+  /// The master ID, which must be passed when the billing mode is billed by host.
+  String? masterID;
+
   ZegoCopyrightedMusicGetSharedConfigV2(this.songID,
-      {this.vendorID, this.roomID, this.resourceType});
+      {this.vendorID,
+      this.roomID,
+      this.resourceType,
+      this.mode,
+      this.masterID});
 }
 
 /// The configuration of querying cache.

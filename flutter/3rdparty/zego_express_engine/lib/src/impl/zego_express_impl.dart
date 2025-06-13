@@ -17,7 +17,7 @@ import '../utils/zego_express_utils.dart';
 // ignore_for_file: deprecated_member_use_from_same_package, curly_braces_in_flow_control_structures
 
 class Global {
-  static String pluginVersion = "3.20.0";
+  static String pluginVersion = "3.20.5";
 }
 
 class MethodChannelWrapper extends MethodChannel {
@@ -405,7 +405,8 @@ class ZegoExpressImpl {
               'streamCensorshipMode': config.streamCensorshipMode?.index ??
                   ZegoStreamCensorshipMode.None.index,
               'codecNegotiationType': config.codecNegotiationType?.index ??
-                  ZegoCapabilityNegotiationType.None.index
+                  ZegoCapabilityNegotiationType.None.index,
+              'streamTitle': config.streamTitle ?? '',
             }
           : {},
       'channel': channel?.index ?? ZegoPublishChannel.Main.index
@@ -1417,8 +1418,8 @@ class ZegoExpressImpl {
     List<ZegoDeviceInfo> deviceInfoList = [];
 
     for (var deviceInfoMap in deviceInfoMapList) {
-      deviceInfoList.add(ZegoDeviceInfo(
-          deviceInfoMap["deviceID"], deviceInfoMap["deviceName"]));
+      deviceInfoList.add(ZegoDeviceInfo(deviceInfoMap["deviceID"],
+          deviceInfoMap["deviceName"], deviceInfoMap["deviceExtraInfo"]));
     }
 
     return deviceInfoList;
@@ -1447,7 +1448,8 @@ class ZegoExpressImpl {
     var resultList = await _channel.invokeMethod('getVideoDeviceList', {});
     var retList = <ZegoDeviceInfo>[];
     for (dynamic info in resultList) {
-      retList.add(ZegoDeviceInfo(info['deviceID'], info['deviceName']));
+      retList.add(ZegoDeviceInfo(
+          info['deviceID'], info['deviceName'], info["deviceExtraInfo"]));
     }
     return retList;
   }
@@ -1564,7 +1566,8 @@ class ZegoExpressImpl {
       ZegoAudioDeviceType deviceType) async {
     var resultMap = await _channel.invokeMethod(
         'getCurrentAudioDevice', {'deviceType': deviceType.index});
-    return ZegoDeviceInfo(resultMap['deviceID'], resultMap['deviceName']);
+    return ZegoDeviceInfo(resultMap['deviceID'], resultMap['deviceName'],
+        resultMap["deviceExtraInfo"]);
   }
 
   /* PreProcess */
@@ -2086,6 +2089,20 @@ class ZegoExpressImpl {
         'channel': param.channel.index
       }
     });
+  }
+
+  /* Audio Mixing */
+  Future<void> enableAudioMixing(bool enable) async {
+    return await _channel.invokeMethod('enableAudioMixing', {'enable': enable});
+  }
+
+  Future<void> setAudioMixingVolume(int volume, ZegoVolumeType type) async {
+    return await _channel.invokeMethod(
+        'setAudioMixingVolume', {'volume': volume, 'type': type.index});
+  }
+
+  Future<void> muteLocalAudioMixing(bool mute) async {
+    return await _channel.invokeMethod('muteLocalAudioMixing', {'mute': mute});
   }
 
   /* Range Audio */
@@ -2916,7 +2933,9 @@ class ZegoExpressImpl {
         if (ZegoExpressEngine.onAudioDeviceStateChanged == null) return;
 
         ZegoDeviceInfo info = ZegoDeviceInfo(
-            map['deviceInfo']['deviceID'], map['deviceInfo']['deviceName']);
+            map['deviceInfo']['deviceID'],
+            map['deviceInfo']['deviceName'],
+            map['deviceInfo']["deviceExtraInfo"]);
 
         ZegoExpressEngine.onAudioDeviceStateChanged!(
             ZegoUpdateType.values[map['updateType']],
@@ -2937,7 +2956,9 @@ class ZegoExpressImpl {
         if (ZegoExpressEngine.onVideoDeviceStateChanged == null) return;
 
         ZegoDeviceInfo info = ZegoDeviceInfo(
-            map['deviceInfo']['deviceID'], map['deviceInfo']['deviceName']);
+            map['deviceInfo']['deviceID'],
+            map['deviceInfo']['deviceName'],
+            map['deviceInfo']["deviceExtraInfo"]);
 
         ZegoExpressEngine.onVideoDeviceStateChanged!(
             ZegoUpdateType.values[map['updateType']], info);
@@ -3583,6 +3604,21 @@ class ZegoExpressImpl {
         }
         break;
 
+      case 'onCaptureTypeExceptionOccurred':
+        if (ZegoExpressEngine.onCaptureTypeExceptionOccurred == null) return;
+
+        var screenCaptureSourceIndex = map['screenCaptureSourceIndex'];
+        var screenCaptureSource =
+            screenCaptureSourceMap[screenCaptureSourceIndex!];
+        if (screenCaptureSource != null) {
+          ZegoExpressEngine.onCaptureTypeExceptionOccurred!(
+              screenCaptureSource,
+              ZegoScreenCaptureSourceType.values[map['sourceType']],
+              ZegoScreenCaptureSourceExceptionType
+                  .values[map['exceptionType']]);
+        }
+        break;
+
       case 'onWindowStateChanged':
         if (ZegoExpressEngine.onWindowStateChanged == null) return;
 
@@ -3684,6 +3720,30 @@ class ZegoExpressImpl {
         if (aiVoiceChanger != null) {
           ZegoExpressEngine.onAIVoiceChangerUpdateProgress!(aiVoiceChanger,
               map['percent'], map['fileIndex'], map['fileCount']);
+        }
+        break;
+      
+      case 'onAIVoiceChangerSetSpeaker':
+        if (ZegoExpressEngine.onAIVoiceChangerSetSpeaker == null) {
+          return;
+        }
+        var aiVoiceChangerIndex = map['aiVoiceChangerIndex'];
+        var aiVoiceChanger = aiVoiceChangerMap[aiVoiceChangerIndex];
+        if (aiVoiceChanger != null) {
+          ZegoExpressEngine.onAIVoiceChangerSetSpeaker!(
+              aiVoiceChanger, map['errorCode']);
+        }
+        break;
+      
+      case 'onAIVoiceChangerEvent':
+        if (ZegoExpressEngine.onAIVoiceChangerEvent == null) {
+          return;
+        }
+        var aiVoiceChangerIndex = map['aiVoiceChangerIndex'];
+        var aiVoiceChanger = aiVoiceChangerMap[aiVoiceChangerIndex];
+        if (aiVoiceChanger != null) {
+          ZegoExpressEngine.onAIVoiceChangerEvent!(
+              aiVoiceChanger, ZegoAIVoiceChangerEvent.values[map['event']]);
         }
         break;
 
@@ -4761,7 +4821,9 @@ class ZegoCopyrightedMusicImpl extends ZegoCopyrightedMusic {
         'vendorID': config.vendorID?.value ??
             ZegoCopyrightedMusicVendorID
                 .ZegoCopyrightedMusicVendorDefault.value,
-        'roomID': config.roomID ?? ''
+        'roomID': config.roomID ?? '',
+        'mode': config.mode,
+        'masterID': config.masterID
       },
       'type': type.index
     });
@@ -4772,15 +4834,18 @@ class ZegoCopyrightedMusicImpl extends ZegoCopyrightedMusic {
   @override
   Future<ZegoCopyrightedMusicGetSharedResourceResult> getSharedResourceV2(
       ZegoCopyrightedMusicGetSharedConfigV2 config) async {
-    var resultMap = await ZegoExpressImpl._channel
-        .invokeMethod('copyrightedMusicGetSharedResourceV2', {
+    final reqConfig = {
       'config': {
         'songID': config.songID,
         'vendorID': config.vendorID ?? 0,
         'roomID': config.roomID ?? '',
-        'resourceType': config.resourceType ?? 0
+        'resourceType': config.resourceType ?? 0,
+        'mode': config.mode,
+        'masterID': config.masterID
       }
-    });
+    };
+    var resultMap = await ZegoExpressImpl._channel
+        .invokeMethod('copyrightedMusicGetSharedResourceV2', reqConfig);
     return ZegoCopyrightedMusicGetSharedResourceResult(
         resultMap['errorCode'], resultMap['resource']);
   }

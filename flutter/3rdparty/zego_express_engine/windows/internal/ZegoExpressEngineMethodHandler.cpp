@@ -10,6 +10,7 @@
 #include "zego_express_engine/ZegoMediaPlayerAudioManager.h"
 #include "zego_express_engine/ZegoMediaPlayerBlockDataManager.h"
 #include "zego_express_engine/ZegoMediaPlayerVideoManager.h"
+#include "zego_express_engine/ZegoAudioMixingDataManager.h"
 #include <flutter/encodable_value.h>
 #include <flutter/plugin_registrar_windows.h>
 #endif
@@ -510,6 +511,7 @@ void ZegoExpressEngineMethodHandler::startPublishingStream(ZFArgument argument, 
                 zego_value_get_int(configMap[ZFValue("forceSynchronousNetworkTime")]);
             config.streamCensorshipMode = (EXPRESS::ZegoStreamCensorshipMode)zego_value_get_int(
                 configMap[ZFValue("streamCensorshipMode")]);
+            config.streamTitle = zego_value_get_string(configMap[ZFValue("streamTitle")]);
 
             EXPRESS::ZegoExpressSDK::getEngine()->startPublishingStream(
                 streamID, config, (EXPRESS::ZegoPublishChannel)channel);
@@ -982,10 +984,31 @@ void ZegoExpressEngineMethodHandler::enableVideoObjectSegmentation(ZFArgument ar
                 backgroundConfigMap[ZFValue("blurLevel")]);
             // Note：注意这里巨坑，如果这里使用std::get<int64_t>处理传过来的0时会导致crash, 怀疑是flutter内部的bug
             backgroundConfig.color = zego_value_get_long(backgroundConfigMap[ZFValue("color")]);
-            backgroundConfig.imageURL =
-                zego_value_get_string(backgroundConfigMap[ZFValue("imageURL")]);
-            backgroundConfig.videoURL =
-                zego_value_get_string(backgroundConfigMap[ZFValue("videoURL")]);
+            std::string imageURL = zego_value_get_string(backgroundConfigMap[ZFValue("imageURL")]);
+            std::string videoURL = zego_value_get_string(backgroundConfigMap[ZFValue("videoURL")]);
+            const std::string flutterAssertTaget = "flutter-asset://";
+            if (imageURL.compare(0, flutterAssertTaget.size(), flutterAssertTaget) == 0) {
+                std::string flutterAssetsPath = GetFlutterAssetsPath();
+                if (!flutterAssetsPath.empty()) {
+                    imageURL.replace(0, flutterAssertTaget.size(), "");
+                    imageURL = flutterAssetsPath + imageURL;
+                } else {
+                    ZF::logInfo("enableVideoObjectSegmentation_get_exe_path_fail",
+                                "Failed to get the directory where the application is located");
+                }
+            }
+            if (videoURL.compare(0, flutterAssertTaget.size(), flutterAssertTaget) == 0) {
+                std::string flutterAssetsPath = GetFlutterAssetsPath();
+                if (!flutterAssetsPath.empty()) {
+                    videoURL.replace(0, flutterAssertTaget.size(), "");
+                    videoURL = flutterAssetsPath + videoURL;
+                } else {
+                    ZF::logInfo("enableVideoObjectSegmentation_get_exe_path_fail",
+                                "Failed to get the directory where the application is located");
+                }
+            }
+            backgroundConfig.imageURL = imageURL;
+            backgroundConfig.videoURL = videoURL;
 
             config.backgroundConfig = backgroundConfig;
         }
@@ -1301,6 +1324,7 @@ void ZegoExpressEngineMethodHandler::getAudioDeviceList(ZFArgument argument, ZFR
         ZFMap deviceMap;
         deviceMap[ZFValue("deviceID")] = ZFValue(deviceInfo.deviceID);
         deviceMap[ZFValue("deviceName")] = ZFValue(deviceInfo.deviceName);
+        deviceMap[ZFValue("deviceExtraInfo")] = ZFValue(deviceInfo.deviceExtraInfo);
 
         deviceListArray.emplace_back(ZFValue(deviceMap));
     }
@@ -1543,6 +1567,37 @@ void ZegoExpressEngineMethodHandler::startAudioDataObserver(ZFArgument argument,
 
 void ZegoExpressEngineMethodHandler::stopAudioDataObserver(ZFArgument argument, ZFResult result) {
     EXPRESS::ZegoExpressSDK::getEngine()->stopAudioDataObserver();
+
+    result->Success();
+}
+
+void ZegoExpressEngineMethodHandler::enableAudioMixing(ZFArgument argument, ZFResult result) {
+    auto enable = zego_value_get_bool(argument[ZFValue("enable")]);
+
+    if (enable) {
+        EXPRESS::ZegoExpressSDK::getEngine()->setAudioMixingHandler(
+            ZegoAudioMixingDataManager::getInstance()->getHandler());
+    } else {
+        EXPRESS::ZegoExpressSDK::getEngine()->setAudioMixingHandler(nullptr);
+    }
+
+    EXPRESS::ZegoExpressSDK::getEngine()->enableAudioMixing(enable);
+
+    result->Success();
+}
+
+void ZegoExpressEngineMethodHandler::setAudioMixingVolume(ZFArgument argument, ZFResult result) {
+    auto volume = zego_value_get_int(argument[ZFValue("volume")]);
+    auto volumeType = zego_value_get_int(argument[ZFValue("type")]);
+    EXPRESS::ZegoExpressSDK::getEngine()->setAudioMixingVolume(volume,
+                                                                (EXPRESS::ZegoVolumeType)volumeType);
+
+    result->Success();
+}
+
+void ZegoExpressEngineMethodHandler::muteLocalAudioMixing(ZFArgument argument, ZFResult result) {
+    auto mute = zego_value_get_bool(argument[ZFValue("mute")]);
+    EXPRESS::ZegoExpressSDK::getEngine()->muteLocalAudioMixing(mute);
 
     result->Success();
 }
@@ -3456,6 +3511,7 @@ void ZegoExpressEngineMethodHandler::getVideoDeviceList(ZFArgument argument, ZFR
         ZFMap deviceMap;
         deviceMap[ZFValue("deviceID")] = ZFValue(deviceInfo.deviceID);
         deviceMap[ZFValue("deviceName")] = ZFValue(deviceInfo.deviceName);
+        deviceMap[ZFValue("deviceExtraInfo")] = ZFValue(deviceInfo.deviceExtraInfo);
 
         deviceListArray.emplace_back(ZFValue(deviceMap));
     }
@@ -3526,6 +3582,7 @@ void ZegoExpressEngineMethodHandler::getCurrentAudioDevice(ZFArgument argument, 
     ZFMap resultMap;
     resultMap[ZFValue("deviceID")] = ZFValue(deviceInfo.deviceID);
     resultMap[ZFValue("deviceName")] = ZFValue(deviceInfo.deviceName);
+    resultMap[ZFValue("deviceExtraInfo")] = ZFValue(deviceInfo.deviceExtraInfo);
     result->Success(resultMap);
 }
 

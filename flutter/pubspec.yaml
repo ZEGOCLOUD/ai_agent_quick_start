@@ -11,11 +11,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # web请使用pub.dev版本，本地版本的web实现需要后续替换
-#  zego_express_engine: ^3.20.5
-  # 原生端请使用本地版本
+  # 需要特殊编包
   zego_express_engine:
     path: 3rdparty/zego_express_engine
+  # pub.dev现上报web上有些问题，特殊编包，2.21后可替换更新
+  zego_zim: 2.20.0-custom3315
 
   permission_handler: ^11.3.0
   cupertino_icons: ^1.0.2

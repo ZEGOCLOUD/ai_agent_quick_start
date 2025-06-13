@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import im.zego.zegoexpress.ZegoAIVoiceChanger;
@@ -35,6 +34,7 @@ import im.zego.zegoexpress.callback.IZegoMediaDataPublisherEventHandler;
 import im.zego.zegoexpress.callback.IZegoMediaPlayerEventHandler;
 import im.zego.zegoexpress.callback.IZegoRangeAudioEventHandler;
 import im.zego.zegoexpress.callback.IZegoRealTimeSequentialDataEventHandler;
+import im.zego.zegoexpress.constants.ZegoAIVoiceChangerEvent;
 import im.zego.zegoexpress.constants.ZegoAudioEffectPlayState;
 import im.zego.zegoexpress.constants.ZegoAudioRoute;
 import im.zego.zegoexpress.constants.ZegoDataRecordState;
@@ -57,7 +57,6 @@ import im.zego.zegoexpress.constants.ZegoScreenCaptureExceptionType;
 import im.zego.zegoexpress.constants.ZegoStreamEvent;
 import im.zego.zegoexpress.constants.ZegoStreamQualityLevel;
 import im.zego.zegoexpress.constants.ZegoUpdateType;
-import im.zego.zegoexpress.constants.ZegoAudioSampleRate;
 import im.zego.zegoexpress.constants.ZegoVideoCodecID;
 import im.zego.zegoexpress.constants.ZegoAudioVADType;
 import im.zego.zegoexpress.constants.ZegoAudioVADStableStateMonitorType;
@@ -66,6 +65,7 @@ import im.zego.zegoexpress.constants.ZegoDeviceType;
 import im.zego.zegoexpress.constants.ZegoSuperResolutionState;
 import im.zego.zegoexpress.entity.ZegoAIVoiceChangerSpeakerInfo;
 import im.zego.zegoexpress.entity.ZegoAudioFrameParam;
+import im.zego.zegoexpress.entity.ZegoAudioMixingData;
 import im.zego.zegoexpress.entity.ZegoBarrageMessageInfo;
 import im.zego.zegoexpress.entity.ZegoBroadcastMessageInfo;
 import im.zego.zegoexpress.entity.ZegoDataRecordConfig;
@@ -924,7 +924,8 @@ public class ZegoExpressEngineEventHandler {
         @Override
         public void onMixerSoundLevelUpdate(HashMap<Integer, Float> soundLevels) {
             super.onMixerSoundLevelUpdate(soundLevels);
-            // Super high frequency callbacks do not log, do not guard sink
+
+            if (guardSink()) { return; }
 
             HashMap<String, Object> map = new HashMap<>();
 
@@ -937,7 +938,8 @@ public class ZegoExpressEngineEventHandler {
         @Override
         public void onAutoMixerSoundLevelUpdate(HashMap<String, Float> soundLevels) {
             super.onAutoMixerSoundLevelUpdate(soundLevels);
-            // Super high frequency callbacks do not log, do not guard sink
+            
+            if (guardSink()) { return; }
 
             HashMap<String, Object> map = new HashMap<>();
 
@@ -953,7 +955,8 @@ public class ZegoExpressEngineEventHandler {
         @Override
         public void onCapturedSoundLevelUpdate(float soundLevel) {
             super.onCapturedSoundLevelUpdate(soundLevel);
-            // Super high frequency callbacks do not log, do not guard sink
+            
+            if (guardSink()) { return; }
 
             HashMap<String, Object> map = new HashMap<>();
 
@@ -966,7 +969,8 @@ public class ZegoExpressEngineEventHandler {
         @Override
         public void onCapturedSoundLevelInfoUpdate(ZegoSoundLevelInfo soundLevelInfo) {
             super.onCapturedSoundLevelInfoUpdate(soundLevelInfo);
-            // Super high frequency callbacks do not log, do not guard sink
+            
+            if (guardSink()) { return; }
 
             HashMap<String, Object> map = new HashMap<>();
 
@@ -984,7 +988,8 @@ public class ZegoExpressEngineEventHandler {
         @Override
         public void onRemoteSoundLevelUpdate(HashMap<String, Float> soundLevels) {
             super.onRemoteSoundLevelUpdate(soundLevels);
-            // Super high frequency callbacks do not log, do not guard sink
+            
+            if (guardSink()) { return; }
 
             HashMap<String, Object> map = new HashMap<>();
 
@@ -997,7 +1002,8 @@ public class ZegoExpressEngineEventHandler {
         @Override
         public void onRemoteSoundLevelInfoUpdate(HashMap<String, ZegoSoundLevelInfo> soundLevelInfos) {
             super.onRemoteSoundLevelInfoUpdate(soundLevelInfos);
-            // Super high frequency callbacks do not log, do not guard sink
+
+            if (guardSink()) { return; }
 
             HashMap<String, Object> map = new HashMap<>();
             map.put("method", "onRemoteSoundLevelInfoUpdate");
@@ -1019,7 +1025,8 @@ public class ZegoExpressEngineEventHandler {
         @Override
         public void onCapturedAudioSpectrumUpdate(float[] audioSpectrum) {
             super.onCapturedAudioSpectrumUpdate(audioSpectrum);
-            // Super high frequency callbacks do not log, do not guard sink
+            
+            if (guardSink()) { return; }
 
             ArrayList<Float> audioSpectrumList = new ArrayList<>();
 
@@ -1038,7 +1045,8 @@ public class ZegoExpressEngineEventHandler {
         @Override
         public void onRemoteAudioSpectrumUpdate(HashMap<String, float[]> audioSpectrums) {
             super.onRemoteAudioSpectrumUpdate(audioSpectrums);
-            // Super high frequency callbacks do not log, do not guard sink
+            
+            if (guardSink()) { return; }
 
             HashMap<String, ArrayList<Float>> audioSpectrumsMap = new HashMap<>();
 
@@ -2294,6 +2302,38 @@ public class ZegoExpressEngineEventHandler {
             map.put("percent", percent);
             map.put("fileIndex", fileIndex);
             map.put("fileCount", fileCount);
+
+            sink.success(map);
+        }
+
+        @Override
+        public void onSetSpeaker(ZegoAIVoiceChanger aiVoiceChanger, int errorCode) {
+            super.onSetSpeaker(aiVoiceChanger, errorCode);
+            ZegoLog.log("[onAIVoiceChangerSetSpeaker] idx: %d, errorCode: %d", aiVoiceChanger.getIndex(), errorCode);
+            
+            if (guardSink()) { return; }
+
+            HashMap<String, Object> map = new HashMap<>();
+
+            map.put("method", "onAIVoiceChangerSetSpeaker");
+            map.put("aiVoiceChangerIndex", aiVoiceChanger.getIndex());
+            map.put("errorCode", errorCode);
+
+            sink.success(map);
+        }
+
+        @Override
+        public void onEvent(ZegoAIVoiceChanger aiVoiceChanger, ZegoAIVoiceChangerEvent event) {
+            super.onEvent(aiVoiceChanger, event);
+            ZegoLog.log("[onAIVoiceChangerEvent] idx: %d, event: %d", aiVoiceChanger.getIndex(), event.value());
+
+            if (guardSink()) { return; }
+
+            HashMap<String, Object> map = new HashMap<>();
+
+            map.put("method", "onAIVoiceChangerEvent");
+            map.put("aiVoiceChangerIndex", aiVoiceChanger.getIndex());
+            map.put("event", event.value());
 
             sink.success(map);
         }
