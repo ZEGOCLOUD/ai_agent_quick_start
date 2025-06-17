@@ -4,6 +4,8 @@
 
 这是一个AI语音智能助手（Agent）的Quick Start项目，基于iOS平台开发，允许用户通过语音与AI智能体进行交互。项目实现了语音识别(ASR)、自然语言处理(LLM)和语音合成(TTS)的完整流程，支持实时语音对话和字幕显示。
 
+⚠️ 在运行客户端前，请先启动[您的业务后台](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server/tree/main)，分支需和客户端匹配
+
 ## 技术栈
 
 - 开发语言：Objective-C
@@ -40,8 +42,9 @@ ai_agent_quickstart/
 
 ### 应用启动流程
 
-1. 应用启动，初始化AppDelegate和SceneDelegate
-2. SceneDelegate直接加载ZegoAIAgentAudioViewController为根视图控制器，进入主界面
+1. 请先启动[您的业务后台](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server/tree/main)，分支需和客户端匹配
+2. 应用启动，初始化AppDelegate和SceneDelegate
+3. SceneDelegate直接加载ZegoAIAgentAudioViewController为根视图控制器，进入主界面
 
 ### 音频对话流程
 
