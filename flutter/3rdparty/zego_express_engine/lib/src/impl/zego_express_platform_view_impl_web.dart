@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:html';
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui;
 
 /// Web implementation of [createPlatformView]
 class ZegoExpressPlatformViewImpl {
