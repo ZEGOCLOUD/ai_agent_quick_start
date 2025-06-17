@@ -4,6 +4,8 @@
 
 这是一个基于 Flutter 开发的 AI 语音智能助手（Agent）Quick Start 项目，允许用户通过语音与 AI 智能体进行交互。项目实现了语音识别(ASR)、自然语言处理(LLM)和语音合成(TTS)的完整流程，支持实时语音对话和字幕显示。
 
+⚠️ 在运行客户端前，请先启动[您的业务后台](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server/tree/im_and_voice)，分支需和客户端匹配
+
 ## 技术栈
 
 - 开发语言：Dart
@@ -35,8 +37,9 @@ lib/
 
 ### 应用启动流程
 
-1. 应用启动，初始化 Flutter 应用
-2. 加载 AudioChatPage 作为主界面，进入音频对话界面
+1. 请先启动[您的业务后台](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server/tree/im_and_voice)，分支需和客户端匹配
+2. 应用启动，初始化 Flutter 应用
+3. 加载 AudioChatPage 作为主界面，进入音频对话界面
 
 ### 音频对话流程
 
