@@ -4,7 +4,7 @@
 
 本项目是一个基于 ZEGO Express SDK 的 AI Agent Web 快速启动示例，展示了如何在 Web 应用中集成和使用 AI Agent 功能。通过本示例，您可以快速了解和实现智能体语音通话功能。
 
-⚠️ 在运行客户端前，请先启动[您的业务后台](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server/tree/main)，分支需和客户端匹配
+⚠️ 在运行客户端前，请先启动[您的业务后台](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server/tree/im_and_voice)，分支需和客户端匹配
 ## 环境要求
 
 - 现代浏览器（支持 WebRTC）
