@@ -132,7 +132,9 @@ export class ExpressManager {
   ): void {
     if (this.express) {
       console.log("mytag startPublishingStream", streamID, LocalStream);
-      this.express.startPublishingStream(streamID, LocalStream);
+      this.express.startPublishingStream(streamID, LocalStream, {
+        enableAutoSwitchVideoCodec: true,
+      });
     }
   }
 
@@ -195,14 +197,6 @@ export class ExpressManager {
     if (this.express) {
       this.express.destroyStream(localStream);
     }
-  }
-
-  public setStreamUpdateHandler(callback: VoidFunction) {
-    this.express?.on("roomStreamUpdate", callback);
-  }
-
-  public setRoomStateChangedHandler(callback: VoidFunction) {
-    this.express?.on("roomStateChanged", callback);
   }
 
   public async getPlayingStreamQuality(streamID: string) {

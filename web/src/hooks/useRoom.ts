@@ -77,9 +77,7 @@ export function useRoom() {
               const mediaStream = await zg.startPlayingStream(stream.streamID);
               const remoteView = await zg.createRemoteStreamView(mediaStream);
               if (remoteView) {
-                remoteView.play("remoteSteamView", {
-                  enableAutoplayDialog: false,
-                });
+                remoteView.play("remoteSteamView");
               }
               console.log(`成功拉取流: ${stream.streamID}`);
               break;
