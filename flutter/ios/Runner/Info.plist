@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>需要访问麦克风以进行语音聊天</string>
 </dict>
 </plist>
