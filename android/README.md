@@ -4,6 +4,8 @@
 
 本项目是基于 ZEGO Express Engine 的 Android 快速入门示例，演示了如何集成 AI Agent 语音聊天能力。用户可通过本应用体验与 AI Agent 的实时语音交互，消息自动滚动显示，支持房间登录、消息收发、流管理等功能。
 
+⚠️ 在运行客户端前，请先启动[您的业务后台](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server/tree/main)，分支需和客户端匹配
+
 ---
 
 ## 文件目录结构
