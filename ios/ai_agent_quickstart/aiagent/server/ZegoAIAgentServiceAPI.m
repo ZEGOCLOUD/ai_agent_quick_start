@@ -100,21 +100,29 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
     }];
 }
 
-- (void)startDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
+- (void)startDigitalHumanWithDigitalHumanId:(NSString * _Nullable)digitalHumanId
+                                   configId:(NSString * _Nullable)configId
+                                 completion:(void (^)(BOOL success, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion {
     __weak typeof(self) weakSelf = self;
-    
-    // 先创建Agent实例
-    [self doStartDigitalHumanWithCompletion:^(ZegoAIServiceCommonResponse *response) {
+
+    // 先创建Agent实例，传入新的参数
+    [self doStartDigitalHumanWithDigitalHumanId:digitalHumanId configId:configId completion:^(ZegoAIServiceCommonResponse *response) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) { return; }
         
         if (response.code != 0) {
             if (completion) {
-                completion(NO, response.message ?: @"创建数字人Agent实例失败");
+                completion(NO, response.message ?: @"创建数字人Agent实例失败", nil);
             }
             return;
         }
-        
+
+        // 从响应中获取 digital_human_config
+        NSString *digitalHumanConfig = nil;
+        if (response.data && [response.data isKindOfClass:[NSDictionary class]]) {
+            digitalHumanConfig = response.data[@"digital_human_config"];
+        }
+
         // 创建Agent实例成功后，初始化RTC引擎
         [strongSelf initZegoExpressEngine];
         
@@ -127,7 +135,7 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
             
             if (errorCode != 0) {
                 NSString* errorMsg = [NSString stringWithFormat:@"进入数字人房间失败:%d", errorCode];
-                completion(NO, errorMsg);
+                completion(NO, errorMsg, nil);
                 return;
             }
             
@@ -142,11 +150,12 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
             [strongSelf startPlayStream:strongSelf.agentStreamId];
             
             if (completion) {
-                completion(YES, nil);
+                NSString *configToReturn = digitalHumanConfig ?: @"";
+                completion(YES, nil, configToReturn);
             }
         }];
     }];
-    
+
 }
 
 - (void)stopDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
@@ -243,12 +252,24 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 
 #pragma mark - Agent Instance API Methods
 
-- (void)doStartDigitalHumanWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
+- (void)doStartDigitalHumanWithDigitalHumanId:(NSString * _Nullable)digitalHumanId
+                                     configId:(NSString * _Nullable)configId
+                                   completion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
     NSString *url = [NSString stringWithFormat:@"%@/api/start-digital-human", self.currentBaseURL];
-    
+
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
+
+    // 添加新的请求参数
+    if (digitalHumanId && digitalHumanId.length > 0) {
+        params[@"digital_human_id"] = digitalHumanId;
+    }
+
+    if (configId && configId.length > 0) {
+        params[@"config_id"] = configId;
+    }
+
     NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
-    
+
     [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
         if (completion) {
             completion(response);

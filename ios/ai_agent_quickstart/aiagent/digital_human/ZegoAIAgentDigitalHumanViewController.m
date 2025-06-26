@@ -96,10 +96,12 @@
         }
 
         __weak typeof(self) weakSelf = self;
-        [[ZegoAIAgentServiceAPI sharedInstance] startDigitalHumanWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+        [[ZegoAIAgentServiceAPI sharedInstance] startDigitalHumanWithDigitalHumanId:@"digital_human_id_ios"
+                                                                            configId:@"mobile"
+                                                                          completion:^(BOOL success, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) return;
-            
+
             if (success) {
                 // 创建数字人实例
                 strongSelf.digitalMobile = [ZegoDigitalMobileFactory create];
@@ -113,10 +115,12 @@
                         NSLog(@"Page dismissed, cleaning up digital mobile instance");
                         return;
                     }
-                    
-                    // 启动数字人
-                    [strongSelf.digitalMobile start:@"TODO_digitalHumanEncodeConfig" delegate:strongSelf];
-                    
+
+                    // 启动数字人，使用返回的配置（可能包含服务器返回的 digital_human_config）
+                    NSString *configToUse = digitalHumanEncodeConfig ?: @"";
+                    NSLog(@"使用数字人配置: %@", configToUse);
+                    [strongSelf.digitalMobile start:configToUse delegate:strongSelf];
+
                     // 绑定渲染视图
                     if (strongSelf.previewView) {
                         [strongSelf.digitalMobile attach:strongSelf.previewView];

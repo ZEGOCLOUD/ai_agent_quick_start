@@ -66,9 +66,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * 开始与数字人聊天
- * @param completion 开始聊天的回调，成功返回agentInstanceId
+ * @param digitalHumanId 数字人ID，可选参数
+ * @param configId 配置ID，可选参数
+ * @param completion 开始聊天的回调，成功返回digitalHumanEncodeConfig
  */
-- (void)startDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
+- (void)startDigitalHumanWithDigitalHumanId:(NSString * _Nullable)digitalHumanId
+                                   configId:(NSString * _Nullable)configId
+                                 completion:(void (^)(BOOL success, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion;
 
 /**
  * 结束数字人聊天
