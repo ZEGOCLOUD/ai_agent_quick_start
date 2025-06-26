@@ -125,7 +125,6 @@
     // 清除数字人事件处理器
     [[ZegoAIAgentServiceAPI sharedInstance] registerDigitalHumanEventHandler:nil];
 
-    __weak typeof(self) weakSelf = self;
     [[ZegoAIAgentServiceAPI sharedInstance] stopDigitalHumanWithCompletion:nil];
     
     // 清理digitalMobile
