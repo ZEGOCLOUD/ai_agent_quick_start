@@ -15,6 +15,8 @@
 		410B351E2DA7CE0D00CFA563 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B351D2DA7CE0D00CFA563 /* main.m */; };
 		41868C9E2E0D321D009F9692 /* ZegoDigitalMobile.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41868C9D2E0D321D009F9692 /* ZegoDigitalMobile.xcframework */; };
 		41868C9F2E0D321D009F9692 /* ZegoDigitalMobile.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 41868C9D2E0D321D009F9692 /* ZegoDigitalMobile.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		41868CA62E0D3689009F9692 /* ZegoAIAgentDigitalHumanViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 41868CA22E0D3689009F9692 /* ZegoAIAgentDigitalHumanViewController.m */; };
+		41868CA72E0D3689009F9692 /* ZegoAIAgentHomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 41868CA52E0D3689009F9692 /* ZegoAIAgentHomeViewController.m */; };
 		419158A02DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m in Sources */ = {isa = PBXBuildFile; fileRef = 4191588B2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m */; };
 		419158A12DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.m in Sources */ = {isa = PBXBuildFile; fileRef = 4191588D2DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.m */; };
 		419158A22DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 419158912DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageDispatcher.m */; };
@@ -59,6 +61,10 @@
 		410B351C2DA7CE0D00CFA563 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		410B351D2DA7CE0D00CFA563 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		41868C9D2E0D321D009F9692 /* ZegoDigitalMobile.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ZegoDigitalMobile.xcframework; path = libs/ZegoDigitalMobile/ZegoDigitalMobile.xcframework; sourceTree = "<group>"; };
+		41868CA12E0D3689009F9692 /* ZegoAIAgentDigitalHumanViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentDigitalHumanViewController.h; sourceTree = "<group>"; };
+		41868CA22E0D3689009F9692 /* ZegoAIAgentDigitalHumanViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentDigitalHumanViewController.m; sourceTree = "<group>"; };
+		41868CA42E0D3689009F9692 /* ZegoAIAgentHomeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentHomeViewController.h; sourceTree = "<group>"; };
+		41868CA52E0D3689009F9692 /* ZegoAIAgentHomeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentHomeViewController.m; sourceTree = "<group>"; };
 		4191588A2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesColors.h; sourceTree = "<group>"; };
 		4191588B2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesColors.m; sourceTree = "<group>"; };
 		4191588C2DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesDefines.h; sourceTree = "<group>"; };
@@ -130,6 +136,9 @@
 			isa = PBXGroup;
 			children = (
 				41A863072DA7E51400B1A58B /* aiagent */,
+				41868CA32E0D3689009F9692 /* digital_human */,
+				41868CA42E0D3689009F9692 /* ZegoAIAgentHomeViewController.h */,
+				41868CA52E0D3689009F9692 /* ZegoAIAgentHomeViewController.m */,
 				410B350B2DA7CE0A00CFA563 /* AppDelegate.h */,
 				410B350C2DA7CE0A00CFA563 /* AppDelegate.m */,
 				410B350E2DA7CE0A00CFA563 /* SceneDelegate.h */,
@@ -141,6 +150,15 @@
 				410B351D2DA7CE0D00CFA563 /* main.m */,
 			);
 			path = ai_agent_quickstart;
+			sourceTree = "<group>";
+		};
+		41868CA32E0D3689009F9692 /* digital_human */ = {
+			isa = PBXGroup;
+			children = (
+				41868CA12E0D3689009F9692 /* ZegoAIAgentDigitalHumanViewController.h */,
+				41868CA22E0D3689009F9692 /* ZegoAIAgentDigitalHumanViewController.m */,
+			);
+			path = digital_human;
 			sourceTree = "<group>";
 		};
 		4191588E2DB782ED009BAA71 /* core */ = {
@@ -385,6 +403,8 @@
 				41CD42BC2DB0F87B008F13F4 /* ZegoAIServiceCommonResponse.m in Sources */,
 				419158A32DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageProtocol.m in Sources */,
 				419158A62DB782ED009BAA71 /* ZegoAIAgentSubtitlesTableViewCell.m in Sources */,
+				41868CA62E0D3689009F9692 /* ZegoAIAgentDigitalHumanViewController.m in Sources */,
+				41868CA72E0D3689009F9692 /* ZegoAIAgentHomeViewController.m in Sources */,
 				410B351E2DA7CE0D00CFA563 /* main.m in Sources */,
 				419158A52DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageModel.m in Sources */,
 				419158A42DB782ED009BAA71 /* ZegoAIAgentSubtitlesCellLabelView.m in Sources */,

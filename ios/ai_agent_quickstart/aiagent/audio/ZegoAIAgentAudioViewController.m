@@ -49,13 +49,25 @@
         make.left.right.equalTo(self.view);
         make.height.mas_equalTo(48);
     }];
+    // 返回按钮
+    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [backButton setTitle:@"← Back" forState:UIControlStateNormal];
+    [backButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    backButton.titleLabel.font = [UIFont systemFontOfSize:16];
+    [backButton addTarget:self action:@selector(backButtonTapped) forControlEvents:UIControlEventTouchUpInside];
+    [titleBar addSubview:backButton];
+    [backButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(titleBar.mas_left).offset(16);
+        make.centerY.equalTo(titleBar);
+    }];
+
     UILabel *titleLabel = [[UILabel alloc] init];
     titleLabel.text = @"VoiceChat";
     titleLabel.font = [UIFont boldSystemFontOfSize:20];
     titleLabel.textColor = [UIColor blackColor];
     [titleBar addSubview:titleLabel];
     [titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(titleBar.mas_left).offset(16);
+        make.centerX.equalTo(titleBar);
         make.centerY.equalTo(titleBar);
     }];
 
@@ -283,6 +295,12 @@
 
 - (void)onRecvLLMChatMsg:(ZegoAIAgentAudioSubtitlesMessage *)message {
     [self.subtitlesTableView handleRecvLLMMessage:message];
+}
+
+#pragma mark - Button Actions
+
+- (void)backButtonTapped {
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end
