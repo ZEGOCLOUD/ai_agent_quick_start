@@ -6,9 +6,12 @@
 //
 
 #import "ZegoAIAgentDigitalHumanViewController.h"
+
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 #import <Masonry/Masonry.h>
+#import <ZegoDigitalMobile/ZegoDigitalMobile.h>
+
 #import "ZegoAIAgentServiceAPI.h"
 #import "ZegoAIAgentSubtitlesTableView.h"
 #import "ZegoAIAgentSubtitlesMessageDispatcher.h"
@@ -18,6 +21,7 @@
 // UI组件
 @property (nonatomic, strong) UIView *videoContainer;
 @property (nonatomic, strong) UIButton *backButton;
+@property (nonatomic, strong) id<IZegoDigitalMobile> digitalMobile;
 
 @end
 

@@ -70,7 +70,7 @@ NS_ASSUME_NONNULL_BEGIN
  * 3. 建立双向通信通道
  * 4. 开始接收和处理音频/文本数据
  */
-- (void)startCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
+- (void)startAudioWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
 
 /**
  * 停止与智能体聊天
@@ -82,7 +82,7 @@ NS_ASSUME_NONNULL_BEGIN
  * 3. 清理会话资源
  * 4. 回调通知会话终止结果
  */
-- (void)stopCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
+- (void)stopAudioWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
 
 /**
  * 获取Token

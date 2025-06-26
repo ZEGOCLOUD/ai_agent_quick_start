@@ -208,7 +208,7 @@
             return;
         }
         __weak typeof(self) weakSelf = self;
-        [[ZegoAIAgentServiceAPI sharedInstance] startCallWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+        [[ZegoAIAgentServiceAPI sharedInstance] startAudioWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) return;
             strongSelf.loginLogoutButton.enabled = YES;
@@ -228,7 +228,7 @@
     [self unregisterEventHandler];
     
     __weak typeof(self) weakSelf = self;
-    [[ZegoAIAgentServiceAPI sharedInstance] stopCallWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+    [[ZegoAIAgentServiceAPI sharedInstance] stopAudioWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         strongSelf.loginLogoutButton.enabled = YES;
         [strongSelf.loginLogoutLoading stopAnimating];
