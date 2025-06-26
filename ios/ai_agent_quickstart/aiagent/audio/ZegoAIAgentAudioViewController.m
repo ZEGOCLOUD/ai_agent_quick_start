@@ -193,9 +193,9 @@
     if (!self.isLoggedIn) {
         [self startAudioChat];
     } else {
-        [self stopChat];
+        [self stopAudioChat];
     }
-}
+} 
 
 - (void)startAudioChat {
     [self registerEventHandler];
@@ -224,7 +224,7 @@
     }];
 }
 
-- (void)stopChat {
+- (void)stopAudioChat {
     [self unregisterEventHandler];
     
     __weak typeof(self) weakSelf = self;

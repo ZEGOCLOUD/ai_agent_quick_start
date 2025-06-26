@@ -49,6 +49,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)getRoomId;
 
 /**
+ * 开始与数字人聊天
+ * @param completion 开始聊天的回调，成功返回agentInstanceId
+ */
+- (void)startDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
+
+/**
+ * 结束数字人聊天
+ * @param completion 停止聊天的回调
+ */
+- (void)stopDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
+
+/**
  * 开始与智能体聊天
  * @param completion 开始聊天的回调，成功返回agentInstanceId
  *

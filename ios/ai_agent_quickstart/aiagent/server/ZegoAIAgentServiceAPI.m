@@ -10,6 +10,7 @@
 #import <UIKit/UIKit.h>
 #import <ZegoExpressEngine/ZegoExpressEngine.h>
 #import <ZegoExpressEngine/ZegoExpressEventHandler.h>
+#import <ZegoDigitalMobile/ZegoDigitalMobile.h>
 
 #import "ZegoKey.h"
 
@@ -32,6 +33,9 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 @property (nonatomic, copy) NSString *userId;
 @property (nonatomic, copy) NSString *userStreamId;
 @property (nonatomic, copy) NSString *roomId;
+
+/// 数字人移动端实例数组，用于管理多个数字人
+@property (nonatomic, strong) NSMutableArray<id<IZegoDigitalMobile>>* digitalMobileArray;
 
 @end
 
@@ -84,6 +88,14 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
             completion(tokenResponse);
         }
     }];
+}
+
+- (void)startDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
+    
+}
+
+- (void)stopDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
+
 }
 
 - (void)startCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
@@ -358,6 +370,36 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 //      比如用户说话状态、机器人说话状态、ASR识别的文本、大模型回答的文本。客户端监听房间自定义消息，解析对应的状态事件来渲染UI
 - (void)onRecvExperimentalAPI:(NSString *)content{
     [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] handleExpressExperimentalAPIContent:content];
+}
+
+// 同步视频帧到数字人
+- (void)onRemoteVideoFrameRawData:(unsigned char **)data
+                       dataLength:(unsigned int *)dataLength
+                            param:(ZegoVideoFrameParam *)param
+                         streamID:(NSString *)streamID {
+    // 转换参数格式
+    ZDMVideoFrameParam *digitalParam = [[ZDMVideoFrameParam alloc] init];
+    digitalParam.format = (ZDMVideoFrameFormat)param.format;
+    digitalParam.width = param.size.width;
+    digitalParam.height = param.size.height;
+    digitalParam.rotation = param.rotation;
+    
+    
+    for (int i = 0; i < 4; i++) {
+        [digitalParam setStride: param.strides[i] atIndex:i];
+    }
+    
+    // 遍历所有数字人API进行数据回调
+    for (id<IZegoDigitalMobile> digitalMobile in self.digitalMobileArray) {
+        [digitalMobile onRemoteVideoFrameRawData:data dataLength:dataLength param:digitalParam streamID:streamID];
+    }
+}
+
+- (void)onPlayerSyncRecvSEI:(NSData *)data streamID:(NSString *)streamID{
+    // 遍历所有数字人API进行SEI数据回调
+    for (id<IZegoDigitalMobile> digitalMobile in self.digitalMobileArray) {
+        [digitalMobile onPlayerSyncRecvSEI:streamID data:data];
+    }
 }
 
 #pragma mark - Http API Methods
