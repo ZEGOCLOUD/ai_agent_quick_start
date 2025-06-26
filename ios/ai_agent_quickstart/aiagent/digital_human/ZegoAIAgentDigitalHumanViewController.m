@@ -19,7 +19,6 @@
 @interface ZegoAIAgentDigitalHumanViewController ()<ZegoAIAgentDigitalHumanEventHandler>
 
 // UI组件
-@property (nonatomic, strong) UIView *videoContainer;
 @property (nonatomic, strong) UIButton *backButton;
 
 @property (nonatomic, strong) id<IZegoDigitalMobile> digitalMobile;
@@ -31,7 +30,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = [UIColor blackColor];
+    self.view.backgroundColor = [UIColor whiteColor];
 
     [self setupUI];
 
@@ -47,10 +46,12 @@
 }
 
 - (void)setupUI {
+    [self setupPreviewView];
+    
     // 返回按钮
     self.backButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [self.backButton setTitle:@"← 返回" forState:UIControlStateNormal];
-    [self.backButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [self.backButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     self.backButton.titleLabel.font = [UIFont systemFontOfSize:16];
     [self.backButton addTarget:self action:@selector(backButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.backButton];
@@ -58,28 +59,13 @@
         make.top.equalTo(self.view.mas_safeAreaLayoutGuideTop).offset(10);
         make.left.equalTo(self.view.mas_left).offset(16);
     }];
-    
-    // 数字人视频容器
-    self.videoContainer = [[UIView alloc] init];
-    self.videoContainer.backgroundColor = [UIColor colorWithWhite:0.1 alpha:1];
-    self.videoContainer.layer.cornerRadius = 12;
-    self.videoContainer.layer.masksToBounds = YES;
-    [self.view addSubview:self.videoContainer];
-    [self.videoContainer mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(self.backButton.mas_bottom).offset(20);
-        make.left.equalTo(self.view.mas_left).offset(20);
-        make.right.equalTo(self.view.mas_right).offset(-20);
-        make.height.mas_equalTo(300);
-    }];
-    
-    [self setupPreviewView];
 }
 
 - (void)setupPreviewView {
     // 创建并添加previewView
     self.previewView = [[ZegoPreviewView alloc] init];
     [self.view addSubview:self.previewView];
-    
+
     [self.previewView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self.view);
     }];
@@ -140,13 +126,7 @@
     [[ZegoAIAgentServiceAPI sharedInstance] registerDigitalHumanEventHandler:nil];
 
     __weak typeof(self) weakSelf = self;
-    [[ZegoAIAgentServiceAPI sharedInstance] stopDigitalHumanWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        
-        if (!success) {
-            [strongSelf showToast:[NSString stringWithFormat:@"Failed to stop digital human chat: %@", errorMessage]];
-        }
-    }];
+    [[ZegoAIAgentServiceAPI sharedInstance] stopDigitalHumanWithCompletion:nil];
     
     // 清理digitalMobile
     if (self.digitalMobile) {
