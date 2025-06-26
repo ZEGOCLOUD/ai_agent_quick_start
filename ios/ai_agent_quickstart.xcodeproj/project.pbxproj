@@ -13,6 +13,8 @@
 		410B35182DA7CE0D00CFA563 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 410B35172DA7CE0D00CFA563 /* Assets.xcassets */; };
 		410B351B2DA7CE0D00CFA563 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 410B351A2DA7CE0D00CFA563 /* Base */; };
 		410B351E2DA7CE0D00CFA563 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B351D2DA7CE0D00CFA563 /* main.m */; };
+		41868C9E2E0D321D009F9692 /* ZegoDigitalMobile.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41868C9D2E0D321D009F9692 /* ZegoDigitalMobile.xcframework */; };
+		41868C9F2E0D321D009F9692 /* ZegoDigitalMobile.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 41868C9D2E0D321D009F9692 /* ZegoDigitalMobile.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		419158A02DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m in Sources */ = {isa = PBXBuildFile; fileRef = 4191588B2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m */; };
 		419158A12DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.m in Sources */ = {isa = PBXBuildFile; fileRef = 4191588D2DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.m */; };
 		419158A22DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 419158912DB782ED009BAA71 /* ZegoAIAgentSubtitlesMessageDispatcher.m */; };
@@ -31,6 +33,20 @@
 		B7A0E32150EA6585986D6DA4 /* Pods_ai_agent_quickstart.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD7DBC0F763F357DC3BD209B /* Pods_ai_agent_quickstart.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		41868CA02E0D321D009F9692 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				41868C9F2E0D321D009F9692 /* ZegoDigitalMobile.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		410B35082DA7CE0A00CFA563 /* ai_agent_quickstart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ai_agent_quickstart.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		410B350B2DA7CE0A00CFA563 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -42,6 +58,7 @@
 		410B351A2DA7CE0D00CFA563 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		410B351C2DA7CE0D00CFA563 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		410B351D2DA7CE0D00CFA563 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		41868C9D2E0D321D009F9692 /* ZegoDigitalMobile.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = ZegoDigitalMobile.xcframework; path = libs/ZegoDigitalMobile/ZegoDigitalMobile.xcframework; sourceTree = "<group>"; };
 		4191588A2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesColors.h; sourceTree = "<group>"; };
 		4191588B2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesColors.m; sourceTree = "<group>"; };
 		4191588C2DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesDefines.h; sourceTree = "<group>"; };
@@ -84,6 +101,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B7A0E32150EA6585986D6DA4 /* Pods_ai_agent_quickstart.framework in Frameworks */,
+				41868C9E2E0D321D009F9692 /* ZegoDigitalMobile.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,6 +248,7 @@
 		D8617B052F094CBD82AB3FED /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				41868C9D2E0D321D009F9692 /* ZegoDigitalMobile.xcframework */,
 				41A863282DA7EF2A00B1A58B /* ZegoExpressEngine.xcframework */,
 				BD7DBC0F763F357DC3BD209B /* Pods_ai_agent_quickstart.framework */,
 			);
@@ -248,6 +267,7 @@
 				410B35052DA7CE0A00CFA563 /* Frameworks */,
 				410B35062DA7CE0A00CFA563 /* Resources */,
 				07223FD6C1516011AE4FCB37 /* [CP] Embed Pods Frameworks */,
+				41868CA02E0D321D009F9692 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
