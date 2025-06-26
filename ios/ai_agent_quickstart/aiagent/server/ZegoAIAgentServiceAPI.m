@@ -10,7 +10,6 @@
 #import <UIKit/UIKit.h>
 #import <ZegoExpressEngine/ZegoExpressEngine.h>
 #import <ZegoExpressEngine/ZegoExpressEventHandler.h>
-#import <ZegoDigitalMobile/ZegoDigitalMobile.h>
 
 #import "ZegoKey.h"
 
@@ -34,8 +33,11 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 @property (nonatomic, copy) NSString *userStreamId;
 @property (nonatomic, copy) NSString *roomId;
 
-/// 数字人移动端实例数组，用于管理多个数字人
-@property (nonatomic, strong) NSMutableArray<id<IZegoDigitalMobile>>* digitalMobileArray;
+/// 音频事件处理器
+@property (nonatomic, weak) id<ZegoAIAgentAudioEventHandler> audioEventHandler;
+
+/// 数字人事件处理器
+@property (nonatomic, weak) id<ZegoAIAgentDigitalHumanEventHandler> digitalHumanEventHandler;
 
 @end
 
@@ -71,6 +73,14 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 
 - (NSString *)getRoomId {
     return self.roomId;
+}
+
+- (void)registerAudioEventHandler:(id<ZegoAIAgentAudioEventHandler>)handler {
+    self.audioEventHandler = handler;
+}
+
+- (void)registerDigitalHumanEventHandler:(id<ZegoAIAgentDigitalHumanEventHandler>)handler {
+    self.digitalHumanEventHandler = handler;
 }
 
 - (void)getTokenWithCompletion:(void (^)(ZegoAIGetTokenResponse *response))completion {
@@ -484,10 +494,11 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 
 //2. RTC房间事件消息协议
 //实时音视频 服务端 API 推送自定义消息 - 开发者中心 - ZEGO即构科技
-//描述： 用户与Agent进行语音对话期间，服务端通过RTC房间自定义消息下发一些状态信息，
-//      比如用户说话状态、机器人说话状态、ASR识别的文本、大模型回答的文本。客户端监听房间自定义消息，解析对应的状态事件来渲染UI
 - (void)onRecvExperimentalAPI:(NSString *)content{
-    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] handleExpressExperimentalAPIContent:content];
+    // 抛出给音频事件处理器处理
+    if (self.audioEventHandler && [self.audioEventHandler respondsToSelector:@selector(onRecvExperimentalAPI:)]) {
+        [self.audioEventHandler onRecvExperimentalAPI:content];
+    }
 }
 
 // 同步视频帧到数字人
@@ -495,28 +506,16 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
                        dataLength:(unsigned int *)dataLength
                             param:(ZegoVideoFrameParam *)param
                          streamID:(NSString *)streamID {
-    // 转换参数格式
-    ZDMVideoFrameParam *digitalParam = [[ZDMVideoFrameParam alloc] init];
-    digitalParam.format = (ZDMVideoFrameFormat)param.format;
-    digitalParam.width = param.size.width;
-    digitalParam.height = param.size.height;
-    digitalParam.rotation = param.rotation;
-    
-    
-    for (int i = 0; i < 4; i++) {
-        [digitalParam setStride: param.strides[i] atIndex:i];
-    }
-    
-    // 遍历所有数字人API进行数据回调
-    for (id<IZegoDigitalMobile> digitalMobile in self.digitalMobileArray) {
-        [digitalMobile onRemoteVideoFrameRawData:data dataLength:dataLength param:digitalParam streamID:streamID];
+    // 抛出给数字人事件处理器处理
+    if (self.digitalHumanEventHandler && [self.digitalHumanEventHandler respondsToSelector:@selector(onRemoteVideoFrameRawData:dataLength:param:streamID:)]) {
+        [self.digitalHumanEventHandler onRemoteVideoFrameRawData:data dataLength:dataLength param:param streamID:streamID];
     }
 }
 
 - (void)onPlayerSyncRecvSEI:(NSData *)data streamID:(NSString *)streamID{
-    // 遍历所有数字人API进行SEI数据回调
-    for (id<IZegoDigitalMobile> digitalMobile in self.digitalMobileArray) {
-        [digitalMobile onPlayerSyncRecvSEI:streamID data:data];
+    // 抛出给数字人事件处理器处理
+    if (self.digitalHumanEventHandler && [self.digitalHumanEventHandler respondsToSelector:@selector(onPlayerSyncRecvSEI:streamID:)]) {
+        [self.digitalHumanEventHandler onPlayerSyncRecvSEI:data streamID:streamID];
     }
 }
 

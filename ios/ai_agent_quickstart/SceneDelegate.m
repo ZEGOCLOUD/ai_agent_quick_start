@@ -6,7 +6,8 @@
 //
 
 #import "SceneDelegate.h"
-#import "aiagent/ZegoAIAgentHomeViewController.h"
+
+#import "ZegoAIAgentHomeViewController.h"
 
 @interface SceneDelegate ()
 

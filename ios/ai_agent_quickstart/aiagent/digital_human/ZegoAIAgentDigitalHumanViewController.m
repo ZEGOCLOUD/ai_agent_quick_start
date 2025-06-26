@@ -11,17 +11,19 @@
 #import <AVFoundation/AVFoundation.h>
 #import <Masonry/Masonry.h>
 #import <ZegoDigitalMobile/ZegoDigitalMobile.h>
+#import <ZegoExpressEngine/ZegoExpressEngine.h>
 
 #import "ZegoAIAgentServiceAPI.h"
-#import "ZegoAIAgentSubtitlesTableView.h"
-#import "ZegoAIAgentSubtitlesMessageDispatcher.h"
+#import "ZegoAIAgentDigitalHumanEventHandler.h"
 
-@interface ZegoAIAgentDigitalHumanViewController ()<ZegoAIAgentSubtitlesEventHandler>
+@interface ZegoAIAgentDigitalHumanViewController ()<ZegoAIAgentDigitalHumanEventHandler>
 
 // UI组件
 @property (nonatomic, strong) UIView *videoContainer;
 @property (nonatomic, strong) UIButton *backButton;
+
 @property (nonatomic, strong) id<IZegoDigitalMobile> digitalMobile;
+@property (nonatomic, strong) ZegoPreviewView *previewView;
 
 @end
 
@@ -40,6 +42,8 @@
 - (void)dealloc {
     // 界面销毁时自动停止数字人聊天
     [self stopDigitalHumanChat];
+    
+    self.previewView = nil;
 }
 
 - (void)setupUI {
@@ -67,21 +71,59 @@
         make.right.equalTo(self.view.mas_right).offset(-20);
         make.height.mas_equalTo(300);
     }];
+    
+    [self setupPreviewView];
+}
+
+- (void)setupPreviewView {
+    // 创建并添加previewView
+    self.previewView = [[ZegoPreviewView alloc] init];
+    [self.view addSubview:self.previewView];
+    
+    [self.previewView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(self.view);
+    }];
 }
 
 - (void)startDigitalHumanChat {
+    // 设置自己为数字人事件处理器
+    [[ZegoAIAgentServiceAPI sharedInstance] registerDigitalHumanEventHandler:self];
+
     [self requestAudioPermission:^(BOOL granted) {
         if (!granted) {
             [self showToast:@"No audio permission granted"];
             return;
         }
-        
+
         __weak typeof(self) weakSelf = self;
         [[ZegoAIAgentServiceAPI sharedInstance] startDigitalHumanWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) return;
             
             if (success) {
+                // 创建数字人实例
+                strongSelf.digitalMobile = [ZegoDigitalMobileFactory create];
+                if (!strongSelf.digitalMobile) {
+                    [strongSelf showToast:@"创建数字人实例失败"];
+                } else {
+                    // 启动数字人（设置委托时再次检查页面状态）
+                    if (!strongSelf.view.window) {
+                        // 页面已经不在显示，清理资源
+                        strongSelf.digitalMobile = nil;
+                        NSLog(@"Page dismissed, cleaning up digital mobile instance");
+                        return;
+                    }
+                    
+                    // 启动数字人
+                    [strongSelf.digitalMobile start:@"TODO_digitalHumanEncodeConfig" delegate:strongSelf];
+                    
+                    // 绑定渲染视图
+                    if (strongSelf.previewView) {
+                        [strongSelf.digitalMobile attach:strongSelf.previewView];
+                    } else {
+                        NSLog(@"previewView is nil, cannot attach");
+                    }
+                }
             } else {
                 [strongSelf showToast:[NSString stringWithFormat:@"Failed to start digital human chat: %@", errorMessage]];
             }
@@ -90,6 +132,9 @@
 }
 
 - (void)stopDigitalHumanChat {
+    // 清除数字人事件处理器
+    [[ZegoAIAgentServiceAPI sharedInstance] registerDigitalHumanEventHandler:nil];
+
     __weak typeof(self) weakSelf = self;
     [[ZegoAIAgentServiceAPI sharedInstance] stopDigitalHumanWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
@@ -98,6 +143,14 @@
             [strongSelf showToast:[NSString stringWithFormat:@"Failed to stop digital human chat: %@", errorMessage]];
         }
     }];
+    
+    // 清理digitalMobile
+    if (self.digitalMobile) {
+        // 停止数字人
+        [self.digitalMobile stop];
+        
+        self.digitalMobile = nil;
+    }
 }
 
 - (void)requestAudioPermission:(void(^)(BOOL granted))completion {
@@ -122,6 +175,42 @@
             });
         }];
     });
+}
+
+#pragma mark - ZegoAIAgentDigitalHumanEventHandler
+
+- (void)onRemoteVideoFrameRawData:(unsigned char **)data
+                       dataLength:(unsigned int *)dataLength
+                            param:(ZegoVideoFrameParam *)param
+                         streamID:(NSString *)streamID {
+    // 处理远程视频帧原始数据
+    NSLog(@"收到远程视频帧数据: streamID=%@, 尺寸=%dx%d", streamID, (int)param.size.width, (int)param.size.height);
+
+    // 转换参数格式并传递给数字人API
+    ZDMVideoFrameParam *digitalParam = [[ZDMVideoFrameParam alloc] init];
+    digitalParam.format = (ZDMVideoFrameFormat)param.format;
+    digitalParam.width = param.size.width;
+    digitalParam.height = param.size.height;
+    digitalParam.rotation = param.rotation;
+
+    for (int i = 0; i < 4; i++) {
+        [digitalParam setStride: param.strides[i] atIndex:i];
+    }
+
+    // 如果有数字人实例，传递数据
+    if (self.digitalMobile) {
+        [self.digitalMobile onRemoteVideoFrameRawData:data dataLength:dataLength param:digitalParam streamID:streamID];
+    }
+}
+
+- (void)onPlayerSyncRecvSEI:(NSData *)data streamID:(NSString *)streamID {
+    // 处理播放器同步接收SEI数据
+    NSLog(@"收到SEI数据: streamID=%@, 数据长度=%lu", streamID, (unsigned long)data.length);
+
+    // 如果有数字人实例，传递SEI数据
+    if (self.digitalMobile) {
+        [self.digitalMobile onPlayerSyncRecvSEI:streamID data:data];
+    }
 }
 
 #pragma mark - Button Actions

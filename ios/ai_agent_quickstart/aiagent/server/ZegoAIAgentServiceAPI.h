@@ -6,8 +6,12 @@
 //
 
 #import <Foundation/Foundation.h>
+
 #import "ZegoAIServiceCommonResponse.h"
 #import "ZegoAIGetTokenResponse.h"
+
+#import "ZegoAIAgentAudioEventHandler.h"
+#import "ZegoAIAgentDigitalHumanEventHandler.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -41,6 +45,18 @@ NS_ASSUME_NONNULL_BEGIN
  * @return 用户ID
  */
 - (NSString *)getUserId;
+
+/**
+ * 注册音频事件处理器
+ * @param handler 音频事件处理器
+ */
+- (void)registerAudioEventHandler:(id<ZegoAIAgentAudioEventHandler>)handler;
+
+/**
+ * 注册数字人事件处理器
+ * @param handler 数字人事件处理器
+ */
+- (void)registerDigitalHumanEventHandler:(id<ZegoAIAgentDigitalHumanEventHandler>)handler;
 
 /**
  * 获取当前房间ID

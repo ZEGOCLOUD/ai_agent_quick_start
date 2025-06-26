@@ -7,8 +7,9 @@
 #import "ZegoAIAgentServiceAPI.h"
 #import "ZegoAIAgentSubtitlesTableView.h"
 #import "ZegoAIAgentSubtitlesMessageDispatcher.h"
+#import "ZegoAIAgentAudioEventHandler.h"
 
-@interface ZegoAIAgentAudioViewController ()<ZegoAIAgentSubtitlesEventHandler>
+@interface ZegoAIAgentAudioViewController ()<ZegoAIAgentSubtitlesEventHandler, ZegoAIAgentAudioEventHandler>
 
 // 前景UI组件
 @property (nonatomic, strong) UILabel *roomIdLabel;
@@ -198,8 +199,12 @@
 } 
 
 - (void)startAudioChat {
-    [self registerEventHandler];
+    /// 设置自己为字幕事件处理器
+    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] registerEventHandler:self];
     
+    // 设置自己为音频事件处理器
+    [[ZegoAIAgentServiceAPI sharedInstance] registerAudioEventHandler:self];
+
     [self requestAudioPermission:^(BOOL granted) {
         if (!granted) {
             [self showToast:@"No audio permission granted"];
@@ -225,8 +230,12 @@
 }
 
 - (void)stopAudioChat {
-    [self unregisterEventHandler];
-    
+    /// 清除字幕事件处理器
+    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] unregisterEventHandler:self];
+
+    // 清除音频事件处理器
+    [[ZegoAIAgentServiceAPI sharedInstance] registerAudioEventHandler:nil];
+
     __weak typeof(self) weakSelf = self;
     [[ZegoAIAgentServiceAPI sharedInstance] stopAudioWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
@@ -281,20 +290,21 @@
 
 #pragma mark - ZegoAIAgentSubtitlesEventHandler
 
-- (void)registerEventHandler {
-    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] registerEventHandler:self];
-}
-
-- (void)unregisterEventHandler {
-    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] unregisterEventHandler:self];
-}
-
 - (void)onRecvAsrChatMsg:(ZegoAIAgentAudioSubtitlesMessage *)message {
     [self.subtitlesTableView handleRecvAsrMessage:message];
 }
 
 - (void)onRecvLLMChatMsg:(ZegoAIAgentAudioSubtitlesMessage *)message {
     [self.subtitlesTableView handleRecvLLMMessage:message];
+}
+
+#pragma mark - ZegoAIAgentAudioEventHandler
+
+// 用户与Agent进行语音对话期间，服务端通过RTC房间自定义消息下发一些状态信息，
+// 比如用户说话状态、机器人说话状态、ASR识别的文本、大模型回答的文本。客户端监听房间自定义消息，解析对应的状态事件来渲染UI
+- (void)onRecvExperimentalAPI:(NSString *)content {
+    // 处理实验性API消息，转发给字幕消息分发器
+    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] handleExpressExperimentalAPIContent:content];
 }
 
 #pragma mark - Button Actions

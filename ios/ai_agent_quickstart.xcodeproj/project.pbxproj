@@ -65,6 +65,8 @@
 		41868CA92E0D3A79009F9692 /* ZegoAIAgentHomeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentHomeViewController.m; sourceTree = "<group>"; };
 		41868CAF2E0D3A9B009F9692 /* ZegoAIAgentDigitalHumanViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentDigitalHumanViewController.h; sourceTree = "<group>"; };
 		41868CB02E0D3A9B009F9692 /* ZegoAIAgentDigitalHumanViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentDigitalHumanViewController.m; sourceTree = "<group>"; };
+		41868CB52E0D42A7009F9692 /* ZegoAIAgentAudioEventHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentAudioEventHandler.h; sourceTree = "<group>"; };
+		41868CB62E0D42B1009F9692 /* ZegoAIAgentDigitalHumanEventHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentDigitalHumanEventHandler.h; sourceTree = "<group>"; };
 		4191588A2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesColors.h; sourceTree = "<group>"; };
 		4191588B2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZegoAIAgentSubtitlesColors.m; sourceTree = "<group>"; };
 		4191588C2DB782ED009BAA71 /* ZegoAIAgentSubtitlesDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZegoAIAgentSubtitlesDefines.h; sourceTree = "<group>"; };
@@ -154,6 +156,7 @@
 		41868CB12E0D3A9B009F9692 /* digital_human */ = {
 			isa = PBXGroup;
 			children = (
+				41868CB62E0D42B1009F9692 /* ZegoAIAgentDigitalHumanEventHandler.h */,
 				41868CAF2E0D3A9B009F9692 /* ZegoAIAgentDigitalHumanViewController.h */,
 				41868CB02E0D3A9B009F9692 /* ZegoAIAgentDigitalHumanViewController.m */,
 			);
@@ -235,6 +238,7 @@
 			isa = PBXGroup;
 			children = (
 				4191589F2DB782ED009BAA71 /* subtitles */,
+				41868CB52E0D42A7009F9692 /* ZegoAIAgentAudioEventHandler.h */,
 				41A8631F2DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.h */,
 				41A863202DA7E69B00B1A58B /* ZegoAIAgentAudioViewController.m */,
 			);
