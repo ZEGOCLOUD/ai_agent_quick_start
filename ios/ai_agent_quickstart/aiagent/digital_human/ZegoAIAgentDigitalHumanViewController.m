@@ -16,11 +16,17 @@
 #import "ZegoAIAgentServiceAPI.h"
 #import "ZegoAIAgentDigitalHumanEventHandler.h"
 
-@interface ZegoAIAgentDigitalHumanViewController ()<ZegoAIAgentDigitalHumanEventHandler>
+@interface ZegoAIAgentDigitalHumanViewController ()<ZegoAIAgentDigitalHumanEventHandler, ZegoDigitalMobileDelegate>
 
 // UI组件
 @property (nonatomic, strong) UIButton *backButton;
 
+// loading
+@property (nonatomic, strong) UIView *loadingView;
+@property (nonatomic, strong) UIActivityIndicatorView *loadingIndicator;
+@property (nonatomic, strong) UILabel *loadingLabel;
+
+// digital human
 @property (nonatomic, strong) id<IZegoDigitalMobile> digitalMobile;
 @property (nonatomic, strong) ZegoPreviewView *previewView;
 
@@ -47,7 +53,8 @@
 
 - (void)setupUI {
     [self setupPreviewView];
-    
+    [self setupLoadingView];
+
     // 返回按钮
     self.backButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [self.backButton setTitle:@"← 返回" forState:UIControlStateNormal];
@@ -64,6 +71,10 @@
 - (void)setupPreviewView {
     // 创建并添加previewView
     self.previewView = [[ZegoPreviewView alloc] init];
+
+    // 设置背景色以确保视图渲染上下文正确初始化（这对视频显示很重要）
+    self.previewView.backgroundColor = [UIColor whiteColor];
+
     [self.view addSubview:self.previewView];
 
     [self.previewView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -71,20 +82,85 @@
     }];
 }
 
+- (void)setupLoadingView {
+    // 创建 loading 容器视图
+    self.loadingView = [[UIView alloc] init];
+    self.loadingView.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.7];
+    self.loadingView.layer.cornerRadius = 10;
+    [self.view addSubview:self.loadingView];
+
+    // 创建加载指示器（浅紫色）
+    if (@available(iOS 13.0, *)) {
+        self.loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleLarge];
+    } else {
+        self.loadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+    }
+    self.loadingIndicator.color = [UIColor colorWithRed:0.7 green:0.6 blue:1.0 alpha:1.0]; // 浅紫色
+    [self.loadingView addSubview:self.loadingIndicator];
+
+    // 创建加载文本
+    self.loadingLabel = [[UILabel alloc] init];
+    self.loadingLabel.text = @"数字人加载中...";
+    self.loadingLabel.textColor = [UIColor whiteColor];
+    self.loadingLabel.font = [UIFont systemFontOfSize:16];
+    self.loadingLabel.textAlignment = NSTextAlignmentCenter;
+    [self.loadingView addSubview:self.loadingLabel];
+
+    // 设置约束
+    [self.loadingView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.center.equalTo(self.view);
+        make.width.mas_equalTo(200);
+        make.height.mas_equalTo(120);
+    }];
+
+    [self.loadingIndicator mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.loadingView);
+        make.top.equalTo(self.loadingView).offset(20);
+    }];
+
+    [self.loadingLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.loadingView);
+        make.top.equalTo(self.loadingIndicator.mas_bottom).offset(15);
+        make.left.equalTo(self.loadingView).offset(10);
+        make.right.equalTo(self.loadingView).offset(-10);
+    }];
+
+    // 初始状态隐藏
+    self.loadingView.hidden = YES;
+}
+
+- (void)showLoading {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.loadingView.hidden = NO;
+        [self.loadingIndicator startAnimating];
+        NSLog(@"显示 loading 界面");
+    });
+}
+
+- (void)hideLoading {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.loadingView.hidden = YES;
+        [self.loadingIndicator stopAnimating];
+        NSLog(@"隐藏 loading 界面");
+    });
+}
+
 - (void)startDigitalHumanChat {
+    // 显示 loading
+    [self showLoading];
+
     // 设置自己为数字人事件处理器
     [[ZegoAIAgentServiceAPI sharedInstance] registerDigitalHumanEventHandler:self];
 
     [self requestAudioPermission:^(BOOL granted) {
         if (!granted) {
+            [self hideLoading];
             [self showToast:@"No audio permission granted"];
             return;
         }
 
         __weak typeof(self) weakSelf = self;
-        [[ZegoAIAgentServiceAPI sharedInstance] startDigitalHumanWithDigitalHumanId:@"digital_human_id_ios"
-                                                                            configId:@"mobile"
-                                                                          completion:^(BOOL success, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig) {
+        [[ZegoAIAgentServiceAPI sharedInstance] startDigitalHumanWithCompletion:^(BOOL success, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) return;
 
@@ -109,12 +185,15 @@
 
                     // 绑定渲染视图
                     if (strongSelf.previewView) {
+                        NSLog(@"开始绑定数字人到 previewView，frame: %@", NSStringFromCGRect(strongSelf.previewView.frame));
                         [strongSelf.digitalMobile attach:strongSelf.previewView];
+                        NSLog(@"数字人已绑定到 previewView");
                     } else {
                         NSLog(@"previewView is nil, cannot attach");
                     }
                 }
             } else {
+                [strongSelf hideLoading];
                 [strongSelf showToast:[NSString stringWithFormat:@"Failed to start digital human chat: %@", errorMessage]];
             }
         }];
@@ -194,6 +273,23 @@
     if (self.digitalMobile) {
         [self.digitalMobile onPlayerSyncRecvSEI:streamID data:data];
     }
+}
+
+#pragma mark - ZegoDigitalMobileDelegate
+
+- (void)onSurfaceFirstFrameDraw {
+    NSLog(@"数字人首帧渲染完成，隐藏 loading");
+    [self hideLoading];
+}
+
+- (void)onDigitalMobileStartSuccess {
+    NSLog(@"数字人启动成功");
+}
+
+- (void)onError:(int)errorCode errorMsg:(NSString *)errorMsg {
+    NSLog(@"数字人错误: code=%d, msg=%@", errorCode, errorMsg);
+    [self hideLoading];
+    [self showToast:[NSString stringWithFormat:@"数字人错误: %@", errorMsg]];
 }
 
 #pragma mark - Button Actions

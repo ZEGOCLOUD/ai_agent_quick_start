@@ -20,7 +20,7 @@
 typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
 
 // 环境 URL
-static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app";  // 实际URL需要替换
+static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  // 实际URL需要替换
 
 @interface ZegoAIAgentServiceAPI () <ZegoEventHandler>
 
@@ -32,6 +32,10 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 @property (nonatomic, copy) NSString *userId;
 @property (nonatomic, copy) NSString *userStreamId;
 @property (nonatomic, copy) NSString *roomId;
+
+/// digital human
+@property (nonatomic, copy) NSString *digitalHumanId;
+@property (nonatomic, copy) NSString *digitalHumanConfigId;
 
 /// 音频事件处理器
 @property (nonatomic, weak) id<ZegoAIAgentAudioEventHandler> audioEventHandler;
@@ -57,6 +61,9 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
         
         instance.agentId = @"agent_user_id_1";
         instance.agentStreamId = @"agent_stream_id_1";
+
+        instance.digitalHumanId = @"your_digitalHumanID";
+        instance.digitalHumanConfigId = @"your_digitalHumanConfigID";
     });
     return instance;
 }
@@ -100,13 +107,11 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
     }];
 }
 
-- (void)startDigitalHumanWithDigitalHumanId:(NSString * _Nullable)digitalHumanId
-                                   configId:(NSString * _Nullable)configId
-                                 completion:(void (^)(BOOL success, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion {
+- (void)startDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion {
     __weak typeof(self) weakSelf = self;
 
     // 先创建Agent实例，传入新的参数
-    [self doStartDigitalHumanWithDigitalHumanId:digitalHumanId configId:configId completion:^(ZegoAIServiceCommonResponse *response) {
+    [self doStartDigitalHumanWithDigitalHumanId:self.digitalHumanId configId:self.digitalHumanConfigId completion:^(ZegoAIServiceCommonResponse *response) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) { return; }
         
