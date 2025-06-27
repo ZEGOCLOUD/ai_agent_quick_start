@@ -3,7 +3,7 @@ import { ExpressManager } from "../solution/ExpressManager";
 import type ZegoLocalStream from "zego-express-engine-webrtc/sdk/code/zh/ZegoLocalStream.web";
 import type { ZegoStreamList } from "zego-express-engine-webrtc/sdk/code/zh/ZegoExpressEntity.web";
 import config from "../config";
-import { GetZegoToken, Start, Stop } from "../api/agent";
+import { GetZegoToken, Start, StartDigitalHuman, Stop } from "../api/agent";
 import { ElMessage } from "element-plus";
 import type { ZegoRoomStateChangedReason } from "zego-express-engine-webrtc/sdk/code/zh/ZegoExpressEntity.rtm";
 
@@ -18,6 +18,7 @@ export function useRoom() {
   }
 
   async function loginRoom(
+    type: "normal" | "digitalHuman",
     roomId: string,
     userID: string,
     userName: string,
@@ -35,7 +36,14 @@ export function useRoom() {
     console.log("loginRoom", isLogin.value);
     if (!login) throw new Error("登录RTC房间失败");
     await startPublishingStream(localStreamId);
-    const { code } = await Start();
+    let code;
+    if (type === "digitalHuman") {
+      const res = await StartDigitalHuman();
+      code = res.code;
+    } else {
+      const res = await Start();
+      code = res.code
+    }
     if (code !== 0) {
       destroy();
       throw new Error("登录失败");
@@ -68,7 +76,7 @@ export function useRoom() {
         updateType: "DELETE" | "ADD",
         streamList: ZegoStreamList[]
       ) => {
-        console.log("流更新 roomStreamUpdate", updateType, streamList);
+        console.log("流更新 roomStreamUpdate", roomID, updateType, streamList);
 
         if (updateType === "ADD" && streamList.length > 0) {
           try {

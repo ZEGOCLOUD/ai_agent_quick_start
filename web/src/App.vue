@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
-    <VoiceChat />
+    <Chat />
   </div>
 </template>
 <script setup lang="ts">
-import VoiceChat from './components/VoiceChat.vue'
+import Chat from './components/Chat.vue'
 
 </script>
 <style scoped>

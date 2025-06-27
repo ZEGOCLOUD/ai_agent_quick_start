@@ -2,7 +2,7 @@
   <div class="container">
     <!-- 语音聊天区域 -->
     <div class="voice-chat-section">
-      <div class="header">VoiceChat</div>
+      <div class="header">Chat</div>
 
       <!-- 房间信息区域 -->
       <div class="room-info">
@@ -36,9 +36,17 @@
               :loading="loading"
               type="primary"
               class="login-btn"
-              @click="handleLogin"
+              @click="handleLogin('normal')"
             >
-              LoginRoom
+            Start AI Audio Call
+            </el-button>
+            <el-button
+              v-if="!isLogin"
+              :loading="digitalHumanLoading"
+              type="primary"
+              class="login-btn"
+              @click="handleLogin('digitalHuman')">
+              Start Digital Human Call
             </el-button>
             <el-button
               v-else
@@ -58,19 +66,22 @@
           2.请先在服务端创建对应的智能体，并在Call时同步创建智能体实例
         </div>
       </div>
-
-      <!-- 聊天组件区域 -->
-      <div class="chat-container">
-        <el-collapse v-model="activeCollapse">
-          <el-collapse-item title="聊天区域" name="chat">
-            <div class="chat-section">
-              <ChatMessage :messages="messages" />
-            </div>
-          </el-collapse-item>
-        </el-collapse>
+      <div class="room-container"> 
+        <div v-show="isDigitalHuman" class="stream-container">
+          <RemoteSteamView />
+        </div>
+        <!-- 聊天组件区域 -->
+        <div class="chat-container">
+          <el-collapse v-model="activeCollapse">
+            <el-collapse-item title="聊天区域" name="chat">
+              <div class="chat-section">
+                <ChatMessage :messages="messages" />
+              </div>
+            </el-collapse-item>
+          </el-collapse>
+        </div>
       </div>
     </div>
-    <RemoteSteamView />
   </div>
 </template>
 
@@ -106,23 +117,27 @@ const userStreamId = ref("user_stream_id_1");
 
 // 状态管理
 const loading = ref(false);
+const digitalHumanLoading = ref(false);
 const activeCollapse = ref(["chat"]);
+const isDigitalHuman = ref(false);
 
 // 处理登录房间
-const handleLogin = async () => {
+const handleLogin = async (type: "normal" | "digitalHuman") => {
   try {
-    loading.value = true;
+    type === "normal" ? (loading.value = true) : (digitalHumanLoading.value = true);
     await loginRoom(
+      type,
       roomId.value,
       userId.value,
       userName.value,
       userStreamId.value
     );
+    isDigitalHuman.value = type === "digitalHuman";
   } catch (error: any) {
     console.error("登录失败", error);
     ElMessage.error(error.message || "登录失败");
   } finally {
-    loading.value = false;
+    type === "normal" ? (loading.value = false) : (digitalHumanLoading.value = false);
   }
 };
 
@@ -130,6 +145,7 @@ const handleLogin = async () => {
 const handleLogout = async () => {
   try {
     loading.value = true;
+    isDigitalHuman.value = false;
     await logoutRoom();
   } catch (error: any) {
     console.error("退出失败", error);
@@ -158,7 +174,7 @@ onMounted(async () => {
 }
 
 .voice-chat-section {
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -255,9 +271,16 @@ onMounted(async () => {
   border-radius: 4px;
   margin-top: 20px;
 }
+.room-container {
+  display: flex;
+}
+.stream-container {
+  padding: 0 0 0 20px;
+}
 
 .chat-container {
   padding: 0 20px;
+  flex: 1;
 }
 
 .chat-section {
@@ -268,7 +291,6 @@ onMounted(async () => {
   height: calc(100vh - 500px);
   overflow: hidden;
 }
-
 /* 移动端适配 */
 @media screen and (max-width: 768px) {
   .container {

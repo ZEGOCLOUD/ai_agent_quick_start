@@ -147,6 +147,38 @@ export function useChat(zg: ExpressManager) {
       }
     });
     zg.callExperimentalAPI({ method: "onRecvRoomChannelMessage", params: {} });
+    // 兼容旧的消息通道
+    // zg.off("IMRecvCustomCommand");
+    zg.on(
+      "IMRecvCustomCommand",
+      (roomID: string, fromUser: any, command: string) => {
+        console.warn("mytag IMRecvCustomCommand");
+        try {
+          const message = JSON.parse(command);
+          console.warn("IMRecvCustomCommand", message);
+          if (message.cmd && message.data) {
+            const { cmd, seq_id, round, timestamp } = message;
+            const { message_id, text, end_flag, speak_status, user_id } =
+              message.data;
+              handleRoomCommandMessage({
+                Cmd: cmd,
+                SeqId: seq_id,
+                Round: round,
+                Timestamp: timestamp,
+                Data: {
+                  MessageId: message_id,
+                  Text: text,
+                  EndFlag: end_flag,
+                  SpeakStatus: speak_status,
+                  // UserId: user_id,
+                },
+              });
+          }
+        } catch (error) {
+          console.error("解析消息失败:", error);
+        }
+      }
+    );
   }
 
   function clearMessages() {
