@@ -1,4 +1,4 @@
-package im.zego.aiagent.express.quickstart;
+package im.zego.aiagent.express.quickstart.voice;
 
 import android.text.TextUtils;
 import android.util.Log;

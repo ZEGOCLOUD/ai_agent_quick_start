@@ -1,4 +1,4 @@
-package im.zego.aiagent.express.quickstart;
+package im.zego.aiagent.express.quickstart.voice;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -12,7 +12,9 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import im.zego.aiagent.express.quickstart.AudioChatMessageParser.AudioChatMessage;
+
+import im.zego.aiagent.express.quickstart.R;
+import im.zego.aiagent.express.quickstart.voice.AudioChatMessageParser.AudioChatMessage;
 import java.util.ArrayList;
 import java.util.List;
 
