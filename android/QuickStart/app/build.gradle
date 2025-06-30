@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'im.zego.aiagent.express.quickstart'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "im.zego.aiagent.express.quickstart"
-        minSdk 26
-        targetSdk 34
+        minSdk 21
+        targetSdk 35
         versionCode 1
         versionName "1.0"
     }
@@ -44,4 +44,14 @@ dependencies {
     implementation "com.google.code.gson:gson:2.9.1"
 
     implementation 'im.zego:zim:2.19.0'
+
+    // 数字人 SDK
+    implementation 'im.zego:digitalmobile:1.0.1.0'
+
+    // 数字人 SDK 需要的第三方库
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    implementation "com.google.code.gson:gson:2.9.1"
+    implementation 'com.liulishuo.okdownload:okdownload:1.0.7'
+    implementation 'com.liulishuo.okdownload:sqlite:1.0.7'
+    implementation 'com.liulishuo.okdownload:okhttp:1.0.7'
 }
