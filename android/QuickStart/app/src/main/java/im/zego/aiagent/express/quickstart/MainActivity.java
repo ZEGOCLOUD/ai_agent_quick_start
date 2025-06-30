@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // 判断Android版本是否大于26
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             findViewById(R.id.button_video_call).setOnClickListener(view -> {
                 Intent intent = new Intent(MainActivity.this, VideoChatActivity.class);
                 startActivity(intent);
