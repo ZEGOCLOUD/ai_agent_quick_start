@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -158,8 +159,20 @@ public class AudioChatMessageParser {
             rtcRoomMessages.add(newMessage);
         }
 
-        return rtcRoomMessages.stream().sorted(Comparator.comparingLong(message -> message.seqId))
-            .map(message -> message.data.text != null ? message.data.text : "").collect(Collectors.joining());
+        // Sort messages by seqId
+        Collections.sort(rtcRoomMessages, new Comparator<AudioChatMessage>() {
+            public int compare(AudioChatMessage m1, AudioChatMessage m2) {
+                return Long.valueOf(m1.seqId).compareTo(Long.valueOf(m2.seqId));
+            }
+        });
+
+        // Join message texts
+        StringBuilder result = new StringBuilder();
+        for (AudioChatMessage message : rtcRoomMessages) {
+            result.append(message.data.text != null ? message.data.text : "");
+        }
+
+        return result.toString();
     }
 
     private void clearCacheIfNeed(AudioChatMessage newMessage) {
