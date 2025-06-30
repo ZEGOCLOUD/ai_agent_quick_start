@@ -1,5 +1,6 @@
 package im.zego.aiagent.express.quickstart;
 
+import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -7,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AudioChatMessageParser {
@@ -61,10 +62,23 @@ public class AudioChatMessageParser {
      * @param newMessage 要处理的新语音聊天文本消息
      */
     private void updateASRChatMessage(AudioChatMessage newMessage) {
-        Optional<AudioChatMessage> findMessage = rtcMessageList.stream()
-            .filter(rtcRoomMessage -> rtcRoomMessage.data.messageId.equals(newMessage.data.messageId)).findAny();
-        if (findMessage.isPresent()) {
-            AudioChatMessage existedMessage = findMessage.get();
+        AudioChatMessage findMessage = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            findMessage = rtcMessageList.stream()
+                .filter(rtcRoomMessage -> rtcRoomMessage.data.messageId.equals(newMessage.data.messageId)).findAny()
+                .get();
+        } else {
+
+            // 遍历列表，查找匹配的 messageId
+            for (AudioChatMessage rtcRoomMessage : rtcMessageList) {
+                if (rtcRoomMessage.data.messageId.equals(newMessage.data.messageId)) {
+                    findMessage = rtcRoomMessage;
+                    break; // 找到后立即退出循环
+                }
+            }
+        }
+        if (findMessage != null) {
+            AudioChatMessage existedMessage = findMessage;
             if (existedMessage.seqId < newMessage.seqId) {
                 Log.d(TAG, "本地seq_id 比较小，更新消息 = [" + newMessage + "]");
                 existedMessage.seqId = newMessage.seqId;
@@ -114,9 +128,20 @@ public class AudioChatMessageParser {
         newLLMMessage.data.messageId = newMessage.data.messageId;
         newLLMMessage.data.endFlag = newMessage.data.endFlag;
 
-        List<AudioChatMessage> roundLLMMessages = rtcMessageList.stream()
-            .filter(roomMessage -> roomMessage.round == newMessage.round && roomMessage.cmd == 4)
-            .collect(Collectors.toList());
+        List<AudioChatMessage> roundLLMMessages;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            roundLLMMessages = rtcMessageList.stream()
+                .filter(roomMessage -> roomMessage.round == newMessage.round && roomMessage.cmd == 4)
+                .collect(Collectors.toList());
+        } else {
+            roundLLMMessages = new ArrayList<>();
+            for (AudioChatMessage roomMessage : rtcMessageList) {
+                if (roomMessage.round == newMessage.round && roomMessage.cmd == 4) {
+                    roundLLMMessages.add(roomMessage);
+                }
+            }
+        }
+
         if (roundLLMMessages.isEmpty()) {
             // 如果这一轮round 在消息列表中还没有message,那么就直接插入这条消息。
             rtcMessageList.add(newLLMMessage);
@@ -158,8 +183,25 @@ public class AudioChatMessageParser {
             rtcRoomMessages.add(newMessage);
         }
 
-        return rtcRoomMessages.stream().sorted(Comparator.comparingLong(message -> message.seqId))
-            .map(message -> message.data.text != null ? message.data.text : "").collect(Collectors.joining());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return rtcRoomMessages.stream().sorted(Comparator.comparingLong(message -> message.seqId))
+                .map(message -> message.data.text != null ? message.data.text : "").collect(Collectors.joining());
+        } else {
+            // Sort messages by seqId
+            Collections.sort(rtcRoomMessages, new Comparator<AudioChatMessage>() {
+                public int compare(AudioChatMessage m1, AudioChatMessage m2) {
+                    return Long.valueOf(m1.seqId).compareTo(Long.valueOf(m2.seqId));
+                }
+            });
+
+            // Join message texts
+            StringBuilder result = new StringBuilder();
+            for (AudioChatMessage message : rtcRoomMessages) {
+                result.append(message.data.text != null ? message.data.text : "");
+            }
+
+            return result.toString();
+        }
     }
 
     private void clearCacheIfNeed(AudioChatMessage newMessage) {
