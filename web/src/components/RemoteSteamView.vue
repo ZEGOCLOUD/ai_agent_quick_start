@@ -4,7 +4,7 @@
 <script setup lang="ts"></script>
 <style scoped>
   #remoteSteamView {
-    width: 333px;
+    width: 234px;
     height: 416px;
   }
 </style>

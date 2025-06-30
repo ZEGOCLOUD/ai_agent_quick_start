@@ -12,9 +12,17 @@ export function useRoom() {
   const zegoLocalStream = ref<ZegoLocalStream | null>();
   const isLogin = ref(false);
   const permissionValid = ref(false);
-
+  let currentToken = "";
   async function initSDK() {
     return zg.initSDK(config.appId, config.server);
+  }
+
+  async function getToken(userID: string) {
+    const { token } = await GetZegoToken({ userId: userID });
+    if (!token) {
+      throw new Error("获取 token 失败");
+    }
+    currentToken = token;
   }
 
   async function loginRoom(
@@ -24,12 +32,8 @@ export function useRoom() {
     userName: string,
     localStreamId: string
   ) {
-    console.log("loginRoom");
-    const { token } = await GetZegoToken({ userId: userID });
-    if (!token) {
-      throw new Error("获取 token 失败");
-    }
-    const login = await zg.loginRoom(roomId, token, {
+    console.log("loginRoom", currentToken);
+    const login = await zg.loginRoom(roomId, currentToken, {
       userID,
       userName,
     });
@@ -152,5 +156,6 @@ export function useRoom() {
     setupEventListeners,
     loginRoom,
     logoutRoom,
+    getToken,
   };
 }

@@ -101,6 +101,7 @@ const {
   setupEventListeners,
   loginRoom,
   logoutRoom,
+  getToken
 } = useRoom();
 const {
   messages,
@@ -161,6 +162,7 @@ onMounted(async () => {
   setupEventListeners();
   setupChatEventListeners();
   checkPermission();
+  await getToken(userId.value);
 });
 </script>
 

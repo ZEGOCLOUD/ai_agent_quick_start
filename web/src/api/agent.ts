@@ -21,7 +21,7 @@ export function Start(): Promise<Response> {
 export function StartDigitalHuman(): Promise<Response> {
   return post(ActionCmd.StartDigitalHuman, {
     "digital_human_id":"20be9bfb-ef6b-4d63-8c3b-1f20077599c5",
-    "config_id":"mobile"
+    "config_id":"web"
   });
 }
 
