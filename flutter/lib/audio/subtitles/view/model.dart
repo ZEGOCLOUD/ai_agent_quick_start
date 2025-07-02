@@ -149,7 +149,7 @@ class ZegoSubtitlesViewModel {
 
   void _resortAndNotify() {
     /// 按seqId排序
-    chatMsgList.sort((a, b) => a.seqId.compareTo(b.seqId));
+    // chatMsgList.sort((a, b) => a.seqId.compareTo(b.seqId));
     historyNotifier.value = List<ZegoSubtitlesMessageModel>.from(chatMsgList);
   }
 }
