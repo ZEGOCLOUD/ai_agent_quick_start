@@ -7,8 +7,9 @@
 #import "ZegoAIAgentServiceAPI.h"
 #import "ZegoAIAgentSubtitlesTableView.h"
 #import "ZegoAIAgentSubtitlesMessageDispatcher.h"
+#import "ZegoAIAgentAudioEventHandler.h"
 
-@interface ZegoAIAgentAudioViewController ()<ZegoAIAgentSubtitlesEventHandler>
+@interface ZegoAIAgentAudioViewController ()<ZegoAIAgentSubtitlesEventHandler, ZegoAIAgentAudioEventHandler>
 
 // 前景UI组件
 @property (nonatomic, strong) UILabel *roomIdLabel;
@@ -49,13 +50,25 @@
         make.left.right.equalTo(self.view);
         make.height.mas_equalTo(48);
     }];
+    // 返回按钮
+    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [backButton setTitle:@"← Back" forState:UIControlStateNormal];
+    [backButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    backButton.titleLabel.font = [UIFont systemFontOfSize:16];
+    [backButton addTarget:self action:@selector(backButtonTapped) forControlEvents:UIControlEventTouchUpInside];
+    [titleBar addSubview:backButton];
+    [backButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(titleBar.mas_left).offset(16);
+        make.centerY.equalTo(titleBar);
+    }];
+
     UILabel *titleLabel = [[UILabel alloc] init];
     titleLabel.text = @"VoiceChat";
     titleLabel.font = [UIFont boldSystemFontOfSize:20];
     titleLabel.textColor = [UIColor blackColor];
     [titleBar addSubview:titleLabel];
     [titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(titleBar.mas_left).offset(16);
+        make.centerX.equalTo(titleBar);
         make.centerY.equalTo(titleBar);
     }];
 
@@ -181,13 +194,17 @@
     if (!self.isLoggedIn) {
         [self startAudioChat];
     } else {
-        [self stopChat];
+        [self stopAudioChat];
     }
-}
+} 
 
 - (void)startAudioChat {
-    [self registerEventHandler];
+    /// 设置自己为字幕事件处理器
+    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] registerEventHandler:self];
     
+    // 设置自己为音频事件处理器
+    [[ZegoAIAgentServiceAPI sharedInstance] registerAudioEventHandler:self];
+
     [self requestAudioPermission:^(BOOL granted) {
         if (!granted) {
             [self showToast:@"No audio permission granted"];
@@ -196,7 +213,7 @@
             return;
         }
         __weak typeof(self) weakSelf = self;
-        [[ZegoAIAgentServiceAPI sharedInstance] startCallWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+        [[ZegoAIAgentServiceAPI sharedInstance] startAudioWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) return;
             strongSelf.loginLogoutButton.enabled = YES;
@@ -212,11 +229,15 @@
     }];
 }
 
-- (void)stopChat {
-    [self unregisterEventHandler];
-    
+- (void)stopAudioChat {
+    /// 清除字幕事件处理器
+    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] unregisterEventHandler:self];
+
+    // 清除音频事件处理器
+    [[ZegoAIAgentServiceAPI sharedInstance] registerAudioEventHandler:nil];
+
     __weak typeof(self) weakSelf = self;
-    [[ZegoAIAgentServiceAPI sharedInstance] stopCallWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+    [[ZegoAIAgentServiceAPI sharedInstance] stopAudioWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         strongSelf.loginLogoutButton.enabled = YES;
         [strongSelf.loginLogoutLoading stopAnimating];
@@ -269,20 +290,27 @@
 
 #pragma mark - ZegoAIAgentSubtitlesEventHandler
 
-- (void)registerEventHandler {
-    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] registerEventHandler:self];
-}
-
-- (void)unregisterEventHandler {
-    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] unregisterEventHandler:self];
-}
-
 - (void)onRecvAsrChatMsg:(ZegoAIAgentAudioSubtitlesMessage *)message {
     [self.subtitlesTableView handleRecvAsrMessage:message];
 }
 
 - (void)onRecvLLMChatMsg:(ZegoAIAgentAudioSubtitlesMessage *)message {
     [self.subtitlesTableView handleRecvLLMMessage:message];
+}
+
+#pragma mark - ZegoAIAgentAudioEventHandler
+
+// 用户与Agent进行语音对话期间，服务端通过RTC房间自定义消息下发一些状态信息，
+// 比如用户说话状态、机器人说话状态、ASR识别的文本、大模型回答的文本。客户端监听房间自定义消息，解析对应的状态事件来渲染UI
+- (void)onRecvExperimentalAPI:(NSString *)content {
+    // 处理实验性API消息，转发给字幕消息分发器
+    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] handleExpressExperimentalAPIContent:content];
+}
+
+#pragma mark - Button Actions
+
+- (void)backButtonTapped {
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end

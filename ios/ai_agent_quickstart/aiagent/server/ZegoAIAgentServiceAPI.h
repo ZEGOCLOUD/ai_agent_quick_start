@@ -6,8 +6,12 @@
 //
 
 #import <Foundation/Foundation.h>
+
 #import "ZegoAIServiceCommonResponse.h"
 #import "ZegoAIGetTokenResponse.h"
+
+#import "ZegoAIAgentAudioEventHandler.h"
+#import "ZegoAIAgentDigitalHumanEventHandler.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -43,10 +47,36 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)getUserId;
 
 /**
+ * 注册音频事件处理器
+ * @param handler 音频事件处理器
+ */
+- (void)registerAudioEventHandler:(id<ZegoAIAgentAudioEventHandler>)handler;
+
+/**
+ * 注册数字人事件处理器
+ * @param handler 数字人事件处理器
+ */
+- (void)registerDigitalHumanEventHandler:(id<ZegoAIAgentDigitalHumanEventHandler>)handler;
+
+/**
  * 获取当前房间ID
  * @return 房间ID
  */
 - (NSString *)getRoomId;
+
+/**
+ * 开始与数字人聊天
+ * @param digitalHumanId 数字人ID，可选参数
+ * @param configId 配置ID，可选参数
+ * @param completion 开始聊天的回调，成功返回digitalHumanEncodeConfig
+ */
+- (void)startDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion;
+
+/**
+ * 结束数字人聊天
+ * @param completion 停止聊天的回调
+ */
+- (void)stopDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
 
 /**
  * 开始与智能体聊天
@@ -58,7 +88,7 @@ NS_ASSUME_NONNULL_BEGIN
  * 3. 建立双向通信通道
  * 4. 开始接收和处理音频/文本数据
  */
-- (void)startCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
+- (void)startAudioWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
 
 /**
  * 停止与智能体聊天
@@ -70,7 +100,7 @@ NS_ASSUME_NONNULL_BEGIN
  * 3. 清理会话资源
  * 4. 回调通知会话终止结果
  */
-- (void)stopCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
+- (void)stopAudioWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
 
 /**
  * 获取Token

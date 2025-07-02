@@ -20,7 +20,7 @@
 typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
 
 // 环境 URL
-static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app";  // 实际URL需要替换
+static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  // 实际URL需要替换
 
 @interface ZegoAIAgentServiceAPI () <ZegoEventHandler>
 
@@ -32,6 +32,16 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 @property (nonatomic, copy) NSString *userId;
 @property (nonatomic, copy) NSString *userStreamId;
 @property (nonatomic, copy) NSString *roomId;
+
+/// digital human
+@property (nonatomic, copy) NSString *digitalHumanId;
+@property (nonatomic, copy) NSString *digitalHumanConfigId;
+
+/// 音频事件处理器
+@property (nonatomic, weak) id<ZegoAIAgentAudioEventHandler> audioEventHandler;
+
+/// 数字人事件处理器
+@property (nonatomic, weak) id<ZegoAIAgentDigitalHumanEventHandler> digitalHumanEventHandler;
 
 @end
 
@@ -51,6 +61,9 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
         
         instance.agentId = @"agent_user_id_1";
         instance.agentStreamId = @"agent_stream_id_1";
+
+        instance.digitalHumanId = @"your_digitalHumanID";
+        instance.digitalHumanConfigId = @"your_digitalHumanConfigID";
     });
     return instance;
 }
@@ -67,6 +80,14 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 
 - (NSString *)getRoomId {
     return self.roomId;
+}
+
+- (void)registerAudioEventHandler:(id<ZegoAIAgentAudioEventHandler>)handler {
+    self.audioEventHandler = handler;
+}
+
+- (void)registerDigitalHumanEventHandler:(id<ZegoAIAgentDigitalHumanEventHandler>)handler {
+    self.digitalHumanEventHandler = handler;
 }
 
 - (void)getTokenWithCompletion:(void (^)(ZegoAIGetTokenResponse *response))completion {
@@ -86,11 +107,90 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
     }];
 }
 
-- (void)startCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
+- (void)startDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion {
+    __weak typeof(self) weakSelf = self;
+
+    // 先创建Agent实例，传入新的参数
+    [self doStartDigitalHumanWithDigitalHumanId:self.digitalHumanId configId:self.digitalHumanConfigId completion:^(ZegoAIServiceCommonResponse *response) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) { return; }
+        
+        if (response.code != 0) {
+            if (completion) {
+                completion(NO, response.message ?: @"创建数字人Agent实例失败", nil);
+            }
+            return;
+        }
+
+        // 从响应中获取 digital_human_config
+        NSString *digitalHumanConfig = nil;
+        if (response.data && [response.data isKindOfClass:[NSDictionary class]]) {
+            digitalHumanConfig = response.data[@"digital_human_config"];
+        }
+
+        // 创建Agent实例成功后，初始化RTC引擎
+        [strongSelf initZegoExpressEngine];
+        
+        [strongSelf enableCustomVideoRender];
+        
+        // 登录房间
+        [strongSelf loginRoom:^(int errorCode, NSDictionary *extendedData) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) { return; }
+            
+            if (errorCode != 0) {
+                NSString* errorMsg = [NSString stringWithFormat:@"进入数字人房间失败:%d", errorCode];
+                completion(NO, errorMsg, nil);
+                return;
+            }
+            
+            /**下面用来做应答延迟优化的，需要集成对应版本的ZegoExpressEngine sdk，请联系即构同学**/
+            NSString *params_publish = @"{\"method\":\"liveroom.audio.set_publish_latency_mode\",\"params\":{\"mode\":1,\"channel\":0}}";
+            [[ZegoExpressEngine sharedEngine] callExperimentalAPI:params_publish];
+            
+            // 进房后开始推流
+            [strongSelf startPushlishStream];
+            
+            // 开始播放Agent的流
+            [strongSelf startPlayStream:strongSelf.agentStreamId];
+            
+            if (completion) {
+                NSString *configToReturn = digitalHumanConfig ?: @"";
+                completion(YES, nil, configToReturn);
+            }
+        }];
+    }];
+
+}
+
+- (void)stopDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
+    __weak typeof(self) weakSelf = self;
+    
+    // 先停止聊天
+    [self doStopDigitalHumanWithCompletion:^(ZegoAIServiceCommonResponse *response) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) { return; }
+        
+        // 无论停止聊天是否成功，都释放RTC资源
+        [strongSelf unInitZegoExpressEngine];
+        
+        if (response.code == 0) {
+            if (completion) {
+                completion(YES, nil);
+            }
+        } else {
+            if (completion) {
+                completion(NO, response.message ?: @"停止聊天失败");
+            }
+        }
+    }];
+}
+
+- (void)startAudioWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
     __weak typeof(self) weakSelf = self;
     
     // 先创建Agent实例
-    [self doStartCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
+    [self doStartAudioWithCompletion:^(ZegoAIServiceCommonResponse *response) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) { return; }
         
@@ -132,11 +232,11 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
     }];
 }
 
-- (void)stopCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
+- (void)stopAudioWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
     __weak typeof(self) weakSelf = self;
     
     // 先停止聊天
-    [self doStopCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
+    [self doStopAudioWithCompletion:^(ZegoAIServiceCommonResponse *response) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) { return; }
         
@@ -157,7 +257,46 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 
 #pragma mark - Agent Instance API Methods
 
-- (void)doStartCallWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
+- (void)doStartDigitalHumanWithDigitalHumanId:(NSString * _Nullable)digitalHumanId
+                                     configId:(NSString * _Nullable)configId
+                                   completion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
+    NSString *url = [NSString stringWithFormat:@"%@/api/start-digital-human", self.currentBaseURL];
+
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+
+    // 添加新的请求参数
+    if (digitalHumanId && digitalHumanId.length > 0) {
+        params[@"digital_human_id"] = digitalHumanId;
+    }
+
+    if (configId && configId.length > 0) {
+        params[@"config_id"] = configId;
+    }
+
+    NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
+
+    [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
+        if (completion) {
+            completion(response);
+        }
+    }];
+}
+
+- (void)doStopDigitalHumanWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
+    NSString *url = [NSString stringWithFormat:@"%@/api/stop-digital-human", self.currentBaseURL];
+    
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
+    
+    [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
+        if (completion) {
+            completion(response);
+        }
+    }];
+}
+
+
+- (void)doStartAudioWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
     NSString *url = [NSString stringWithFormat:@"%@/api/start", self.currentBaseURL];
     
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -170,7 +309,7 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
     }];
 }
 
-- (void)doStopCallWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
+- (void)doStopAudioWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
     NSString *url = [NSString stringWithFormat:@"%@/api/stop", self.currentBaseURL];
     
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
@@ -196,6 +335,9 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
     engineConfig.advancedConfig = @{
         @"set_audio_volume_ducking_mode":@1,/**该配置是用来做音量闪避的**/
         @"enable_rnd_volume_adaptive":@"true",/**该配置是用来做播放音量自适用**/
+        //数字人
+        @"sideinfo_callback_version":@(3),
+        @"sideinfo_bound_to_video_decoder":@"true"
     };
     
     [ZegoExpressEngine setEngineConfig:engineConfig];
@@ -315,13 +457,37 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 
 -(void)startPlayStream:(NSString*)streamId{
     NSLog(@"开始拉流：streamID=%@", streamId);
-    [[ZegoExpressEngine sharedEngine] setPlayStreamBufferIntervalRange:streamId min:0 max:4000];
+    [[ZegoExpressEngine sharedEngine] setPlayStreamBufferIntervalRange:streamId min:0 max:2000];
     [[ZegoExpressEngine sharedEngine] startPlayingStream:streamId];
     
     /**下面用来做应答延迟优化的，需要集成对应版本的ZegoExpressEngine sdk，请联系即构同学**/
     NSString *params = [NSString stringWithFormat:@"{\"method\":\"liveroom.audio.set_play_latency_mode\",\"params\":{\"mode\":1,\"stream_id\":\"%@\"}}", streamId];
     [[ZegoExpressEngine sharedEngine] callExperimentalAPI:params];
     NSLog(@"拉流延迟模式设置完成：streamID=%@", streamId);
+}
+
+- (BOOL)enableCustomVideoRender {
+    // 自定义渲染
+    ZegoCustomVideoRenderConfig *renderConfig =
+    [[ZegoCustomVideoRenderConfig alloc] init];
+    // 选择 RawData 类型视频帧数据
+    renderConfig.bufferType = ZegoVideoBufferTypeRawData;
+    // 选择 RGB 色系数据格式
+    renderConfig.frameFormatSeries = ZegoVideoFrameFormatSeriesRGB;
+    // 指定在自定义视频渲染的同时引擎也渲染
+    renderConfig.enableEngineRender = NO;
+    
+    ZegoExpressEngine *engine = [ZegoExpressEngine sharedEngine];
+    if (!engine) {
+        NSLog(@"ZegoExpressEngine未初始化，无法启用自定义视频渲染");
+        return NO;
+    }
+    
+    [engine enableCustomVideoRender:YES config:renderConfig];
+    [engine setCustomVideoRenderHandler:self];
+    
+    NSLog(@"自定义视频渲染启用成功");
+    return YES;
 }
 
 #pragma mark - delegate ZegoEventHandler
@@ -354,10 +520,29 @@ static NSString *const kBaseURL = @"https://astounding-pothos-06fee6.netlify.app
 
 //2. RTC房间事件消息协议
 //实时音视频 服务端 API 推送自定义消息 - 开发者中心 - ZEGO即构科技
-//描述： 用户与Agent进行语音对话期间，服务端通过RTC房间自定义消息下发一些状态信息，
-//      比如用户说话状态、机器人说话状态、ASR识别的文本、大模型回答的文本。客户端监听房间自定义消息，解析对应的状态事件来渲染UI
 - (void)onRecvExperimentalAPI:(NSString *)content{
-    [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] handleExpressExperimentalAPIContent:content];
+    // 抛出给音频事件处理器处理
+    if (self.audioEventHandler && [self.audioEventHandler respondsToSelector:@selector(onRecvExperimentalAPI:)]) {
+        [self.audioEventHandler onRecvExperimentalAPI:content];
+    }
+}
+
+// 同步视频帧到数字人
+- (void)onRemoteVideoFrameRawData:(unsigned char **)data
+                       dataLength:(unsigned int *)dataLength
+                            param:(ZegoVideoFrameParam *)param
+                         streamID:(NSString *)streamID {
+    // 抛出给数字人事件处理器处理
+    if (self.digitalHumanEventHandler && [self.digitalHumanEventHandler respondsToSelector:@selector(onRemoteVideoFrameRawData:dataLength:param:streamID:)]) {
+        [self.digitalHumanEventHandler onRemoteVideoFrameRawData:data dataLength:dataLength param:param streamID:streamID];
+    }
+}
+
+- (void)onPlayerSyncRecvSEI:(NSData *)data streamID:(NSString *)streamID{
+    // 抛出给数字人事件处理器处理
+    if (self.digitalHumanEventHandler && [self.digitalHumanEventHandler respondsToSelector:@selector(onPlayerSyncRecvSEI:streamID:)]) {
+        [self.digitalHumanEventHandler onPlayerSyncRecvSEI:data streamID:streamID];
+    }
 }
 
 #pragma mark - Http API Methods
