@@ -13,9 +13,7 @@
 #import "ZegoAIAgentSubtitlesMessageModel.h"
 
 @interface ZegoAIAgentSubtitlesTableView ()<UITableViewDataSource, UITableViewDelegate>
-@property (nonatomic, assign) long msgTotalCount;                                                       // 消息总数计数器
-@property (nonatomic, strong) NSMutableDictionary<NSNumber*,ZegoAIAgentSubtitlesMessageModel*>* chatMsgList;       // 存储所有聊天消息的字典，键为消息索引
-@property (nonatomic, strong) NSMutableArray<ZegoAIAgentSubtitlesMessageModel*>* sortedChatMsgList;                // 按seqId排序的消息数组，用于展示
+@property (nonatomic, strong) NSMutableArray<ZegoAIAgentSubtitlesMessageModel*>* chatMsgList;                       // 存储所有聊天消息的有序数组
 @property (nonatomic, strong) NSMutableDictionary<NSString*,ZegoAIAgentSubtitlesMessageModel*>* tempAsrMsgList;    // 临时存储ASR(语音识别)消息的字典，键为message_id
 @property (nonatomic, strong) NSMutableDictionary<NSNumber*,NSMutableDictionary<NSNumber*, ZegoAIAgentSubtitlesMessageModel*>*>* tempLLMMsgList;  // 临时存储LLM(大语言模型)消息的嵌套字典，外层键为message_id，内层键为round id
 @property (nonatomic, strong) NSMutableOrderedSet<NSNumber*>* roundEndFlag;
@@ -35,9 +33,7 @@
                        otherTextColor:[UIColor blackColor]];
         
         // 初始化各种存储容器
-        self.chatMsgList = [[NSMutableDictionary alloc] initWithCapacity:100];
-        self.sortedChatMsgList = [[NSMutableArray alloc] initWithCapacity:100]; // 初始化排序后的消息数组
-        self.msgTotalCount = 0;
+        self.chatMsgList = [[NSMutableArray alloc] initWithCapacity:100];
         self.tempAsrMsgList = [[NSMutableDictionary alloc] initWithCapacity:5];
         self.tempLLMMsgList = [[NSMutableDictionary alloc] initWithCapacity:5];
         self.roundEndFlag = [[NSMutableOrderedSet alloc] initWithCapacity:5];
@@ -99,7 +95,7 @@
                 // 更新现有消息的内容并刷新表格
                 existAsrMsgModel.content = messageContent;
                 existAsrMsgModel.seqId = messageSeqId; // 更新seqId
-                [self resortAndReloadMessages]; // 重新排序并刷新
+                [self reloadMessages]; // 刷新显示
             }
         }
     }
@@ -165,20 +161,21 @@
                 if (messageSeqId > [maxSeqIdKey longLongValue]) {
                     [existAsrMsgList removeAllObjects];
                     
-                    // 同时需要从chatMsgList中删除对应的消息
+                    // 同时需要从chatMsgList中删除对应的消息，并记住原来的位置
                     ZegoAIAgentSubtitlesMessageModel* oldMsgModel = [self queryMsgModelWithMessageId:firstValue.message_id];
+                    NSInteger oldIndex = -1;
                     if (oldMsgModel) {
-                        NSArray* keysArray = [self.chatMsgList allKeys];
-                        for (NSNumber* key in keysArray) {
-                            ZegoAIAgentSubtitlesMessageModel* msgModel = [self.chatMsgList objectForKey:key];
+                        for (NSInteger i = 0; i < self.chatMsgList.count; i++) {
+                            ZegoAIAgentSubtitlesMessageModel* msgModel = self.chatMsgList[i];
                             if ([msgModel.message_id isEqualToString:firstValue.message_id]) {
-                                [self.chatMsgList removeObjectForKey:key];
+                                oldIndex = i; // 记住原来的位置
+                                [self.chatMsgList removeObjectAtIndex:i];
                                 break;
                             }
                         }
                     }
                     
-                    // 创建新的消息模型并添加到显示列表
+                    // 创建新的消息模型并替换到原来的位置
                     ZegoAIAgentSubtitlesMessageModel* newMsgModel = [[ZegoAIAgentSubtitlesMessageModel alloc] init];
                     newMsgModel.seqId = messageSeqId;
                     newMsgModel.isMine = NO;
@@ -187,7 +184,15 @@
                     newMsgModel.message_id = messageId;
                     newMsgModel.end_flag = messageEndFlag;
                     newMsgModel.messageTimeStamp = messageTimeStamp;
-                    [self insertCurMsgModel:messageCmd withMsgModel:newMsgModel];
+                    
+                    if (oldIndex >= 0) {
+                        // 插入到原来的位置，而不是插入到末尾
+                        [self.chatMsgList insertObject:newMsgModel atIndex:oldIndex];
+                        [self reloadMessages];
+                    } else {
+                        // 如果没有找到原来的位置，则正常插入
+                        [self insertCurMsgModel:messageCmd withMsgModel:newMsgModel];
+                    }
                 }
             }
             
@@ -220,7 +225,7 @@
             curUserChatMsgModel.end_flag = messageEndFlag;
             curUserChatMsgModel.messageTimeStamp = messageTimeStamp;
             curUserChatMsgModel.content = totalContent;
-            [self resortAndReloadMessages]; // 重新排序并刷新
+            [self reloadMessages]; // 刷新显示
         }
     }
     
@@ -241,43 +246,44 @@
     if (curMsgModel == nil) {
         return;
     }
-    
-    // 将消息添加到聊天列表中，键为消息计数值，并自增计数器
-    // 注意：chatMsgList存储的是最终显示在UI上的消息，而tempLLMMsgList存储的是消息片段
-    [self.chatMsgList setObject:curMsgModel forKey:[NSNumber numberWithLong:self.msgTotalCount++]];
-    
-    // 对消息重新排序并刷新显示
-    [self resortAndReloadMessages];
+
+    // 将消息添加到聊天列表末尾
+    [self.chatMsgList addObject:curMsgModel];
+
+    // 刷新显示
+    [self reloadMessages];
 }
 
-// 对消息按seqId进行排序并重新加载表格
--(void)resortAndReloadMessages {
-    // 清空排序数组
-    [self.sortedChatMsgList removeAllObjects];
-    
-    // 将所有消息添加到数组中
-    NSArray *keys = [self.chatMsgList allKeys];
-    for (NSNumber *key in keys) {
-        ZegoAIAgentSubtitlesMessageModel *msgModel = [self.chatMsgList objectForKey:key];
-        [self.sortedChatMsgList addObject:msgModel];
+// 替换聊天列表中指定位置的消息模型
+-(void)replaceCurMsgModel:(int)cmd
+             withMsgModel:(ZegoAIAgentSubtitlesMessageModel*)curMsgModel
+                  atIndex:(NSInteger)index{
+    if (curMsgModel == nil || index < 0 || index >= self.chatMsgList.count) {
+        return;
     }
-    
-    // 按seqId排序
-    [self.sortedChatMsgList sortUsingComparator:^NSComparisonResult(ZegoAIAgentSubtitlesMessageModel *obj1, ZegoAIAgentSubtitlesMessageModel *obj2) {
-        if (obj1.seqId < obj2.seqId) {
-            return NSOrderedAscending;
-        } else if (obj1.seqId > obj2.seqId) {
-            return NSOrderedDescending;
-        }
-        return NSOrderedSame;
-    }];
-    
+    NSLog(@"chatMsgList replace:cmd=%d, seqId=%lld, timeStamp=%lld, message=%@, isMine=%d, index=%ld",
+          cmd,
+          curMsgModel.seqId,
+          curMsgModel.messageTimeStamp,
+          curMsgModel.content,
+          curMsgModel.isMine,
+          (long)index);
+
+    // 替换到原来的位置，而不是插入到末尾
+    [self.chatMsgList replaceObjectAtIndex:index withObject:curMsgModel];
+
+    // 刷新显示
+    [self reloadMessages];
+}
+
+// 重新加载表格
+-(void)reloadMessages {
     // 刷新表格
     [self reloadData];
-    
+
     // 滚动到底部
-    if (self.sortedChatMsgList.count > 0) {
-        NSIndexPath* indexPath = [NSIndexPath indexPathForItem:self.sortedChatMsgList.count-1 inSection:0];
+    if (self.chatMsgList.count > 0) {
+        NSIndexPath* indexPath = [NSIndexPath indexPathForItem:self.chatMsgList.count-1 inSection:0];
         [self scrollToRowAtIndexPath:indexPath atScrollPosition:UITableViewScrollPositionBottom animated:NO];
     }
 }
@@ -285,20 +291,12 @@
 // 根据消息ID查询消息模型
 -(ZegoAIAgentSubtitlesMessageModel*)queryMsgModelWithMessageId:(NSString*)msgId{
     // 遍历聊天列表查找匹配的message_id
-    NSArray* keysArray = [self.chatMsgList allKeys];
-    for (int i=0; i<keysArray.count; i++) {
-        NSNumber* itemKey = keysArray[i];
-        ZegoAIAgentSubtitlesMessageModel* itemValue = [self.chatMsgList objectForKey:itemKey];
-        if ([itemValue.message_id isEqualToString:msgId]) {
-            return itemValue;
+    for (ZegoAIAgentSubtitlesMessageModel* msgModel in self.chatMsgList) {
+        if ([msgModel.message_id isEqualToString:msgId]) {
+            return msgModel;
         }
     }
     return nil;
-}
-
-// 重新加载表格视图并滚动到最底部 - 已被resortAndReloadMessages替代
--(void)reloadTableViewInternal{
-    [self resortAndReloadMessages];
 }
 
 #pragma mark - UITableViewDataSource
@@ -309,8 +307,8 @@
 
 - (NSInteger)tableView:(UITableView *)tableView
  numberOfRowsInSection:(NSInteger)section {
-    // 使用排序后的数组count
-    return self.sortedChatMsgList.count;
+    // 使用chatMsgList的count
+    return self.chatMsgList.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView
@@ -323,8 +321,8 @@
     cell.colors = self.colors;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
-    // 从排序后的数组中获取消息模型
-    ZegoAIAgentSubtitlesMessageModel* msgModel = [self.sortedChatMsgList objectAtIndex:indexPath.row];
+    // 从chatMsgList中直接根据索引获取消息模型
+    ZegoAIAgentSubtitlesMessageModel* msgModel = self.chatMsgList[indexPath.row];
     
     cell.msgModel = msgModel;
     return cell;
@@ -333,7 +331,7 @@
 - (CGFloat)tableView:(UITableView *)tableView
 heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     // 设置单元格的高度
-    ZegoAIAgentSubtitlesMessageModel* msgModel = [self.sortedChatMsgList objectAtIndex:indexPath.row];
+    ZegoAIAgentSubtitlesMessageModel* msgModel = self.chatMsgList[indexPath.row];
     CGRect rect = msgModel.boundingBox;
     return rect.size.height + CELL_TOP_MARGIN;
 }
