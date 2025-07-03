@@ -20,8 +20,8 @@ interface RoomMessage {
 export function useVoiceChat(zg: ExpressManager) {
   // 状态管理
   const messages = ref<ChatMessage[]>([]);
-  let userMsgSeq = 0;
   let agentMsgMap: Record<string, ChatMessage[]> = {};
+  let userMsgMap: Record<string, ChatMessage[]> = {};
 
   /**
    * 处理房间命令消息
@@ -50,32 +50,36 @@ export function useVoiceChat(zg: ExpressManager) {
   // 处理用户消息
   function handleUserMessage(seqId: number, data: MessageData, round: number) {
     console.log(`"mytag 用户说话文本内容：", ${seqId}, ${data.Text}`);
-    if (seqId > userMsgSeq) {
-      if (data.EndFlag) {
-        console.log(`"mytag 用户说话完毕", ${seqId}`);
-      }
+    if (data.EndFlag) {
+      console.log(`"mytag 用户说话完毕", ${seqId}`);
+    }
 
-      const content = data.Text.trim();
-      const messageId = data.MessageId;
-      userMsgSeq = seqId;
-      if (!content) return;
-      const index = messages.value.findIndex(
-        (message) => message.sender === 'user' && message.round === round
-      );
-      const newMessage: ChatMessage = {
-        sender: "user",
-        messageId: messageId,
-        seqId: seqId,
-        content: content,
-        type: "message",
-        round,
-      };
+    const content = data.Text.trim();
+    const messageId = data.MessageId;
+    if (!content) return;
+    const index = messages.value.findIndex(
+      (message) => message.sender === 'user' && message.round === round
+    );
+    const newMessage: ChatMessage = {
+      sender: "user",
+      messageId: messageId,
+      seqId: seqId,
+      content: content,
+      type: "message",
+      round,
+    };
 
-      if (index !== -1) {
-        messages.value[index].content = newMessage.content;
-      } else {
-        messages.value.push(newMessage);
-      }
+    // 缓存新消息
+    userMsgMap[round].push({ ...newMessage });
+
+    if (index !== -1) {
+      // 消息已存在,取出seqId最大的消息
+      const maxMsg = userMsgMap[round].reduce((maxMsg, currentMsg) => {
+        return currentMsg.seqId > maxMsg.seqId ? currentMsg : maxMsg;
+      });
+      messages.value[index].content = maxMsg.content;
+    } else {
+      messages.value.push(newMessage);
     }
   }
 
@@ -143,7 +147,7 @@ export function useVoiceChat(zg: ExpressManager) {
 
   function clearMessages() {
     messages.value = [];
-    userMsgSeq = 0;
+    userMsgMap = {};
     agentMsgMap = {};
   }
 
