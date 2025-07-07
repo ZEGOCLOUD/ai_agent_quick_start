@@ -64,7 +64,7 @@ export function useVoiceChat(zg: ExpressManager) {
       sender: "user",
       messageId: messageId,
       seqId: seqId,
-      content: content,
+      content: data.Text,
       type: "message",
       round,
     };
@@ -104,7 +104,7 @@ export function useVoiceChat(zg: ExpressManager) {
       sender: "bot",
       messageId: llmMessageId,
       seqId: seqId,
-      content: content,
+      content: data.Text,
       type: "message",
       round,
     };
@@ -119,7 +119,7 @@ export function useVoiceChat(zg: ExpressManager) {
         .sort((a, b) => a.seqId - b.seqId)
         .map(({ content }) => content)
         .join("");
-      if (sortedMessages.trim()) {
+      if (sortedMessages) {
         messages.value[index].content = sortedMessages;
       }
     } else {
