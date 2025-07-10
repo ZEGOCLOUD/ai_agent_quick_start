@@ -23,7 +23,7 @@
 import { ref, onMounted, onUpdated } from 'vue';
 import type { Message } from '../hooks/useChat';
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     messages: Message[];
   }>(),

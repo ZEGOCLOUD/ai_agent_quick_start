@@ -159,14 +159,14 @@ export function useChat(zg: ExpressManager) {
     // zg.off("IMRecvCustomCommand");
     zg.on(
       "IMRecvCustomCommand",
-      (roomID: string, fromUser: any, command: string) => {
+      (_: string, __: any, command: string) => {
         console.warn("mytag IMRecvCustomCommand");
         try {
           const message = JSON.parse(command);
           console.warn("IMRecvCustomCommand", message);
           if (message.cmd && message.data) {
             const { cmd, seq_id, round, timestamp } = message;
-            const { message_id, text, end_flag, speak_status, user_id } =
+            const { message_id, text, end_flag, speak_status } =
               message.data;
               handleRoomCommandMessage({
                 Cmd: cmd,
