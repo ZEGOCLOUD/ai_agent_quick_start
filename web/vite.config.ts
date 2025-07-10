@@ -7,7 +7,7 @@ import { resolve } from 'path'
 export default defineConfig({
   plugins: [vue(), basicSsl(),],
   server: {
-    https: true,
+    host: true,
   },
   resolve: {
     alias: {

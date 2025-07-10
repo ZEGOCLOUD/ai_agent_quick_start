@@ -44,16 +44,13 @@ export function useRoom() {
   }
 
   async function startPublishingStream(
-    localStreamId: string,
-    enableAiDenoise: boolean = true
+    localStreamId: string
   ) {
     const localStream = await zg.createAudioStream();
     zegoLocalStream.value = localStream;
     console.log("createAudioStream", localStream);
     // 开始推流
     await zg.startPublishingStream(localStreamId, localStream);
-    // 开始ai降噪
-    await zg.enableAiDenoise(localStream, enableAiDenoise);
   }
 
   /**

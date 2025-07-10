@@ -23,7 +23,7 @@
 import type { ChatMessage } from '@/types/chat';
 import { ref, onMounted, onUpdated } from 'vue';
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     messages: ChatMessage[];
   }>(),

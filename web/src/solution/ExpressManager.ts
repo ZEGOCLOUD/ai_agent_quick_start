@@ -1,5 +1,4 @@
 import { ZegoExpressEngine } from "zego-express-engine-webrtc";
-import { VoiceChanger } from "zego-express-engine-webrtc/voice-changer";
 import type ZegoLocalStream from "zego-express-engine-webrtc/sdk/code/zh/ZegoLocalStream.web";
 import type { ZegoEvent } from "zego-express-engine-webrtc/sdk/code/zh/ZegoExpressEntity.web";
 
@@ -39,7 +38,6 @@ export class ExpressManager {
   }
 
   public async initSDK(appID: number, server: string): Promise<void> {
-    ZegoExpressEngine.use(VoiceChanger);
     this.express = new ZegoExpressEngine(appID, server, {
       scenario: ZegoScenario.HighQualityChatroom,
     });
@@ -87,27 +85,6 @@ export class ExpressManager {
     }
     await this.express.logoutRoom(this.roomID);
     this.roomID = "";
-  }
-
-  // ai 降噪
-  public async enableAiDenoise(
-    zegoLocalStream: ZegoLocalStream | MediaStream,
-    enable: boolean
-  ) {
-    if (!this.express) {
-      return;
-    }
-    const enableResult = await this.express.enableAiDenoise(
-      zegoLocalStream,
-      enable
-    );
-    if (enable && enableResult.errorCode === 0) {
-      return this.express?.setAiDenoiseMode(
-        zegoLocalStream,
-        AiDenoiseMode.AIBalanced
-      );
-    }
-    return enableResult;
   }
 
   public createAudioStream() {
