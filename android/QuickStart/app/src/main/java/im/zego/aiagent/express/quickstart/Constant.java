@@ -4,7 +4,7 @@ import im.zego.aiagent.express.quickstart.util.StringUtil;
 
 public class Constant {
 
-    public static final long appId = 339762299L;  // 你部署的业务后台用到的参数
+    public static final long appId = ;  // 这个需要在机构申请
 
     public static final String agent_id = "agent_id_android"; //客户端推流
     public static final String agent_name = "小智"; //客户端推流
@@ -18,5 +18,5 @@ public class Constant {
     public static final String agent_user_id = "agent_user_id_" + StringUtil.generateRandomString(6); //agent推流id，数字人推流id
     public static final String agent_stream_id = "agent_stream_id_" + StringUtil.generateRandomString(6); //agent推流id，数字人推流id
     public static final String agent_zim_uid = "ddddd";  // 你部署的业务后台用到的参数
-    public static final String BASE_URL = "http://47.112.186.35:3000";  // 你部署的业务后台地址
+    public static final String BASE_URL = ;  // 你部署的业务后台地址
 }
