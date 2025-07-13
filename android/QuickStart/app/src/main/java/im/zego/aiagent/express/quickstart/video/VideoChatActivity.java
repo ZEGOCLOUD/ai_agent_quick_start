@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import im.zego.aiagent.express.quickstart.Constant;
+import im.zego.aiagent.express.quickstart.util.StringUtil;
 import im.zego.digitalmobile.IZegoDigitalMobile;
 import im.zego.digitalmobile.ZegoDigitalMobileFactory;
 import im.zego.zegoexpress.ZegoExpressEngine;
@@ -252,8 +253,18 @@ public class VideoChatActivity extends AppCompatActivity {
         String jsonContent;
         try {
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("digital_human_id", Constant.digital_human_id); // 替换为实际的 userId
+            jsonObject.put("digital_human_id", Constant.digital_human_id); // 替换为实际的 数字人形象ID
             jsonObject.put("config_id", "mobile"); // 替换为实际的 callId
+
+            jsonObject.put("agent_id", Constant.agent_id);
+            jsonObject.put("agent_name", Constant.agent_name);
+            jsonObject.put("user_id", Constant.user_id);
+            jsonObject.put("room_id", Constant.room_id);
+            jsonObject.put("agent_stream_id", Constant.agent_stream_id);
+            jsonObject.put("agent_user_id", Constant.agent_user_id);
+            jsonObject.put("user_stream_id", Constant.user_stream_id);
+
+
             jsonContent = jsonObject.toString();
         } catch (JSONException e) {
             showError("startDigitalHumanChat", "json error: " + e.getMessage());
