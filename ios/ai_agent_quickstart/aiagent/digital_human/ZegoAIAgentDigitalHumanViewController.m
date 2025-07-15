@@ -15,6 +15,7 @@
 
 #import "ZegoAIAgentServiceAPI.h"
 #import "ZegoAIAgentDigitalHumanEventHandler.h"
+#import "ZegoKey.h"
 
 @interface ZegoAIAgentDigitalHumanViewController ()<ZegoAIAgentDigitalHumanEventHandler, ZegoDigitalMobileDelegate>
 
@@ -29,6 +30,9 @@
 // digital human
 @property (nonatomic, strong) id<IZegoDigitalMobile> digitalMobile;
 @property (nonatomic, strong) ZegoPreviewView *previewView;
+
+// 静态图片视图
+@property (nonatomic, strong) UIImageView *staticImageView;
 
 @end
 
@@ -47,12 +51,14 @@
 - (void)dealloc {
     // 界面销毁时自动停止数字人聊天
     [self stopDigitalHumanChat];
-    
+
     self.previewView = nil;
+    self.staticImageView = nil;
 }
 
 - (void)setupUI {
     [self setupPreviewView];
+    [self setupStaticImageView];
     [self setupLoadingView];
 
     // 返回按钮
@@ -72,12 +78,69 @@
     // 创建并添加previewView
     self.previewView = [[ZegoPreviewView alloc] init];
 
-    // 设置背景色以确保视图渲染上下文正确初始化（这对视频显示很重要）
-    self.previewView.backgroundColor = [UIColor whiteColor];
+    // 设置透明背景，让底层的静态图片可以显示
+    self.previewView.backgroundColor = [UIColor clearColor];
 
     [self.view addSubview:self.previewView];
 
+    // previewView全屏显示
     [self.previewView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.edges.equalTo(self.view);
+    }];
+}
+
+- (void)setupStaticImageView {
+    // 创建静态图片视图，放在previewView下方
+    self.staticImageView = [[UIImageView alloc] init];
+    self.staticImageView.contentMode = UIViewContentModeScaleAspectFill;
+    self.staticImageView.clipsToBounds = YES;
+
+    // 设置背景色（可选，用于加载时显示）
+    self.staticImageView.backgroundColor = [UIColor colorWithRed:0.95 green:0.95 blue:0.95 alpha:1.0]; // 很浅的灰色背景
+
+    // 添加红色边框用于测试
+    self.staticImageView.layer.borderWidth = 3.0;
+    self.staticImageView.layer.borderColor = [UIColor redColor].CGColor;
+
+    // 使用kDigitalHumanImageURL加载图片
+    if (kDigitalHumanImageURL && kDigitalHumanImageURL.length > 0) {
+        NSLog(@"开始加载静态图片: %@", kDigitalHumanImageURL);
+        NSURL *imageURL = [NSURL URLWithString:kDigitalHumanImageURL];
+        if (imageURL) {
+            NSURLSession *session = [NSURLSession sharedSession];
+            NSURLSessionDataTask *dataTask = [session dataTaskWithURL:imageURL completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (data && !error) {
+                        UIImage *image = [UIImage imageWithData:data];
+                        if (image) {
+                            NSLog(@"静态图片加载成功，尺寸: %.0fx%.0f", image.size.width, image.size.height);
+                            self.staticImageView.image = image;
+                            NSLog(@"staticImageView frame: %@", NSStringFromCGRect(self.staticImageView.frame));
+                            NSLog(@"staticImageView bounds: %@", NSStringFromCGRect(self.staticImageView.bounds));
+                            NSLog(@"staticImageView hidden: %@", self.staticImageView.hidden ? @"YES" : @"NO");
+                            NSLog(@"staticImageView alpha: %.2f", self.staticImageView.alpha);
+                        } else {
+                            NSLog(@"静态图片数据无效");
+                        }
+                    } else {
+                        NSLog(@"加载静态图片失败: %@", error.localizedDescription);
+                        // 设置一个默认的占位图片或者创建一个简单的占位视图
+                    }
+                });
+            }];
+            [dataTask resume];
+        } else {
+            NSLog(@"静态图片URL无效: %@", kDigitalHumanImageURL);
+        }
+    } else {
+        NSLog(@"静态图片URL为空，跳过加载");
+    }
+
+    // 添加到previewView下方
+    [self.view insertSubview:self.staticImageView belowSubview:self.previewView];
+
+    // 设置约束，让staticImageView覆盖整个屏幕（作为加载时的占位图）
+    [self.staticImageView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self.view);
     }];
 }
@@ -163,7 +226,9 @@
         [[ZegoAIAgentServiceAPI sharedInstance] startDigitalHumanWithCompletion:^(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) return;
-
+            
+            NSLog(@"%@", errorMessage);
+            
             if (success) {
                 // 创建数字人实例
                 strongSelf.digitalMobile = [ZegoDigitalMobileFactory create];
@@ -246,7 +311,7 @@
                             param:(ZegoVideoFrameParam *)param
                          streamID:(NSString *)streamID {
     // 处理远程视频帧原始数据
-    NSLog(@"收到远程视频帧数据: streamID=%@, 尺寸=%dx%d", streamID, (int)param.size.width, (int)param.size.height);
+//    NSLog(@"收到远程视频帧数据: streamID=%@, 尺寸=%dx%d", streamID, (int)param.size.width, (int)param.size.height);
 
     // 转换参数格式并传递给数字人API
     ZDMVideoFrameParam *digitalParam = [[ZDMVideoFrameParam alloc] init];
@@ -267,7 +332,7 @@
 
 - (void)onPlayerSyncRecvSEI:(NSData *)data streamID:(NSString *)streamID {
     // 处理播放器同步接收SEI数据
-    NSLog(@"收到SEI数据: streamID=%@, 数据长度=%lu", streamID, (unsigned long)data.length);
+//    NSLog(@"收到SEI数据: streamID=%@, 数据长度=%lu", streamID, (unsigned long)data.length);
 
     // 如果有数字人实例，传递SEI数据
     if (self.digitalMobile) {
@@ -278,8 +343,17 @@
 #pragma mark - ZegoDigitalMobileDelegate
 
 - (void)onSurfaceFirstFrameDraw {
-    NSLog(@"数字人首帧渲染完成，隐藏 loading");
+    NSLog(@"数字人首帧渲染完成，隐藏 loading 和静态图片");
     [self hideLoading];
+
+    // 隐藏静态图片，显示真实的数字人视频
+    dispatch_async(dispatch_get_main_queue(), ^{
+        // 设置背景色
+        self.previewView.backgroundColor = [UIColor whiteColor];
+
+        self.staticImageView.hidden = YES;
+        NSLog(@"静态图片已隐藏");
+    });
 }
 
 - (void)onDigitalMobileStartSuccess {
