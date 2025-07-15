@@ -14,7 +14,7 @@ export function useRoom() {
   const permissionValid = ref(false);
   let currentToken = "";
   async function initSDK() {
-    return zg.initSDK(config.appId, config.server);
+    return zg.initSDK(config.zego.appId, config.zego.server);
   }
 
   async function getToken(userID: string) {

@@ -132,7 +132,7 @@ const handleLogin = async (type: "normal" | "digitalHuman") => {
     );
     console.log("mytag demo 执行了 handleLogin",res);
     isDigitalHuman.value = type === "digitalHuman";
-    agentInstanceId.value = res.agent_instance_id;
+    agentInstanceId.value = res.agent_instance_id || "";
   } catch (error: any) {
     console.error("登录失败", error);
     ElMessage.error(error.message || "登录失败");

@@ -28,8 +28,8 @@ export function StartDigitalHuman(roomId: string, userID: string, userStreamId: 
     "room_id": roomId,
     "user_id": userID,
     "user_stream_id": userStreamId,
-    "digital_human_id": config.digitalHumanId,
-    "config_id": config.configId
+    "digital_human_id": config.digitalHuman.id,
+    "config_id": config.digitalHuman.configId
   });
 }
 
