@@ -1,6 +1,8 @@
 import axios from 'axios';
 import type { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 import config from '../config';
+import { ErrorHandler, ErrorType, createError } from './error-handler';
+import { logger } from './logger';
 
 // 创建axios实例
 const service = axios.create({
@@ -14,6 +16,9 @@ const service = axios.create({
 // 请求拦截器
 service.interceptors.request.use(
   (config) => {
+    // 记录API请求
+    logger.apiCall(config.method?.toUpperCase() || 'GET', config.url || '', config.params || config.data);
+    
     // 在发送请求之前做些什么，例如添加token
     const token = localStorage.getItem('token');
     if (token) {
@@ -24,8 +29,8 @@ service.interceptors.request.use(
   },
   (error: AxiosError) => {
     // 对请求错误做些什么
-    console.error('Request error:', error);
-    return Promise.reject(error);
+    const appError = ErrorHandler.handle(error, 'HTTP_REQUEST');
+    return Promise.reject(appError);
   }
 );
 
@@ -33,50 +38,50 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     const { data } = response;
+    
+    // 记录API响应
+    logger.apiCall(
+      response.config.method?.toUpperCase() || 'GET', 
+      response.config.url || '', 
+      response.config.params || response.config.data,
+      { status: response.status, data: data }
+    );
+    
     // 根据自定义错误码判断请求是否成功
     if (data.code && data.code !== 0) {
-      // 处理业务错误
-      const errorMessage = data.message || '未知错误';
-
-      return Promise.reject({code: data.code, message: errorMessage});
+      // 处理业务错误 - 不显示通知，让上层处理
+      const businessError = createError.business(data.message || '业务操作失败', {
+        code: data.code,
+        canRetry: false,
+        context: 'HTTP_RESPONSE'
+      });
+      
+      return Promise.reject(businessError);
     }
     
     return data;
   },
   (error: AxiosError) => {
-    // 处理HTTP错误状态码
-    let errorMessage = '网络错误';
+    // 使用统一错误处理器处理HTTP错误，但禁用自动通知
+    const originalConfig = ErrorHandler['config'];
+    ErrorHandler.updateConfig({ showNotification: false });
     
-    if (error.response) {
-      const { status } = error.response;
-      switch (status) {
-        case 401:
-          errorMessage = '未授权，请重新登录';
-          // 清除token并重定向到登录页
-          localStorage.removeItem('token');
-          break;
-        case 403:
-          errorMessage = '拒绝访问';
-          break;
-        case 404:
-          errorMessage = '请求的资源不存在';
-          break;
-        case 500:
-          errorMessage = '服务器内部错误';
-          break;
-        default:
-          errorMessage = `请求错误 (${status})`;
+    try {
+      const appError = ErrorHandler.handle(error, 'HTTP_RESPONSE');
+      // 恢复配置
+      ErrorHandler.updateConfig(originalConfig);
+      
+      // 对于401错误，清除token
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
       }
-    } else if (error.request) {
-      // 请求已发出但未收到响应
-      errorMessage = '服务器无响应';
-    } else {
-      // 请求配置有误
-      errorMessage = error.message;
+      
+      return Promise.reject(appError);
+    } catch (handlerError) {
+      // 恢复配置
+      ErrorHandler.updateConfig(originalConfig);
+      throw handlerError;
     }
-    
-    console.error('Response error:', errorMessage);
-    return Promise.reject(error);
   }
 );
 
@@ -88,6 +93,34 @@ export function get<T>(url: string, params?: any, config?: AxiosRequestConfig): 
 // 封装POST请求
 export function post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
   return service.post(url, data, config);
+}
+
+// 带重试的GET请求
+export function getWithRetry<T>(
+  url: string, 
+  params?: any, 
+  config?: AxiosRequestConfig,
+  maxRetries?: number
+): Promise<T> {
+  return ErrorHandler.withRetry(
+    () => service.get(url, { params, ...config }),
+    `GET ${url}`,
+    maxRetries
+  );
+}
+
+// 带重试的POST请求
+export function postWithRetry<T>(
+  url: string, 
+  data?: any, 
+  config?: AxiosRequestConfig,
+  maxRetries?: number
+): Promise<T> {
+  return ErrorHandler.withRetry(
+    () => service.post(url, data, config),
+    `POST ${url}`,
+    maxRetries
+  );
 }
 
 // 导出axios实例

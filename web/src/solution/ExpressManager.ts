@@ -1,6 +1,8 @@
 import { ZegoExpressEngine } from "zego-express-engine-webrtc";
 import type ZegoLocalStream from "zego-express-engine-webrtc/sdk/code/zh/ZegoLocalStream.web";
 import type { ZegoEvent } from "zego-express-engine-webrtc/sdk/code/zh/ZegoExpressEntity.web";
+import { logger } from "../utils/logger";
+import { ErrorHandler, createError } from "../utils/error-handler";
 
 interface UserConfig {
   userID: string;
@@ -38,9 +40,16 @@ export class ExpressManager {
   }
 
   public async initSDK(appID: number, server: string): Promise<void> {
-    this.express = new ZegoExpressEngine(appID, server, {
-      scenario: ZegoScenario.HighQualityChatroom,
-    });
+    try {
+      logger.info('SDK', 'ZEGO Express SDK 初始化开始', { appID, server });
+      this.express = new ZegoExpressEngine(appID, server, {
+        scenario: ZegoScenario.HighQualityChatroom,
+      });
+      logger.info('SDK', 'ZEGO Express SDK 初始化成功');
+    } catch (error) {
+      logger.error('SDK', 'ZEGO Express SDK 初始化失败', { appID, server, error });
+      throw ErrorHandler.handle(error, 'ExpressManager.initSDK');
+    }
   }
 
   public callExperimentalAPI(params: Record<string, any>) {
@@ -67,25 +76,47 @@ export class ExpressManager {
   }
 
   public async loginRoom(roomID: string, token: string, config: UserConfig) {
-    console.log("loginRoom", roomID, token, config);
-    if (!this.express) {
-      console.error("Express 未初始化");
-      return false;
+    try {
+      logger.info('SDK', 'Express SDK 登录房间', { roomID, userConfig: config });
+      
+      if (!this.express) {
+        throw createError.sdk("Express SDK 未初始化", { canRetry: false });
+      }
+      
+      this.roomID = roomID;
+      const result = await this.express.loginRoom(roomID, token, config, {
+        userUpdate: true,
+      });
+      
+      logger.info('SDK', 'Express SDK 登录房间成功', { roomID, result });
+      return result;
+    } catch (error) {
+      logger.error('SDK', 'Express SDK 登录房间失败', { roomID, error });
+      throw ErrorHandler.handle(error, 'ExpressManager.loginRoom');
     }
-    this.roomID = roomID;
-
-    return await this.express.loginRoom(roomID, token, config, {
-      userUpdate: true,
-    });
   }
 
   public async logoutRoom() {
-    if (!this.express || !this.roomID) {
-      console.log("mytag zg 实例为空或者roomID为空",this.roomID,!this.express);
-      return;
+    try {
+      if (!this.express || !this.roomID) {
+        logger.warn('SDK', 'Express SDK 实例或房间ID为空，跳过退出房间', { 
+          hasExpress: !!this.express, 
+          roomID: this.roomID 
+        });
+        return;
+      }
+      
+      logger.info('SDK', 'Express SDK 退出房间', { roomID: this.roomID });
+      this.express.logoutRoom(this.roomID);
+      this.roomID = "";
+      logger.info('SDK', 'Express SDK 退出房间成功');
+    } catch (error) {
+      logger.error('SDK', 'Express SDK 退出房间失败', { roomID: this.roomID, error });
+      // 退出房间的错误不抛出，只记录日志
+      ErrorHandler.updateConfig({ showNotification: false });
+      ErrorHandler.handle(error, 'ExpressManager.logoutRoom');
+      ErrorHandler.updateConfig({ showNotification: true });
     }
-    this.express.logoutRoom(this.roomID);
-    this.roomID = "";
   }
 
   public createAudioStream() {
@@ -108,11 +139,19 @@ export class ExpressManager {
     streamID: string,
     LocalStream: ZegoLocalStream | MediaStream
   ): void {
-    if (this.express) {
-      console.log("mytag startPublishingStream", streamID, LocalStream);
+    try {
+      if (!this.express) {
+        throw createError.sdk("Express SDK 未初始化", { canRetry: false });
+      }
+      
+      logger.info('SDK', 'Express SDK 开始推流', { streamID });
       this.express.startPublishingStream(streamID, LocalStream, {
         enableAutoSwitchVideoCodec: true,
       });
+      logger.info('SDK', 'Express SDK 推流启动成功', { streamID });
+    } catch (error) {
+      logger.error('SDK', 'Express SDK 推流启动失败', { streamID, error });
+      throw ErrorHandler.handle(error, 'ExpressManager.startPublishingStream');
     }
   }
 
@@ -143,16 +182,21 @@ export class ExpressManager {
     mute: boolean
   ): Promise<void> {
     try {
-      if (localStream) {
-        console.log("muteMicrophone", mute);
-
-        this.express?.mutePublishStreamAudio(localStream, mute);
-        return Promise.resolve();
+      if (!localStream) {
+        throw createError.sdk("本地流未初始化", { canRetry: false });
       }
-      throw new Error("Express 或 localStream 未初始化");
+      
+      if (!this.express) {
+        throw createError.sdk("Express SDK 未初始化", { canRetry: false });
+      }
+
+      logger.info('SDK', 'Express SDK 麦克风控制', { mute });
+      this.express.mutePublishStreamAudio(localStream, mute);
+      logger.info('SDK', 'Express SDK 麦克风控制成功', { mute });
+      return Promise.resolve();
     } catch (error) {
-      console.error("麦克风控制失败:", error);
-      return Promise.reject(error);
+      logger.error('SDK', 'Express SDK 麦克风控制失败', { mute, error });
+      return Promise.reject(ErrorHandler.handle(error, 'ExpressManager.muteMicrophone'));
     }
   }
 

@@ -83,7 +83,8 @@ import ChatMessage from "./ChatMessage.vue";
 import RemoteSteamView from "./RemoteSteamView.vue";
 import { useChat } from "../hooks/useChat";
 import { useRoom } from "../hooks/useRoom";
-import { ElMessage } from "element-plus";
+import { ErrorHandler } from "../utils/error-handler";
+import { logger } from "../utils/logger";
 
 const {
   zg,
@@ -123,6 +124,9 @@ let agentInstanceId = ref("");
 const handleLogin = async (type: "normal" | "digitalHuman") => {
   try {
     type === "normal" ? (loading.value = true) : (digitalHumanLoading.value = true);
+    
+    logger.userAction('用户开始登录', { type, roomId: roomId.value, userId: userId.value });
+    
     const res = await loginRoom(
       type,
       roomId.value,
@@ -130,12 +134,19 @@ const handleLogin = async (type: "normal" | "digitalHuman") => {
       userName.value,
       userStreamId.value,
     );
-    console.log("mytag demo 执行了 handleLogin",res);
+    
+    logger.userAction('用户登录成功', { 
+      type, 
+      roomId: roomId.value, 
+      userId: userId.value,
+      agentInstanceId: res.agent_instance_id 
+    });
+    
     isDigitalHuman.value = type === "digitalHuman";
     agentInstanceId.value = res.agent_instance_id || "";
-  } catch (error: any) {
-    console.error("登录失败", error);
-    ElMessage.error(error.message || "登录失败");
+  } catch (error) {
+    logger.userAction('用户登录失败', { type, roomId: roomId.value, userId: userId.value, error });
+    ErrorHandler.handle(error, 'Chat.handleLogin');
   } finally {
     type === "normal" ? (loading.value = false) : (digitalHumanLoading.value = false);
   }
@@ -146,11 +157,26 @@ const handleLogout = async () => {
   try {
     loading.value = true;
     isDigitalHuman.value = false;
-    console.log("mytag demo 执行了 handleLogout");
+    
+    logger.userAction('用户开始退出房间', { 
+      roomId: roomId.value, 
+      userId: userId.value,
+      agentInstanceId: agentInstanceId.value 
+    });
+    
     await logoutRoom(agentInstanceId.value);
-  } catch (error: any) {
-    console.error("退出失败", error);
-    ElMessage.error(error.message || "退出失败");
+    
+    logger.userAction('用户退出房间成功', { 
+      roomId: roomId.value, 
+      userId: userId.value 
+    });
+  } catch (error) {
+    logger.userAction('用户退出房间失败', { 
+      roomId: roomId.value, 
+      userId: userId.value,
+      error 
+    });
+    ErrorHandler.handle(error, 'Chat.handleLogout');
   } finally {
     clearMessages();
     loading.value = false;
@@ -158,11 +184,30 @@ const handleLogout = async () => {
 };
 
 onMounted(async () => {
-  await initSDK();
-  setupEventListeners();
-  setupChatEventListeners();
-  checkPermission();
-  await getToken(userId.value);
+  try {
+    logger.info('COMPONENT', 'Chat 组件初始化开始', { 
+      roomId: roomId.value, 
+      userId: userId.value 
+    });
+    
+    await initSDK();
+    setupEventListeners();
+    setupChatEventListeners();
+    checkPermission();
+    await getToken(userId.value);
+    
+    logger.info('COMPONENT', 'Chat 组件初始化完成', { 
+      roomId: roomId.value, 
+      userId: userId.value 
+    });
+  } catch (error) {
+    logger.error('COMPONENT', 'Chat 组件初始化失败', { 
+      roomId: roomId.value, 
+      userId: userId.value,
+      error 
+    });
+    ErrorHandler.handle(error, 'Chat.onMounted');
+  }
 });
 </script>
 

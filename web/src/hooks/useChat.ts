@@ -1,5 +1,7 @@
 import { ref } from "vue";
 import type { ExpressManager } from "../solution/ExpressManager";
+import { logger } from "../utils/logger";
+import { ErrorHandler } from "../utils/error-handler";
 
 interface MessageData {
   MessageId: string;
@@ -52,14 +54,14 @@ export function useChat(zg: ExpressManager) {
         break;
 
       default:
-        console.warn(`Unknown command: ${Cmd}`);
+        logger.warn('CHAT', '未知的消息命令', { cmd: Cmd, seqId: SeqId });
     }
   }
   // 处理用户消息
   function handleUserMessage(seqId: number, data: MessageData, round: number) {
-    console.log(`"mytag 用户说话文本内容：", ${seqId}, ${data.Text}`);
+    logger.debug('CHAT', '用户说话文本', { seqId, text: data.Text, round });
     if (data.EndFlag) {
-      console.log(`"mytag 用户说话完毕", ${seqId}`);
+      logger.debug('CHAT', '用户说话完毕', { seqId, round });
     }
 
     const content = data.Text.trim();
@@ -101,10 +103,10 @@ export function useChat(zg: ExpressManager) {
     data: MessageData,
     round: number
   ) {
-    console.log(`"mytag 智能体说话文本内容：", ${seqId}, ${data.Text}`);
+    logger.debug('CHAT', 'AI Agent 说话文本', { seqId, text: data.Text, round });
     const llmEndFlag = data.EndFlag;
     if (llmEndFlag) {
-      console.log(`"mytag 智能体回答完毕", ${seqId}`);
+      logger.debug('CHAT', 'AI Agent 回答完毕', { seqId, round });
     }
     const content = data.Text.trim();
     const llmMessageId = data.MessageId;
@@ -150,7 +152,8 @@ export function useChat(zg: ExpressManager) {
           const recvMsg = JSON.parse(content.msgContent);
           handleRoomCommandMessage(recvMsg);
         } catch (error) {
-          console.error("解析消息失败:", error);
+          logger.error('CHAT', '解析房间消息失败', { method, content, error });
+          ErrorHandler.handle(error, 'useChat.recvExperimentalAPI');
         }
       }
     });
@@ -160,30 +163,31 @@ export function useChat(zg: ExpressManager) {
     zg.on(
       "IMRecvCustomCommand",
       (_: string, __: any, command: string) => {
-        console.warn("mytag IMRecvCustomCommand");
+        logger.debug('CHAT', '接收自定义命令消息 (兼容模式)', { command });
         try {
           const message = JSON.parse(command);
-          console.warn("IMRecvCustomCommand", message);
+          logger.debug('CHAT', '解析自定义命令消息', { message });
+          
           if (message.cmd && message.data) {
             const { cmd, seq_id, round, timestamp } = message;
-            const { message_id, text, end_flag, speak_status } =
-              message.data;
-              handleRoomCommandMessage({
-                Cmd: cmd,
-                SeqId: seq_id,
-                Round: round,
-                Timestamp: timestamp,
-                Data: {
-                  MessageId: message_id,
-                  Text: text,
-                  EndFlag: end_flag,
-                  SpeakStatus: speak_status,
-                  // UserId: user_id,
-                },
-              });
+            const { message_id, text, end_flag, speak_status } = message.data;
+            
+            handleRoomCommandMessage({
+              Cmd: cmd,
+              SeqId: seq_id,
+              Round: round,
+              Timestamp: timestamp,
+              Data: {
+                MessageId: message_id,
+                Text: text,
+                EndFlag: end_flag,
+                SpeakStatus: speak_status,
+              },
+            });
           }
         } catch (error) {
-          console.error("解析消息失败:", error);
+          logger.error('CHAT', '解析自定义命令消息失败', { command, error });
+          ErrorHandler.handle(error, 'useChat.IMRecvCustomCommand');
         }
       }
     );
