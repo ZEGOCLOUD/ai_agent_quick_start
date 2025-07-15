@@ -32,14 +32,12 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     const { data } = response;
-    
     // 根据自定义错误码判断请求是否成功
-    if (data.code && data.code !== 200) {
+    if (data.code && data.code !== 0) {
       // 处理业务错误
       const errorMessage = data.message || '未知错误';
-      console.error('Business error:', errorMessage);
 
-      return Promise.reject(new Error(errorMessage));
+      return Promise.reject({code: data.code, message: errorMessage});
     }
     
     return data;

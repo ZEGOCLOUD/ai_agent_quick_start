@@ -30,29 +30,37 @@ export function useRoom() {
     roomId: string,
     userID: string,
     userName: string,
-    localStreamId: string
+    userStreamId: string
   ) {
-    console.log("loginRoom", currentToken);
     const login = await zg.loginRoom(roomId, currentToken, {
       userID,
       userName,
     });
     console.log("loginRoom", isLogin.value);
     if (!login) throw new Error("登录RTC房间失败");
-    await startPublishingStream(localStreamId);
-    let code;
-    if (type === "digitalHuman") {
-      const res = await StartDigitalHuman();
-      code = res.code;
-    } else {
-      const res = await Start();
-      code = res.code
-    }
-    if (code !== 0) {
-      destroy();
-      throw new Error("登录失败");
-    }
+    await startPublishingStream(userStreamId);
     isLogin.value = true;
+    try {
+      if (type === "digitalHuman") {
+        const res = await createDigitalHuman(roomId, userID, userStreamId);
+        console.log("createDigitalHuman", res); 
+        return res;
+      }else{
+        const res = await Start(roomId, userID, userStreamId);
+        return res;
+      }
+    } catch (error: any) {
+     throw new Error("并发已满，且语音互动启动失败");
+    }
+  }
+
+  async function createDigitalHuman(
+    roomId: string,
+    userID: string,
+    userStreamId: string
+  ) {
+    console.log("StartDigitalHuman");
+    return await StartDigitalHuman(roomId, userID, userStreamId);
   }
 
   async function startPublishingStream(
@@ -64,7 +72,7 @@ export function useRoom() {
     // 开始推流
     await zg.startPublishingStream(localStreamId, localStream);
   }
-
+  let remoteView:any = null;
   /**
    * 设置事件监听
    */
@@ -77,22 +85,38 @@ export function useRoom() {
         updateType: "DELETE" | "ADD",
         streamList: ZegoStreamList[]
       ) => {
-        console.log("流更新 roomStreamUpdate", roomID, updateType, streamList);
-
+        console.log("mytag demo 流更新 roomStreamUpdate", roomID, updateType, streamList);
         if (updateType === "ADD" && streamList.length > 0) {
           try {
             for (const stream of streamList) {
               // 这里调用拉取流的方法，假设方法名为 startPlayingStream
               const mediaStream = await zg.startPlayingStream(stream.streamID);
-              const remoteView = await zg.createRemoteStreamView(mediaStream);
+              remoteView = await zg.createRemoteStreamView(mediaStream);
               if (remoteView) {
-                remoteView.play("remoteSteamView");
+                console.log("mytag demo remoteView playAudio");
+                remoteView.playAudio();  
               }
               console.log(`成功拉取流: ${stream.streamID}`);
               break;
             }
           } catch (error) {
             console.error("onStreamUpdate", error);
+          }
+        }
+      }
+    );
+    // 拉流摄像头状态回调，所拉流的摄像头状态 'OPEN'表示开启 'MUTE'表示关闭
+    zg.on(
+      "remoteCameraStatusUpdate",
+      (
+        streamID: string, status: 'OPEN' | 'MUTE'
+      ) => {
+        console.log("mytag demo remoteCameraStatusUpdate", streamID, status);
+        if(status === 'OPEN'){
+          if (remoteView) {
+            console.log("mytag demo remoteView playVideo");
+            remoteView?.playVideo
+            ("remoteSteamView");  
           }
         }
       }
@@ -113,6 +137,7 @@ export function useRoom() {
         }
       }
     );
+    
   }
 
   async function destroy() {
@@ -125,8 +150,9 @@ export function useRoom() {
   /*
    * 退出房间
    */
-  async function logoutRoom() {
-    isLogin.value && (await Stop());
+  async function logoutRoom(agentInstanceId: string) {
+    console.log("mytag demo 执行了 logoutRoom");
+    isLogin.value && (await Stop(agentInstanceId));
     await destroy();
     isLogin.value = false;
   }

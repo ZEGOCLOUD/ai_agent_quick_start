@@ -1,5 +1,6 @@
 import { get, post } from '../utils/http';
 import type { Response } from '../types/http';
+import config from '../config';
 
 const ActionCmd = {
   GetZegoToken: "/api/zego-token", // 获取ZEGO Token
@@ -11,25 +12,34 @@ const ActionCmd = {
 /**
  * 进房
  */
-export function Start(): Promise<Response> {
-  return post(ActionCmd.Start);
+export function Start(roomId: string, userID: string, userStreamId: string): Promise<Response> {
+  return post(ActionCmd.Start, {
+    "room_id": roomId,
+    "user_id": userID,
+    "user_stream_id": userStreamId,
+  });
 }
 
 /**
  * 数字人视频通话
  */
-export function StartDigitalHuman(): Promise<Response> {
+export function StartDigitalHuman(roomId: string, userID: string, userStreamId: string): Promise<Response> {
   return post(ActionCmd.StartDigitalHuman, {
-    "digital_human_id":"20be9bfb-ef6b-4d63-8c3b-1f20077599c5",
-    "config_id":"web"
+    "room_id": roomId,
+    "user_id": userID,
+    "user_stream_id": userStreamId,
+    "digital_human_id": config.digitalHumanId,
+    "config_id": config.configId
   });
 }
 
 /**
  * 退房
  */
-export function Stop(): Promise<Response> {
-  return post(ActionCmd.Stop);
+export function Stop(agentInstanceId: string): Promise<Response> {
+  return post(ActionCmd.Stop, {
+    "agent_instance_id": agentInstanceId,
+  });
 }
 
 /**

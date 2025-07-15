@@ -80,10 +80,11 @@ export class ExpressManager {
   }
 
   public async logoutRoom() {
-    if (!this.express || this.roomID) {
+    if (!this.express || !this.roomID) {
+      console.log("mytag zg 实例为空或者roomID为空",this.roomID,!this.express);
       return;
     }
-    await this.express.logoutRoom(this.roomID);
+    this.express.logoutRoom(this.roomID);
     this.roomID = "";
   }
 

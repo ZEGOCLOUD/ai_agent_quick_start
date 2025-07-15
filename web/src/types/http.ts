@@ -2,6 +2,8 @@
 export interface Response {
   code: number;
   message: string;
+  renderType?: string;
+  agent_instance_id?: string;
 }
 
 export interface GetZegoTokenReq {

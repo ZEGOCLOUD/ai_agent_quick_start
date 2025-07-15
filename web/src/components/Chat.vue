@@ -19,14 +19,6 @@
                 </div>
               </div>
             </div>
-            <div class="info-card">
-              <div class="info-title">智能体信息</div>
-              <div class="info-content">
-                <div class="info-item">
-                  <span class="value">AgentUserId: {{ agentUserId }}</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- 登录/退出按钮 -->
@@ -67,7 +59,7 @@
         </div>
       </div>
       <div class="room-container"> 
-        <div v-show="isDigitalHuman" class="stream-container">
+        <div class="stream-container">
           <RemoteSteamView />
         </div>
         <!-- 聊天组件区域 -->
@@ -109,31 +101,38 @@ const {
   clearMessages,
 } = useChat(zg);
 // 用户信息
-const roomId = ref("room_id_1");
-const userId = ref("user_id_1");
-const userName = ref("user_name_1");
-const agentUserId = ref("agent_user_id_1");
-const userStreamId = ref("user_stream_id_1");
-// const agentStreamId = ref("agent_stream_id_1");
+function randomId(prefix: string) {
+  return prefix + Math.random().toString(36).substring(2, 10);
+}
+
+const roomId = ref(randomId("room_"));
+const userId = ref(randomId("user_"));
+const userName = ref(randomId("user_name_"));
+const userStreamId = ref(randomId("stream_user_"));
+
+
 
 // 状态管理
 const loading = ref(false);
 const digitalHumanLoading = ref(false);
 const activeCollapse = ref(["chat"]);
 const isDigitalHuman = ref(false);
+let agentInstanceId = ref("");
 
 // 处理登录房间
 const handleLogin = async (type: "normal" | "digitalHuman") => {
   try {
     type === "normal" ? (loading.value = true) : (digitalHumanLoading.value = true);
-    await loginRoom(
+    const res = await loginRoom(
       type,
       roomId.value,
       userId.value,
       userName.value,
-      userStreamId.value
+      userStreamId.value,
     );
+    console.log("mytag demo 执行了 handleLogin",res);
     isDigitalHuman.value = type === "digitalHuman";
+    agentInstanceId.value = res.agent_instance_id;
   } catch (error: any) {
     console.error("登录失败", error);
     ElMessage.error(error.message || "登录失败");
@@ -147,7 +146,8 @@ const handleLogout = async () => {
   try {
     loading.value = true;
     isDigitalHuman.value = false;
-    await logoutRoom();
+    console.log("mytag demo 执行了 handleLogout");
+    await logoutRoom(agentInstanceId.value);
   } catch (error: any) {
     console.error("退出失败", error);
     ElMessage.error(error.message || "退出失败");
