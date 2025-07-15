@@ -100,7 +100,6 @@
 
     // AgentId
     self.agentIdLabel = [[UILabel alloc] init];
-    self.agentIdLabel.text = [NSString stringWithFormat:@"%@", [[ZegoAIAgentServiceAPI sharedInstance] getAgentId]];
     self.agentIdLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
     self.agentIdLabel.textAlignment = NSTextAlignmentCenter;
     self.agentIdLabel.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1];
@@ -213,7 +212,7 @@
             return;
         }
         __weak typeof(self) weakSelf = self;
-        [[ZegoAIAgentServiceAPI sharedInstance] startAudioWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+        [[ZegoAIAgentServiceAPI sharedInstance] startAudioWithCompletion:^(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) return;
             strongSelf.loginLogoutButton.enabled = YES;
@@ -222,6 +221,8 @@
                 strongSelf.isLoggedIn = YES;
                 [strongSelf.loginLogoutButton setTitle:@"LogoutRoom" forState:UIControlStateNormal];
                 strongSelf.loginLogoutButton.backgroundColor = [UIColor colorWithRed:0.9 green:0.4 blue:0.4 alpha:1];
+                
+                self.agentIdLabel.text = [NSString stringWithFormat:@"%@", [[ZegoAIAgentServiceAPI sharedInstance] getAgentId]];
             } else {
                 [strongSelf showToast:[NSString stringWithFormat:@"Failed to start audio chat: %@", errorMessage]];
             }
@@ -237,7 +238,7 @@
     [[ZegoAIAgentServiceAPI sharedInstance] registerAudioEventHandler:nil];
 
     __weak typeof(self) weakSelf = self;
-    [[ZegoAIAgentServiceAPI sharedInstance] stopAudioWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+    [[ZegoAIAgentServiceAPI sharedInstance] stopAudioWithCompletion:^(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         strongSelf.loginLogoutButton.enabled = YES;
         [strongSelf.loginLogoutLoading stopAnimating];

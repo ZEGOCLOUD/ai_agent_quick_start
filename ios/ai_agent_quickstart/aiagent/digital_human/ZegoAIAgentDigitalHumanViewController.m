@@ -160,7 +160,7 @@
         }
 
         __weak typeof(self) weakSelf = self;
-        [[ZegoAIAgentServiceAPI sharedInstance] startDigitalHumanWithCompletion:^(BOOL success, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig) {
+        [[ZegoAIAgentServiceAPI sharedInstance] startDigitalHumanWithCompletion:^(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) return;
 
