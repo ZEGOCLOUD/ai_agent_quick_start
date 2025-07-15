@@ -19,32 +19,32 @@ class Logger {
     this.level = this.isDevelopment ? LogLevel.DEBUG : LogLevel.WARN;
   }
 
-  private formatMessage(level: string, tag: string, message: any[]): string {
+  private formatMessage(level: string, tag: string): string {
     const timestamp = new Date().toISOString();
     return `[${timestamp}] [${level}] [${tag}]`;
   }
 
   debug(tag: string, ...args: any[]) {
     if (this.level <= LogLevel.DEBUG) {
-      console.log(this.formatMessage('DEBUG', tag, args), ...args);
+      console.log(this.formatMessage('DEBUG', tag), ...args);
     }
   }
 
   info(tag: string, ...args: any[]) {
     if (this.level <= LogLevel.INFO) {
-      console.info(this.formatMessage('INFO', tag, args), ...args);
+      console.info(this.formatMessage('INFO', tag), ...args);
     }
   }
 
   warn(tag: string, ...args: any[]) {
     if (this.level <= LogLevel.WARN) {
-      console.warn(this.formatMessage('WARN', tag, args), ...args);
+      console.warn(this.formatMessage('WARN', tag), ...args);
     }
   }
 
   error(tag: string, error: any, ...args: any[]) {
     if (this.level <= LogLevel.ERROR) {
-      console.error(this.formatMessage('ERROR', tag, [error, ...args]), error, ...args);
+      console.error(this.formatMessage('ERROR', tag), error, ...args);
     }
   }
 

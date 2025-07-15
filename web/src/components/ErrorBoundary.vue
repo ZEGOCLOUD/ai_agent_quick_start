@@ -45,12 +45,14 @@ const handleError = (error: Error, errorInfo?: any) => {
     `.trim()
   }
   
-  // 使用统一错误处理器
-  ErrorHandler.handle(error, {
-    context: 'ErrorBoundary',
-    showNotification: false, // 错误边界已经显示UI，不需要额外通知
-    logError: true
-  })
+  // 使用统一错误处理器，但禁用通知（因为错误边界已经显示UI）
+  const originalConfig = ErrorHandler['config']
+  ErrorHandler.updateConfig({ showNotification: false })
+  try {
+    ErrorHandler.handle(error, 'ErrorBoundary')
+  } finally {
+    ErrorHandler.updateConfig(originalConfig)
+  }
 }
 
 // 重试操作
@@ -109,8 +111,9 @@ import { getCurrentInstance } from 'vue'
 
 const instance = getCurrentInstance()
 if (instance?.appContext?.app) {
-  instance.appContext.app.config.errorHandler = (error: Error, vm: any, info: string) => {
-    handleError(error, { component: vm?.$options?.name || 'Unknown', info })
+  instance.appContext.app.config.errorHandler = (error: unknown, vm: any, info: string) => {
+    const errorObj = error instanceof Error ? error : new Error(String(error))
+    handleError(errorObj, { component: vm?.$options?.name || 'Unknown', info })
   }
 }
 </script>

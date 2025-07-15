@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 import config from '../config';
-import { ErrorHandler, ErrorType, createError } from './error-handler';
+import { ErrorHandler, createError } from './error-handler';
 import { logger } from './logger';
 
 // 创建axios实例
