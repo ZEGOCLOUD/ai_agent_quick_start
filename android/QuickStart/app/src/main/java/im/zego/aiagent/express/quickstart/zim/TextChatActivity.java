@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -13,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import com.google.gson.JsonObject;
 import im.zego.aiagent.express.quickstart.Constant;
 import im.zego.aiagent.express.quickstart.MainActivity;
 import im.zego.aiagent.express.quickstart.R;
@@ -44,6 +46,7 @@ import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okhttp3.logging.HttpLoggingInterceptor.Level;
@@ -57,7 +60,10 @@ public class TextChatActivity extends AppCompatActivity {
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final OkHttpClient client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS)
-        .addInterceptor(new HttpLoggingInterceptor().setLevel(Level.BASIC)).build();
+        .addInterceptor(new HttpLoggingInterceptor().setLevel(Level.BODY)).build();
+    private String agent_id;
+    private String agent_name;
+    private String robot_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,13 +92,13 @@ public class TextChatActivity extends AppCompatActivity {
                 // 只添加本会话的消息到本页面
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     List<ZIMMessage> collect = messageList.stream().filter(
-                            zimMessage -> Objects.equals(Constant.agent_zim_robotid, zimMessage.getConversationID()))
+                            zimMessage -> Objects.equals(robot_id, zimMessage.getConversationID()))
                         .collect(Collectors.toList());
                     chatListView.addMessageList(collect);
                 } else {
                     ArrayList<ZIMMessage> collect = new ArrayList<ZIMMessage>();
                     for (ZIMMessage zimMessage : messageList) {
-                        if (Constant.agent_zim_robotid.equals(zimMessage.getConversationID())) {
+                        if (robot_id.equals(zimMessage.getConversationID())) {
                             collect.add(zimMessage);
                         }
                     }
@@ -102,10 +108,7 @@ public class TextChatActivity extends AppCompatActivity {
             }
         });
 
-        requestZegoToken();
-
-        TextView aiName = findViewById(R.id.ai_name);
-        aiName.setText(Constant.agent_name);
+        queryAgentInfo();
 
         EditText chatText = findViewById(R.id.chat_text);
         findViewById(R.id.send_text).setOnClickListener(v -> {
@@ -117,7 +120,7 @@ public class TextChatActivity extends AppCompatActivity {
             ZIMTextMessage zimMessage = new ZIMTextMessage();
             zimMessage.message = string;
             // 在单聊场景中，ZIMConversationType 设置为 PEER
-            ZIM.getInstance().sendMessage(zimMessage, Constant.agent_zim_robotid, ZIMConversationType.PEER,
+            ZIM.getInstance().sendMessage(zimMessage, robot_id, ZIMConversationType.PEER,
                 new ZIMMessageSendConfig(), new ZIMMessageSentFullCallback() {
                     @Override
                     public void onMessageAttached(ZIMMessage message) {
@@ -147,14 +150,17 @@ public class TextChatActivity extends AppCompatActivity {
         findViewById(R.id.voice_chat).setOnClickListener(v -> {
             Intent intent = new Intent(TextChatActivity.this, MainActivity.class);
             intent.putExtra("fromTextChat", true);
+            intent.putExtra("agent_id", agent_id);
+            intent.putExtra("agent_name", agent_name);
             startActivity(intent);
         });
     }
 
     private void showLoading(boolean show) {
-        findViewById(R.id.loading_layout).setVisibility(show ? View.VISIBLE : View.GONE);
+        runOnUiThread(() -> findViewById(R.id.loading_layout).setVisibility(show ? View.VISIBLE : View.GONE));
     }
 
+    // 拿到 token 之后登录 ZIM SDK
     private void requestZegoToken() {
         Request request = new Request.Builder().url(Constant.BASE_URL + "/api/zego-token?userId=" + Constant.user_id)
             .get().build();
@@ -162,36 +168,45 @@ public class TextChatActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 System.err.println("Request failed: " + e.getMessage());
+                showLoading(false);
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String responseBody = response.body().string();
-                    System.out.println(responseBody);
+
+                    Log.d(TAG, "requestZegoToken onResponse() called with: call = [" + call + "], response = [" + responseBody + "]");
                     try {
                         JSONObject json = new JSONObject(responseBody);
                         String token = (String) json.get("token");
                         long expireTime = (long) json.get("expire_time");
-                        loginZIM(token);
+                        if (!TextUtils.isEmpty(token)) {
+                            loginZIM(token);
+                        }else {
+                            showLoading(false);
+                        }
 
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
                 } else {
                     System.err.println("Request failed with status: " + response.code());
+                    showLoading(false);
                 }
 
             }
         });
     }
 
+    // 登录成功之后查询历史消息
     public void loginZIM(String token) {
+        Log.d(TAG, "loginZIM() called with: token = [" + token + "]");
         TextChatListView chatListView = findViewById(R.id.chat_message_layout);
 
         ZIMUserInfo robot = new ZIMUserInfo();
-        robot.userID = Constant.agent_zim_robotid;
-        robot.userName = Constant.agent_name;
+        robot.userID = robot_id;
+        robot.userName = agent_name;
 
         ZIMUserInfo self = new ZIMUserInfo();
         self.userID = Constant.user_id;
@@ -207,7 +222,7 @@ public class TextChatActivity extends AppCompatActivity {
                     queryConfig.reverse = true;
 
                     ZIM.getInstance()
-                        .queryHistoryMessage(Constant.agent_zim_robotid, ZIMConversationType.PEER, queryConfig,
+                        .queryHistoryMessage(robot_id, ZIMConversationType.PEER, queryConfig,
                             new ZIMMessageQueriedCallback() {
                                 @Override
                                 public void onMessageQueried(String conversationID,
@@ -224,6 +239,59 @@ public class TextChatActivity extends AppCompatActivity {
                             });
                 } else {
                     Toast.makeText(TextChatActivity.this, "登录失败", Toast.LENGTH_SHORT).show();
+                    showLoading(false);
+                }
+
+            }
+        });
+    }
+
+    private static final String TAG = "TextChatActivity";
+
+    /**
+     * 查询获取 robot_id，然后请求 zego token
+     */
+    private void queryAgentInfo() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("user_id", Constant.user_id);
+        RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
+
+        Request request = new Request.Builder().url(Constant.BASE_URL + "/api/getAgentInfo").post(body).build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                System.err.println("Request failed: " + e.getMessage());
+                showLoading(false);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String responseBody = response.body().string();
+                    Log.d(TAG, "queryAgentInfo onResponse() called with: call = [" + call + "], response = [" + responseBody + "]");
+
+                    try {
+                        JSONObject json = new JSONObject(responseBody);
+                        int errorCode = (int) json.get("code");
+                        String message = (String) json.get("message");
+                        if (errorCode == 0) {
+                            agent_id = (String) json.get("agent_id");
+                            agent_name = (String) json.get("agent_name");
+                            robot_id = (String) json.get("robot_id");
+                            runOnUiThread(() -> {
+                                TextView aiName = findViewById(R.id.ai_name);
+                                aiName.setText(agent_name);
+                            });
+                            requestZegoToken();
+                        } else {
+                            showLoading(false);
+                        }
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    System.err.println("Request failed with status: " + response.code());
                     showLoading(false);
                 }
 

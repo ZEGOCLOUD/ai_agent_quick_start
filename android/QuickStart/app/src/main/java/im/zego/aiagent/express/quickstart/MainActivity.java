@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import com.google.gson.JsonObject;
 import im.zego.aiagent.express.quickstart.AudioChatMessageParser.AudioChatMessage;
 import im.zego.aiagent.express.quickstart.AudioChatMessageParser.AudioChatMessageListListener;
 import im.zego.zegoexpress.ZegoExpressEngine;
@@ -54,8 +55,13 @@ public class MainActivity extends AppCompatActivity {
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final OkHttpClient client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS)
-        .addInterceptor(new HttpLoggingInterceptor().setLevel(Level.BASIC)).build();
+        .addInterceptor(new HttpLoggingInterceptor().setLevel(Level.BODY)).build();
     private TextView loadingText;
+    private String agent_instance_id;
+    private String agent_user_id; //agent推流id，数字人推流id
+    private String agent_stream_id; //agent推流id，数字人推流id
+    private String agent_name; //agent推流id，数字人推流id
+    private String agentId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +79,10 @@ public class MainActivity extends AppCompatActivity {
 
         TextView userId = findViewById(R.id.user_id);
         TextView userName = findViewById(R.id.user_name);
+        TextView roomId = findViewById(R.id.room_id);
         userId.setText(Constant.user_id);
         userName.setText(Constant.userName);
+        roomId.setText("RoomId:" + Constant.room_id);
 
         loadingText = findViewById(R.id.loading_text);
 
@@ -82,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
             requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO);
         });
 
+        agentId = getIntent().getStringExtra("agent_id");
+        agent_name = getIntent().getStringExtra("agent_name");
         boolean fromTextChat = getIntent().getBooleanExtra("fromTextChat", false);
         if (fromTextChat) {
             requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO);
@@ -110,7 +120,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void start() {
-        RequestBody body = RequestBody.create("", JSON);
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("room_id", Constant.room_id);
+        jsonObject.addProperty("user_id", Constant.user_id);
+        jsonObject.addProperty("user_stream_id", Constant.user_stream_id);
+        jsonObject.addProperty("agent_id", agentId);
+        RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
+
         Request request = new Request.Builder().url(Constant.BASE_URL + "/api/start").post(body).build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -132,8 +148,20 @@ public class MainActivity extends AppCompatActivity {
                         int errorCode = (int) json.get("code");
                         String message = (String) json.get("message");
                         String agent_id = (String) json.get("agent_id");
+                        if (json.has("agent_name")) {
+                            agent_name = (String) json.get("agent_name");
+                        }
+                        if (json.has("agent_user_id")) {
+                            agent_user_id = (String) json.get("agent_user_id");
+                        }
+                        if (json.has("agent_stream_id")) {
+                            agent_stream_id = (String) json.get("agent_stream_id");
+                        }
+                        if (json.has("agent_instance_id")) {
+                            agent_instance_id = (String) json.get("agent_instance_id");
+                        }
                         if (errorCode == 0) {
-                            ZegoExpressEngine.getEngine().startPlayingStream(Constant.agent_stream_id);
+                            ZegoExpressEngine.getEngine().startPlayingStream(agent_stream_id);
                             updateUI();
                         } else {
                             ZegoExpressEngine.getEngine().logoutRoom();
@@ -164,8 +192,8 @@ public class MainActivity extends AppCompatActivity {
 
                 TextView agentUserId = findViewById(R.id.agent_user_id);
                 TextView agentUserName = findViewById(R.id.agent_user_name);
-                agentUserId.setText(Constant.agent_zim_uid);
-                agentUserName.setText(Constant.agent_name);
+                agentUserId.setText(agent_user_id);
+                agentUserName.setText(agent_name);
             }
         });
     }
@@ -189,7 +217,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stop() {
-        RequestBody body = RequestBody.create("", JSON);
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("agent_instance_id", agent_instance_id);
+        RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
+
         Request request = new Request.Builder().url(Constant.BASE_URL + "/api/stop").post(body).build();
 
         client.newCall(request).enqueue(new Callback() {
@@ -228,8 +259,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestZegoToken() {
-        Request request = new Request.Builder().url(Constant.BASE_URL + "/api/zego-token?userId=" + Constant.user_id).get()
-            .build();
+        Request request = new Request.Builder().url(Constant.BASE_URL + "/api/zego-token?userId=" + Constant.user_id)
+            .get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
