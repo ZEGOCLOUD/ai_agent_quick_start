@@ -98,10 +98,6 @@
     // 设置背景色（可选，用于加载时显示）
     self.staticImageView.backgroundColor = [UIColor colorWithRed:0.95 green:0.95 blue:0.95 alpha:1.0]; // 很浅的灰色背景
 
-    // 添加红色边框用于测试
-    self.staticImageView.layer.borderWidth = 3.0;
-    self.staticImageView.layer.borderColor = [UIColor redColor].CGColor;
-
     // 使用kDigitalHumanImageURL加载图片
     if (kDigitalHumanImageURL && kDigitalHumanImageURL.length > 0) {
         NSLog(@"开始加载静态图片: %@", kDigitalHumanImageURL);
