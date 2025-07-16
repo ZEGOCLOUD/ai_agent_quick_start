@@ -19,14 +19,6 @@
                 </div>
               </div>
             </div>
-            <div class="info-card">
-              <div class="info-title">智能体信息</div>
-              <div class="info-content">
-                <div class="info-item">
-                  <span class="value">AgentUserId: {{ agentUserId }}</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- 登录/退出按钮 -->
@@ -67,7 +59,7 @@
         </div>
       </div>
       <div class="room-container"> 
-        <div v-show="isDigitalHuman" class="stream-container">
+        <div class="stream-container">
           <RemoteSteamView />
         </div>
         <!-- 聊天组件区域 -->
@@ -91,7 +83,8 @@ import ChatMessage from "./ChatMessage.vue";
 import RemoteSteamView from "./RemoteSteamView.vue";
 import { useChat } from "../hooks/useChat";
 import { useRoom } from "../hooks/useRoom";
-import { ElMessage } from "element-plus";
+import { ErrorHandler } from "../utils/error-handler";
+import { logger } from "../utils/logger";
 
 const {
   zg,
@@ -109,34 +102,51 @@ const {
   clearMessages,
 } = useChat(zg);
 // 用户信息
-const roomId = ref("room_id_1");
-const userId = ref("user_id_1");
-const userName = ref("user_name_1");
-const agentUserId = ref("agent_user_id_1");
-const userStreamId = ref("user_stream_id_1");
-// const agentStreamId = ref("agent_stream_id_1");
+function randomId(prefix: string) {
+  return prefix + Math.random().toString(36).substring(2, 10);
+}
+
+const roomId = ref(randomId("room_"));
+const userId = ref(randomId("user_"));
+const userName = ref(randomId("user_name_"));
+const userStreamId = ref(randomId("stream_user_"));
+
+
 
 // 状态管理
 const loading = ref(false);
 const digitalHumanLoading = ref(false);
 const activeCollapse = ref(["chat"]);
 const isDigitalHuman = ref(false);
+let agentInstanceId = ref("");
 
 // 处理登录房间
 const handleLogin = async (type: "normal" | "digitalHuman") => {
   try {
     type === "normal" ? (loading.value = true) : (digitalHumanLoading.value = true);
-    await loginRoom(
+    
+    logger.userAction('用户开始登录', { type, roomId: roomId.value, userId: userId.value });
+    
+    const res = await loginRoom(
       type,
       roomId.value,
       userId.value,
       userName.value,
-      userStreamId.value
+      userStreamId.value,
     );
+    
+    logger.userAction('用户登录成功', { 
+      type, 
+      roomId: roomId.value, 
+      userId: userId.value,
+      agentInstanceId: res.agent_instance_id 
+    });
+    
     isDigitalHuman.value = type === "digitalHuman";
-  } catch (error: any) {
-    console.error("登录失败", error);
-    ElMessage.error(error.message || "登录失败");
+    agentInstanceId.value = res.agent_instance_id || "";
+  } catch (error) {
+    logger.userAction('用户登录失败', { type, roomId: roomId.value, userId: userId.value, error });
+    ErrorHandler.handle(error, 'Chat.handleLogin');
   } finally {
     type === "normal" ? (loading.value = false) : (digitalHumanLoading.value = false);
   }
@@ -147,10 +157,26 @@ const handleLogout = async () => {
   try {
     loading.value = true;
     isDigitalHuman.value = false;
-    await logoutRoom();
-  } catch (error: any) {
-    console.error("退出失败", error);
-    ElMessage.error(error.message || "退出失败");
+    
+    logger.userAction('用户开始退出房间', { 
+      roomId: roomId.value, 
+      userId: userId.value,
+      agentInstanceId: agentInstanceId.value 
+    });
+    
+    await logoutRoom(agentInstanceId.value);
+    
+    logger.userAction('用户退出房间成功', { 
+      roomId: roomId.value, 
+      userId: userId.value 
+    });
+  } catch (error) {
+    logger.userAction('用户退出房间失败', { 
+      roomId: roomId.value, 
+      userId: userId.value,
+      error 
+    });
+    ErrorHandler.handle(error, 'Chat.handleLogout');
   } finally {
     clearMessages();
     loading.value = false;
@@ -158,11 +184,30 @@ const handleLogout = async () => {
 };
 
 onMounted(async () => {
-  await initSDK();
-  setupEventListeners();
-  setupChatEventListeners();
-  checkPermission();
-  await getToken(userId.value);
+  try {
+    logger.info('COMPONENT', 'Chat 组件初始化开始', { 
+      roomId: roomId.value, 
+      userId: userId.value 
+    });
+    
+    await initSDK();
+    setupEventListeners();
+    setupChatEventListeners();
+    checkPermission();
+    await getToken(userId.value);
+    
+    logger.info('COMPONENT', 'Chat 组件初始化完成', { 
+      roomId: roomId.value, 
+      userId: userId.value 
+    });
+  } catch (error) {
+    logger.error('COMPONENT', 'Chat 组件初始化失败', { 
+      roomId: roomId.value, 
+      userId: userId.value,
+      error 
+    });
+    ErrorHandler.handle(error, 'Chat.onMounted');
+  }
 });
 </script>
 
