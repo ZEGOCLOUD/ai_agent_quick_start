@@ -5,7 +5,6 @@ import 'package:zego_express_engine/zego_express_engine.dart';
 
 import 'package:ai_agent_quickstart_flutter/server/zego_key.dart';
 import 'package:ai_agent_quickstart_flutter/audio/subtitles/protocol/message_dispatcher.dart';
-import 'package:ai_agent_quickstart_flutter/digital_human/defines.dart';
 
 import 'http_utils.dart';
 import 'token_response.dart';
@@ -72,10 +71,6 @@ class ZegoAIAgentService {
   late final String _userId;
   late final String _roomId;
   late final String _userStreamId;
-
-  /// 数字人相关配置
-  final String _digitalHumanConfigId = 'mobile';
-  ZegoDigitalHumanStreamInfo? digitalHumanStreamInfo;
 
   /// 后台返回的 agent 信息（动态赋值）
   String? _agentId;
@@ -348,28 +343,11 @@ class ZegoAIAgentService {
       );
     }
   }
-    }
-  }
 
   Future<void> _startPlayingStream(String streamId) async {
     debugPrint('开始拉流$streamId...');
 
-    if (digitalHumanStreamInfo != null) {
-      /// 视频流
-      await ZegoExpressEngine.instance.createCanvasView((viewID) {
-        debugPrint('数字人流widget成功渲染');
-
-        digitalHumanStreamInfo?.viewIDNotifier.value = viewID;
-
-        ZegoCanvas canvas = ZegoCanvas.view(viewID);
-        ZegoExpressEngine.instance.startPlayingStream(streamId, canvas: canvas);
-      }).then((widget) {
-        debugPrint('数字人流widget成功构建');
-        digitalHumanStreamInfo?.viewNotifier.value = widget;
-      });
-    } else {
-      await ZegoExpressEngine.instance.startPlayingStream(streamId);
-    }
+    await ZegoExpressEngine.instance.startPlayingStream(streamId);
 
     await ZegoExpressEngine.instance.callExperimentalAPI(
       '{"method":"liveroom.audio.set_play_latency_mode","params":{"mode":1,"stream_id":"$streamId"}}',
