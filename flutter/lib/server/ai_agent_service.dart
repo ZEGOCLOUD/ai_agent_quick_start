@@ -348,6 +348,172 @@ class ZegoAIAgentService {
       );
     }
   }
+
+  /// 启动数字人会话
+  Future<AIAgentServiceResponse> startDigitalHuman(
+    ZegoDigitalHumanStreamInfo streamInfo,
+  ) async {
+    debugPrint('开始启动数字人会话...');
+
+    /// 通知业务后台开始数字人通话
+    debugPrint('通知业务后台开始数字人通话...');
+    final url = '$_currentBaseUrl/api/start-digital-human';
+    final requestData = {
+      'room_id': _roomId,
+      'user_id': _userId,
+      'user_stream_id': _userStreamId,
+      'digital_human_id': ZegoKey.kDigitalHumanId,
+      'config_id': _digitalHumanConfigId,
+    };
+    final response =
+        await HttpUtil.post(url, body: requestData, fromJson: (json) => json);
+    if (!response.isSuccess) {
+      debugPrint('通知业务后台开始数字人通话失败: ${response.message}');
+      return AIAgentServiceResponse.failure(
+        errorCode: response.code,
+        errorMessage: response.message,
+      );
+    }
+
+    // 从响应中获取后端返回的信息
+    String? digitalHumanConfig;
+    if (response.data != null && response.data is Map<String, dynamic>) {
+      final data = response.data as Map<String, dynamic>;
+      _agentId = data['agent_id'];
+      _agentName = data['agent_name'];
+      _agentStreamId = data['agent_stream_id'];
+      _agentUserId = data['agent_user_id'];
+      _agentInstanceId = data['agent_instance_id'];
+      digitalHumanConfig = data['digital_human_config'];
+      debugPrint(
+          '获取到数字人agent信息: agentId=$_agentId, agentStreamId=$_agentStreamId');
+    }
+    debugPrint('通知业务后台开始数字人通话成功');
+
+    /// 获取Token
+    final token = await getToken();
+    if (token.isEmpty) {
+      debugPrint('获取token失败，无法继续启动数字人会话');
+      return AIAgentServiceResponse.failure(
+        errorCode: -1,
+        errorMessage: '获取token失败',
+      );
+    }
+    debugPrint('成功获取token');
+
+    /// 更新数字人拉流信息
+    digitalHumanStreamInfo = streamInfo;
+
+    try {
+      debugPrint('开始配置Zego引擎...');
+
+      /// 登录房间
+      debugPrint('开始登录房间...');
+      final user = ZegoUser(_userId, _userId);
+      final roomConfig = ZegoRoomConfig.defaultConfig()
+        ..isUserStatusNotify = true
+        ..token = token;
+      final loginResult = await ZegoExpressEngine.instance.loginRoom(
+        _roomId,
+        user,
+        config: roomConfig,
+      );
+      if (0 != loginResult.errorCode && 1002001 != loginResult.errorCode) {
+        debugPrint('登录房间失败，错误码: ${loginResult.errorCode}');
+        return AIAgentServiceResponse.failure(
+          errorCode: loginResult.errorCode,
+          errorMessage: '进入数字人房间失败:${loginResult.errorCode}',
+        );
+      }
+      debugPrint('房间登录成功');
+
+      /// 下面用来做应答延迟优化的，需要集成对应版本的ZegoExpressEngine sdk，请联系即构同学
+      debugPrint('配置发布延迟模式...');
+      await ZegoExpressEngine.instance.callExperimentalAPI(
+        '{"method":"liveroom.audio.set_publish_latency_mode","params":{"mode":1,"channel":0}}',
+      );
+
+      /// 开始推流（打开麦克风）
+      debugPrint('开始推流$_userStreamId...');
+      await ZegoExpressEngine.instance.muteMicrophone(false);
+      await ZegoExpressEngine.instance.startPublishingStream(_userStreamId);
+      debugPrint('推流启动成功');
+
+      debugPrint('数字人会话启动完成');
+      return AIAgentServiceResponse.success(
+        digitalHumanEncodeConfig: digitalHumanConfig ?? '',
+        agentInstanceId: _agentInstanceId,
+      );
+    } catch (e, stackTrace) {
+      debugPrint('启动数字人会话失败: $e');
+      debugPrint('错误堆栈: $stackTrace');
+      return AIAgentServiceResponse.failure(
+        errorCode: -1,
+        errorMessage: '启动数字人会话失败: $e',
+      );
+    }
+  }
+
+  /// 停止数字人会话
+  Future<AIAgentServiceResponse> stopDigitalHuman() async {
+    debugPrint('开始停止数字人会话...');
+
+    /// 清除视频canvas
+    ZegoExpressEngine.instance.destroyCanvasView(
+      digitalHumanStreamInfo?.viewIDNotifier.value ?? -1,
+    );
+    digitalHumanStreamInfo = null;
+
+    /// 通知业务后台停止数字人通话
+    debugPrint('通知业务后台停止数字人通话...');
+    final url = '$_currentBaseUrl/api/stop';
+    final requestData = <String, dynamic>{};
+    if (_agentInstanceId != null) {
+      requestData['agent_instance_id'] = _agentInstanceId;
+    }
+    final response =
+        await HttpUtil.post(url, body: requestData, fromJson: (json) => json);
+    if (!response.isSuccess) {
+      debugPrint('通知业务后台停止数字人通话失败: ${response.message}');
+    } else {
+      debugPrint('通知业务后台停止数字人通话成功');
+    }
+
+    try {
+      final engine = ZegoExpressEngine.instance;
+
+      /// 停止推流
+      debugPrint('停止推流...');
+      await engine.stopPublishingStream();
+      debugPrint('推流已停止');
+
+      /// 登出房间
+      debugPrint('登出房间...');
+      await engine.logoutRoom(_roomId);
+      debugPrint('房间已登出');
+
+      // 清空后台返回的agent instance数据
+      _agentId = null;
+      _agentName = null;
+      _agentStreamId = null;
+      _agentInstanceId = null;
+
+      debugPrint('数字人会话停止完成');
+      if (response.isSuccess) {
+        return AIAgentServiceResponse.success();
+      } else {
+        return AIAgentServiceResponse.failure(
+          errorCode: response.code,
+          errorMessage: response.message,
+        );
+      }
+    } catch (e, stackTrace) {
+      debugPrint('停止数字人会话失败: $e');
+      debugPrint('错误堆栈: $stackTrace');
+      return AIAgentServiceResponse.failure(
+        errorCode: -1,
+        errorMessage: '停止数字人会话失败: $e',
+      );
     }
   }
 
