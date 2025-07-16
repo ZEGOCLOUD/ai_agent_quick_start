@@ -1,5 +1,5 @@
 const config = {
-  appId: 1234567,
+  appId: 1723391556,
   server: "",
 }
 

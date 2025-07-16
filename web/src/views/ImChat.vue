@@ -44,9 +44,39 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const { messages, initSDK, login, queryHistoryMessages, sendMessage } = useImChat();
 
-// 用户信息 - 可根据实际需求修改
-const userId = ref("user_id_1");
-const userName = ref("user_name_1");
+// 生成随机用户信息
+const generateRandomUserInfo = () => {
+  const timestamp = Date.now().toString().slice(-6);
+  const randomSuffix = Math.random().toString(36).substring(2, 6);
+  
+  return {
+    userId: `user_id_${timestamp}_${randomSuffix}`,
+    userName: `用户_${timestamp}`,
+    roomId: `room_${timestamp}_${randomSuffix}`,
+    agentUserId: `agent_user_${timestamp}_${randomSuffix}`,
+    userStreamId: `user_stream_${timestamp}_${randomSuffix}`,
+  };
+};
+
+// 获取或生成用户信息
+const getUserInfo = () => {
+  try {
+    const stored = localStorage.getItem('ai_agent_user_info');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    console.warn('读取用户信息失败:', error);
+  }
+  
+  const newUserInfo = generateRandomUserInfo();
+  localStorage.setItem('ai_agent_user_info', JSON.stringify(newUserInfo));
+  return newUserInfo;
+};
+
+const userInfo = getUserInfo();
+const userId = ref(userInfo.userId);
+const userName = ref(userInfo.userName);
 const agentName = ref("李悦然")
 const conversationID = "@RBT#1530_chuyiyun_726988837747";
 

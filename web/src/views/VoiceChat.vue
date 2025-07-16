@@ -103,12 +103,42 @@ const {
   clearMessages,
 } = useVoiceChat(zg);
 
-// 用户信息 - 可根据实际需求修改
-const roomId = ref("room_id_1");
-const userId = ref("user_id_1");
-const userName = ref("user_name_1");
-const agentUserId = ref("agent_user_id_1");
-const userStreamId = ref("user_stream_id_1");
+// 生成随机用户信息
+const generateRandomUserInfo = () => {
+  const timestamp = Date.now().toString().slice(-6);
+  const randomSuffix = Math.random().toString(36).substring(2, 6);
+  
+  return {
+    userId: `user_${timestamp}_${randomSuffix}`,
+    userName: `用户_${timestamp}`,
+    roomId: `room_${timestamp}_${randomSuffix}`,
+    agentUserId: `agent_${timestamp}_${randomSuffix}`,
+    userStreamId: `stream_${timestamp}_${randomSuffix}`,
+  };
+};
+
+// 获取或生成用户信息
+const getUserInfo = () => {
+  try {
+    const stored = localStorage.getItem('ai_agent_user_info');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    console.warn('读取用户信息失败:', error);
+  }
+  
+  const newUserInfo = generateRandomUserInfo();
+  localStorage.setItem('ai_agent_user_info', JSON.stringify(newUserInfo));
+  return newUserInfo;
+};
+
+const userInfo = getUserInfo();
+const roomId = ref(userInfo.roomId);
+const userId = ref(userInfo.userId);
+const userName = ref(userInfo.userName);
+const agentUserId = ref(userInfo.agentUserId);
+const userStreamId = ref(userInfo.userStreamId);
 // const agentStreamId = ref("agent_stream_id_1");
 
 // 状态管理
