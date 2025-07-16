@@ -57,7 +57,7 @@ public class VoiceChatActivity extends AppCompatActivity {
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final OkHttpClient client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS)
-        .addInterceptor(new HttpLoggingInterceptor().setLevel(Level.BASIC)).build();
+        .addInterceptor(new HttpLoggingInterceptor().setLevel(Level.BODY)).build();
     private TextView loadingText;
     private String agent_instance_id;
     private String agent_user_id; //agent推流id，数字人推流id

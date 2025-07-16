@@ -12,7 +12,7 @@ public class Constant {
     // 固定字符串
     public static final String config_id = "mobile";
     public static final String digital_human_image_URL = "https://zego-ai.oss-cn-shanghai.aliyuncs.com/agent-avatar/38597_1740990880443-20250303-163355.jpeg";
-    public static final String digital_human_id = "20be9bfb-ef6b-4d63-8c3b-1f20077599c5";
+    public static final String digital_human_id = "c4b56d5c-db98-4d91-86d4-5a97b507da97";
 
     // 生成的随机字符串
     public static final String user_id = "user_id_" + StringUtil.generateRandomString(6);
