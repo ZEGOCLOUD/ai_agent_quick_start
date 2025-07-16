@@ -70,13 +70,13 @@ NS_ASSUME_NONNULL_BEGIN
  * @param configId 配置ID，可选参数
  * @param completion 开始聊天的回调，成功返回digitalHumanEncodeConfig
  */
-- (void)startDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion;
+- (void)startDigitalHumanWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion;
 
 /**
  * 结束数字人聊天
  * @param completion 停止聊天的回调
  */
-- (void)stopDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
+- (void)stopDigitalHumanWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion;
 
 /**
  * 开始与智能体聊天
@@ -88,7 +88,7 @@ NS_ASSUME_NONNULL_BEGIN
  * 3. 建立双向通信通道
  * 4. 开始接收和处理音频/文本数据
  */
-- (void)startAudioWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
+- (void)startAudioWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion;
 
 /**
  * 停止与智能体聊天
@@ -100,7 +100,7 @@ NS_ASSUME_NONNULL_BEGIN
  * 3. 清理会话资源
  * 4. 回调通知会话终止结果
  */
-- (void)stopAudioWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion;
+- (void)stopAudioWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion;
 
 /**
  * 获取Token

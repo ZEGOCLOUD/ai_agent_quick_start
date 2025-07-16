@@ -19,21 +19,22 @@
 
 typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
 
-// 环境 URL
-static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  // 实际URL需要替换
-
 @interface ZegoAIAgentServiceAPI () <ZegoEventHandler>
 
 @property (nonatomic, copy) NSString *currentBaseURL;
 
+/// 后台返回的agent instance数据
 @property (nonatomic, copy) NSString *agentId;
+@property (nonatomic, copy) NSString *agentName;
 @property (nonatomic, copy) NSString *agentStreamId;
+@property (nonatomic, copy) NSString *agentInstanceId;
 
+/// 本地随机生成的数据
 @property (nonatomic, copy) NSString *userId;
 @property (nonatomic, copy) NSString *userStreamId;
 @property (nonatomic, copy) NSString *roomId;
 
-/// digital human
+/// demo digital human
 @property (nonatomic, copy) NSString *digitalHumanId;
 @property (nonatomic, copy) NSString *digitalHumanConfigId;
 
@@ -55,16 +56,16 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
     dispatch_once(&onceToken, ^{
         instance = [[ZegoAIAgentServiceAPI alloc] init];
         instance.currentBaseURL = kBaseURL;
-        instance.userId = @"user_id_1";
-        instance.roomId = @"room_id_1";
-        instance.userStreamId = @"user_stream_id_1";
         
-        instance.agentId = @"agent_user_id_1";
-        instance.agentStreamId = @"agent_stream_id_1";
+        // 随机生成的本地用户相关信息
+        instance.userId = [self generateRandomIdWithPrefix:@"user_"];
+        instance.roomId = [self generateRandomIdWithPrefix:@"room_"];
+        instance.userStreamId = [self generateRandomIdWithPrefix:@"stream_user_"];
 
-        instance.digitalHumanId = @"your_digitalHumanID";
-        instance.digitalHumanConfigId = @"your_digitalHumanConfigID";
+        instance.digitalHumanId = kDigitalHumanId; // 数字人ID
+        instance.digitalHumanConfigId = @"mobile"; // 数字人配置ID
     });
+    
     return instance;
 }
 
@@ -107,7 +108,7 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
     }];
 }
 
-- (void)startDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion {
+- (void)startDigitalHumanWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion {
     __weak typeof(self) weakSelf = self;
 
     // 先创建Agent实例，传入新的参数
@@ -117,20 +118,36 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
         
         if (response.code != 0) {
             if (completion) {
-                completion(NO, response.message ?: @"创建数字人Agent实例失败", nil);
+                completion(NO, response.code, response.message ?: @"创建数字人Agent实例失败", nil);
             }
             return;
         }
 
-        // 从响应中获取 digital_human_config
+        // 从响应中获取后端返回的信息
         NSString *digitalHumanConfig = nil;
         if (response.data && [response.data isKindOfClass:[NSDictionary class]]) {
-            digitalHumanConfig = response.data[@"digital_human_config"];
+            // 更新从后端返回的agent信息
+            if (response.data[@"agent_id"]) {
+                strongSelf.agentId = response.data[@"agent_id"];
+            }
+            if (response.data[@"agent_name"]) {
+                strongSelf.agentName = response.data[@"agent_name"];
+            }
+            if (response.data[@"agent_stream_id"]) {
+                strongSelf.agentStreamId = response.data[@"agent_stream_id"];
+            }
+            if (response.data[@"agent_instance_id"]) {
+                strongSelf.agentInstanceId = response.data[@"agent_instance_id"];
+            }
+            if (response.data[@"digital_human_config"]) {
+                digitalHumanConfig = response.data[@"digital_human_config"];
+            }
         }
 
         // 创建Agent实例成功后，初始化RTC引擎
         [strongSelf initZegoExpressEngine];
         
+        // 
         [strongSelf enableCustomVideoRender];
         
         // 登录房间
@@ -140,7 +157,7 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
             
             if (errorCode != 0) {
                 NSString* errorMsg = [NSString stringWithFormat:@"进入数字人房间失败:%d", errorCode];
-                completion(NO, errorMsg, nil);
+                completion(NO, errorCode, errorMsg, nil);
                 return;
             }
             
@@ -151,19 +168,15 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
             // 进房后开始推流
             [strongSelf startPushlishStream];
             
-            // 开始播放Agent的流
-            [strongSelf startPlayStream:strongSelf.agentStreamId];
-            
             if (completion) {
                 NSString *configToReturn = digitalHumanConfig ?: @"";
-                completion(YES, nil, configToReturn);
+                completion(YES, 0, nil, configToReturn);
             }
         }];
     }];
-
 }
 
-- (void)stopDigitalHumanWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
+- (void)stopDigitalHumanWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion {
     __weak typeof(self) weakSelf = self;
     
     // 先停止聊天
@@ -174,19 +187,25 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
         // 无论停止聊天是否成功，都释放RTC资源
         [strongSelf unInitZegoExpressEngine];
         
+        // 清空后台返回的agent instance数据
+        strongSelf.agentId = nil;
+        strongSelf.agentName = nil;
+        strongSelf.agentStreamId = nil;
+        strongSelf.agentInstanceId = nil;
+        
         if (response.code == 0) {
             if (completion) {
-                completion(YES, nil);
+                completion(YES, 0, nil);
             }
         } else {
             if (completion) {
-                completion(NO, response.message ?: @"停止聊天失败");
+                completion(NO, response.code, response.message ?: @"停止聊天失败");
             }
         }
     }];
 }
 
-- (void)startAudioWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
+- (void)startAudioWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion {
     __weak typeof(self) weakSelf = self;
     
     // 先创建Agent实例
@@ -196,9 +215,26 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
         
         if (response.code != 0) {
             if (completion) {
-                completion(NO, response.message ?: @"创建Agent实例失败");
+                completion(NO, response.code, response.message ?: @"创建Agent实例失败");
             }
             return;
+        }
+        
+        // 从响应中获取后端返回的信息
+        if (response.data && [response.data isKindOfClass:[NSDictionary class]]) {
+            // 更新从后端返回的agent信息
+            if (response.data[@"agent_id"]) {
+                strongSelf.agentId = response.data[@"agent_id"];
+            }
+            if (response.data[@"agent_name"]) {
+                strongSelf.agentName = response.data[@"agent_name"];
+            }
+            if (response.data[@"agent_stream_id"]) {
+                strongSelf.agentStreamId = response.data[@"agent_stream_id"];
+            }
+            if (response.data[@"agent_instance_id"]) {
+                strongSelf.agentInstanceId = response.data[@"agent_instance_id"];
+            }
         }
         
         // 创建Agent实例成功后，初始化RTC引擎
@@ -211,7 +247,7 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
             
             if (errorCode != 0) {
                 NSString* errorMsg = [NSString stringWithFormat:@"进入语音房间失败:%d", errorCode];
-                completion(NO, errorMsg);
+                completion(NO, errorCode, errorMsg);
                 return;
             }
             
@@ -222,17 +258,14 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
             // 进房后开始推流
             [strongSelf startPushlishStream];
             
-            // 开始播放Agent的流
-            [strongSelf startPlayStream:strongSelf.agentStreamId];
-            
             if (completion) {
-                completion(YES, nil);
+                completion(YES, 0, nil);
             }
         }];
     }];
 }
 
-- (void)stopAudioWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
+- (void)stopAudioWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion {
     __weak typeof(self) weakSelf = self;
     
     // 先停止聊天
@@ -243,13 +276,19 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
         // 无论停止聊天是否成功，都释放RTC资源
         [strongSelf unInitZegoExpressEngine];
         
+        // 清空后台返回的agent instance数据
+        strongSelf.agentId = nil;
+        strongSelf.agentName = nil;
+        strongSelf.agentStreamId = nil;
+        strongSelf.agentInstanceId = nil;
+        
         if (response.code == 0) {
             if (completion) {
-                completion(YES, nil);
+                completion(YES, 0, nil);
             }
         } else {
             if (completion) {
-                completion(NO, response.message ?: @"停止聊天失败");
+                completion(NO, response.code, response.message ?: @"停止聊天失败");
             }
         }
     }];
@@ -264,11 +303,15 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
 
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
 
-    // 添加新的请求参数
+    // 添加本地用户的相关参数
+    params[@"room_id"] = self.roomId;
+    params[@"user_id"] = self.userId;
+    params[@"user_stream_id"] = self.userStreamId;
+    
+    // 添加数字人的相关参数
     if (digitalHumanId && digitalHumanId.length > 0) {
         params[@"digital_human_id"] = digitalHumanId;
     }
-
     if (configId && configId.length > 0) {
         params[@"config_id"] = configId;
     }
@@ -283,9 +326,14 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
 }
 
 - (void)doStopDigitalHumanWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
-    NSString *url = [NSString stringWithFormat:@"%@/api/stop-digital-human", self.currentBaseURL];
+    NSString *url = [NSString stringWithFormat:@"%@/api/stop", self.currentBaseURL];
     
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    // 添加agent_instance_id参数
+    if (self.agentInstanceId) {
+        params[@"agent_instance_id"] = self.agentInstanceId;
+    }
+    
     NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
     
     [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
@@ -295,11 +343,15 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
     }];
 }
 
-
 - (void)doStartAudioWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
     NSString *url = [NSString stringWithFormat:@"%@/api/start", self.currentBaseURL];
     
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    // 添加随机生成的参数
+    params[@"room_id"] = self.roomId;
+    params[@"user_id"] = self.userId;
+    params[@"user_stream_id"] = self.userStreamId;
+    
     NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
     
     [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
@@ -313,6 +365,11 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
     NSString *url = [NSString stringWithFormat:@"%@/api/stop", self.currentBaseURL];
     
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    // 添加agent_instance_id参数
+    if (self.agentInstanceId) {
+        params[@"agent_instance_id"] = self.agentInstanceId;
+    }
+    
     NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
     
     [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
@@ -501,12 +558,14 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
     if (updateType == ZegoUpdateTypeAdd) {
         for (int i=0; i<streamList.count; i++) {
             ZegoStream* item = [streamList objectAtIndex:i];
-            NSLog(@"检测到新增流: streamID=%@, 用户=%@", item.streamID, item.user.userID);
+            NSLog(@"检测到新增流: streamID=%@, stream用户=%@, agentStreamId=%@", item.streamID, item.user.userID, self.agentStreamId);
             
             if ([item.streamID isEqualToString: self.agentStreamId]) {
                 NSLog(@"匹配到目标流，准备播放: streamID=%@", self.agentStreamId);
                 [self startPlayStream:self.agentStreamId];
                 break;
+            } else {
+                NSLog(@"未匹配到目标流%@", item.streamID);
             }
         }
     } else if(updateType == ZegoUpdateTypeDelete) {
@@ -639,5 +698,12 @@ static NSString *const kBaseURL = @"http://cerulean-liger-2741e4.netlify.app";  
     [task resume];
 }
 
+// 添加随机ID生成方法
++ (NSString *)generateRandomIdWithPrefix:(NSString *)prefix {
+    NSString *randomString = [[NSUUID UUID] UUIDString];
+    // 取UUID的前8位作为随机部分
+    NSString *shortRandomString = [randomString substringToIndex:8];
+    return [NSString stringWithFormat:@"%@%@", prefix, shortRandomString];
+}
 
 @end
