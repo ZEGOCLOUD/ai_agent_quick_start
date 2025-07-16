@@ -1,32 +1,89 @@
-import 'dart:io';
+import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:zego_express_engine/zego_express_engine.dart';
 
 import 'package:ai_agent_quickstart_flutter/server/zego_key.dart';
 import 'package:ai_agent_quickstart_flutter/audio/subtitles/protocol/message_dispatcher.dart';
+import 'package:ai_agent_quickstart_flutter/digital_human/defines.dart';
 
 import 'http_utils.dart';
 import 'token_response.dart';
+
+/// AI Agent 服务响应类
+class AIAgentServiceResponse {
+  final bool success;
+  final int errorCode;
+  final String errorMessage;
+  final String? digitalHumanEncodeConfig;
+  final String? agentInstanceId;
+
+  AIAgentServiceResponse({
+    required this.success,
+    required this.errorCode,
+    required this.errorMessage,
+    this.digitalHumanEncodeConfig,
+    this.agentInstanceId,
+  });
+
+  /// 成功响应
+  factory AIAgentServiceResponse.success({
+    String? digitalHumanEncodeConfig,
+    String? agentInstanceId,
+  }) {
+    return AIAgentServiceResponse(
+      success: true,
+      errorCode: 0,
+      errorMessage: '',
+      digitalHumanEncodeConfig: digitalHumanEncodeConfig,
+      agentInstanceId: agentInstanceId,
+    );
+  }
+
+  /// 失败响应
+  factory AIAgentServiceResponse.failure({
+    required int errorCode,
+    required String errorMessage,
+  }) {
+    return AIAgentServiceResponse(
+      success: false,
+      errorCode: errorCode,
+      errorMessage: errorMessage,
+    );
+  }
+}
 
 /// 负责与AI服务端通信和状态管理
 class ZegoAIAgentService {
   static final ZegoAIAgentService _instance = ZegoAIAgentService._internal();
   factory ZegoAIAgentService() => _instance;
 
-  ZegoAIAgentService._internal();
+  ZegoAIAgentService._internal() {
+    // 随机生成本地用户相关信息
+    _userId = _generateRandomIdWithPrefix('user_');
+    _roomId = _generateRandomIdWithPrefix('room_');
+    _userStreamId = _generateRandomIdWithPrefix('stream_user_');
+  }
 
-  /// 这些属性可根据实际业务动态赋值
-  final String _currentBaseUrl = 'https://cheery-squirrel-1ab760.netlify.app';
-  final String _userId = 'user_id_1';
-  final String _roomId = 'room_id_1';
-  final String _userStreamId = 'user_stream_id_1';
-  final String _agentId = 'ai_agent_example_1';
-  final String _agentUserId = 'agent_user_id_1';
-  final String _agentName = '李浩然';
-  final String _agentRobotId = '@RBT#AIAgentExample1';
-  final String _agentStreamId = 'agent_stream_id_1';
+  /// 业务后台地址
+  String get _currentBaseUrl => ZegoKey.kBaseURL;
+
+  /// 随机生成的本地用户相关信息
+  late final String _userId;
+  late final String _roomId;
+  late final String _userStreamId;
+
+  /// 数字人相关配置
+  final String _digitalHumanConfigId = 'mobile';
+  ZegoDigitalHumanStreamInfo? digitalHumanStreamInfo;
+
+  /// 后台返回的 agent 信息（动态赋值）
+  String? _agentId;
+  String? _agentUserId;
+  String? _agentName;
+  String? _agentRobotId;
+  String? _agentStreamId;
+  String? _agentInstanceId;
 
   /// 添加token缓存相关字段
   String? _cachedToken;
@@ -34,9 +91,11 @@ class ZegoAIAgentService {
   /// 存储毫秒时间戳
   double? _tokenExpireTime;
 
-  String getAgentUserId() => _agentUserId;
-  String getAgentName() => _agentName;
-  String getAgentRobotId() => _agentRobotId;
+  String? getAgentId() => _agentId;
+  String? getAgentUserId() => _agentUserId;
+  String? getAgentName() => _agentName;
+  String? getAgentRobotId() => _agentRobotId;
+  String? getAgentStreamId() => _agentStreamId;
   String getUserId() => _userId;
   String getRoomId() => _roomId;
 
@@ -95,17 +154,38 @@ class ZegoAIAgentService {
     return _cachedToken ?? '';
   }
 
-  /// 启动与AI智能体的会话
-  Future<bool> startCall() async {
+  /// 启动与AI智能体的语音会话
+  Future<AIAgentServiceResponse> startAudioCall() async {
     debugPrint('开始启动AI会话...');
 
     /// 通知业务后台开始通话
     debugPrint('通知业务后台开始通话...');
     final url = '$_currentBaseUrl/api/start';
-    final response = await HttpUtil.post(url, fromJson: (json) => json);
+    final requestData = {
+      'room_id': _roomId,
+      'user_id': _userId,
+      'user_stream_id': _userStreamId,
+    };
+    final response =
+        await HttpUtil.post(url, body: requestData, fromJson: (json) => json);
     if (!response.isSuccess) {
       debugPrint('通知业务后台开始通话失败: ${response.message}');
-      return false;
+      return AIAgentServiceResponse.failure(
+        errorCode: response.code,
+        errorMessage: response.message,
+      );
+    }
+
+    // 从响应中获取后端返回的信息
+    if (response.data != null && response.data is Map<String, dynamic>) {
+      final data = response.data as Map<String, dynamic>;
+      _agentId = data['agent_id'];
+      _agentName = data['agent_name'];
+      _agentStreamId = data['agent_stream_id'];
+      _agentUserId = data['agent_user_id'];
+      _agentInstanceId = data['agent_instance_id'];
+      debugPrint(
+          '获取到agent信息: agentId=$_agentId, agentStreamId=$_agentStreamId');
     }
     debugPrint('通知业务后台开始通话成功');
 
@@ -113,7 +193,10 @@ class ZegoAIAgentService {
     final token = await getToken();
     if (token.isEmpty) {
       debugPrint('获取token失败，无法继续启动会话');
-      return false;
+      return AIAgentServiceResponse.failure(
+        errorCode: -1,
+        errorMessage: '获取token失败',
+      );
     }
     debugPrint('成功获取token');
 
@@ -172,7 +255,10 @@ class ZegoAIAgentService {
       );
       if (0 != loginResult.errorCode && 1002001 != loginResult.errorCode) {
         debugPrint('登录房间失败，错误码: ${loginResult.errorCode}');
-        return false;
+        return AIAgentServiceResponse.failure(
+          errorCode: loginResult.errorCode,
+          errorMessage: '进入语音房间失败:${loginResult.errorCode}',
+        );
       }
       debugPrint('房间登录成功');
 
@@ -189,30 +275,36 @@ class ZegoAIAgentService {
       debugPrint('推流启动成功');
 
       /// 拉流（播放AI语音）
-      debugPrint('开始拉流$_agentStreamId...');
-      await ZegoExpressEngine.instance.startPlayingStream(_agentStreamId);
-      await ZegoExpressEngine.instance.callExperimentalAPI(
-        '{"method":"liveroom.audio.set_play_latency_mode","params":{"mode":1,"stream_id":"$_agentStreamId"}}',
-      );
-      debugPrint('拉流启动成功');
+      if (_agentStreamId != null) {
+      } else {
+        debugPrint('agentStreamId为空，跳过拉流');
+      }
 
       debugPrint('AI会话启动完成');
-      return true;
+      return AIAgentServiceResponse.success(agentInstanceId: _agentInstanceId);
     } catch (e, stackTrace) {
       debugPrint('启动会话失败: $e');
       debugPrint('错误堆栈: $stackTrace');
-      return false;
+      return AIAgentServiceResponse.failure(
+        errorCode: -1,
+        errorMessage: '启动会话失败: $e',
+      );
     }
   }
 
-  /// 停止与AI智能体的会话
-  Future<bool> stopCall() async {
+  /// 停止与AI智能体的语音会话
+  Future<AIAgentServiceResponse> stopAudioCall() async {
     debugPrint('开始停止AI会话...');
 
     /// 通知业务后台停止通话
     debugPrint('通知业务后台停止通话...');
     final url = '$_currentBaseUrl/api/stop';
-    final response = await HttpUtil.post(url, fromJson: (json) => json);
+    final requestData = <String, dynamic>{};
+    if (_agentInstanceId != null) {
+      requestData['agent_instance_id'] = _agentInstanceId;
+    }
+    final response =
+        await HttpUtil.post(url, body: requestData, fromJson: (json) => json);
     if (!response.isSuccess) {
       debugPrint('通知业务后台停止通话失败: ${response.message}');
     } else {
@@ -223,9 +315,11 @@ class ZegoAIAgentService {
       final engine = ZegoExpressEngine.instance;
 
       /// 停止拉流
-      debugPrint('停止拉流...');
-      await engine.stopPlayingStream(_agentStreamId);
-      debugPrint('拉流已停止');
+      if (_agentStreamId != null) {
+        debugPrint('停止拉流...');
+        await engine.stopPlayingStream(_agentStreamId!);
+        debugPrint('拉流已停止');
+      }
 
       /// 停止推流
       debugPrint('停止推流...');
@@ -237,13 +331,50 @@ class ZegoAIAgentService {
       await engine.logoutRoom(_roomId);
       debugPrint('房间已登出');
 
+      // 清空后台返回的agent instance数据
+      _agentId = null;
+      _agentName = null;
+      _agentStreamId = null;
+      _agentInstanceId = null;
+
       debugPrint('AI会话停止完成');
-      return true;
+      return AIAgentServiceResponse.success();
     } catch (e, stackTrace) {
       debugPrint('停止会话失败: $e');
       debugPrint('错误堆栈: $stackTrace');
-      return false;
+      return AIAgentServiceResponse.failure(
+        errorCode: -1,
+        errorMessage: '停止会话失败: $e',
+      );
     }
+  }
+    }
+  }
+
+  Future<void> _startPlayingStream(String streamId) async {
+    debugPrint('开始拉流$streamId...');
+
+    if (digitalHumanStreamInfo != null) {
+      /// 视频流
+      await ZegoExpressEngine.instance.createCanvasView((viewID) {
+        debugPrint('数字人流widget成功渲染');
+
+        digitalHumanStreamInfo?.viewIDNotifier.value = viewID;
+
+        ZegoCanvas canvas = ZegoCanvas.view(viewID);
+        ZegoExpressEngine.instance.startPlayingStream(streamId, canvas: canvas);
+      }).then((widget) {
+        debugPrint('数字人流widget成功构建');
+        digitalHumanStreamInfo?.viewNotifier.value = widget;
+      });
+    } else {
+      await ZegoExpressEngine.instance.startPlayingStream(streamId);
+    }
+
+    await ZegoExpressEngine.instance.callExperimentalAPI(
+      '{"method":"liveroom.audio.set_play_latency_mode","params":{"mode":1,"stream_id":"$streamId"}}',
+    );
+    debugPrint('拉流启动成功');
   }
 
   void _onRecvExperimentalAPI(String content) {
@@ -277,5 +408,26 @@ class ZegoAIAgentService {
             'extraInfo:${e.extraInfo}, '
             '}')},"
         ' extended data:$extendedData');
+
+    if (updateType == ZegoUpdateType.Add) {
+      streamList.forEach((stream) async {
+        if (_agentStreamId == stream.streamID) {
+          _startPlayingStream(stream.streamID);
+        }
+      });
+    } else if (updateType == ZegoUpdateType.Delete) {
+      streamList.forEach((stream) async {
+        if (_agentStreamId == stream.streamID) {
+          ZegoExpressEngine.instance.stopPlayingStream(stream.streamID);
+        }
+      });
+    }
+  }
+
+  /// 生成随机ID
+  String _generateRandomIdWithPrefix(String prefix) {
+    final random = Random();
+    final randomString = random.nextInt(100000000).toString().padLeft(8, '0');
+    return '$prefix$randomString';
   }
 }

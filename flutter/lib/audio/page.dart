@@ -33,7 +33,6 @@ class _ZegoAudioPageState extends State<ZegoAudioPage>
     subtitlesModel = ZegoSubtitlesViewModel();
     roomIdNotifier.value = aiAgentService.getRoomId();
     userIdNotifier.value = aiAgentService.getUserId();
-    agentUserIdNotifier.value = aiAgentService.getAgentUserId();
 
     ZegoSubtitlesMessageDispatcher().registerEventHandler(this);
 
@@ -69,6 +68,13 @@ class _ZegoAudioPageState extends State<ZegoAudioPage>
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back), // 返回箭头图标
+          tooltip: '返回',
+          onPressed: () {
+            Navigator.of(context).pop(); // 返回上一个页面
+          },
+        ),
         title: const Text(LocalStrings.audioPageTitle),
         backgroundColor: const Color(0xFFD9D9D9),
       ),
@@ -224,12 +230,14 @@ class _ZegoAudioPageState extends State<ZegoAudioPage>
   Future<void> startAudioChat() async {
     isLoadingNotifier.value = true;
     try {
-      final success = await aiAgentService.startCall();
-      isLoginedNotifier.value = success;
-      if (!success && mounted) {
+      final response = await aiAgentService.startAudioCall();
+      isLoginedNotifier.value = response.success;
+      agentUserIdNotifier.value = aiAgentService.getAgentUserId() ?? '';
+      if (!response.success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(LocalStrings.audioChatStartFailed),
+          SnackBar(
+            content: Text(
+                '${LocalStrings.audioChatStartFailed}: ${response.errorMessage}'),
           ),
         );
       }
@@ -242,11 +250,12 @@ class _ZegoAudioPageState extends State<ZegoAudioPage>
     isLoadingNotifier.value = true;
     try {
       isLoginedNotifier.value = false;
-      final success = await aiAgentService.stopCall();
-      if (!success && mounted) {
+      final response = await aiAgentService.stopAudioCall();
+      if (!response.success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(LocalStrings.audioChatStopFailed),
+          SnackBar(
+            content: Text(
+                '${LocalStrings.audioChatStopFailed}: ${response.errorMessage}'),
           ),
         );
       }
