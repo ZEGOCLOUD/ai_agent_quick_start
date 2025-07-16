@@ -1,30 +1,25 @@
 package im.zego.aiagent.express.quickstart.video;
 
 import android.Manifest;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
-
+import com.google.gson.JsonObject;
+import com.squareup.picasso.Picasso;
 import im.zego.aiagent.express.quickstart.Constant;
-import im.zego.aiagent.express.quickstart.util.StringUtil;
+import im.zego.aiagent.express.quickstart.R;
 import im.zego.digitalmobile.IZegoDigitalMobile;
 import im.zego.digitalmobile.ZegoDigitalMobileFactory;
+import im.zego.digitalmobile.ZegoPreviewView;
 import im.zego.zegoexpress.ZegoExpressEngine;
 import im.zego.zegoexpress.callback.IZegoCustomVideoRenderHandler;
 import im.zego.zegoexpress.callback.IZegoEventHandler;
@@ -33,16 +28,18 @@ import im.zego.zegoexpress.constants.ZegoAECMode;
 import im.zego.zegoexpress.constants.ZegoANSMode;
 import im.zego.zegoexpress.constants.ZegoAudioDeviceMode;
 import im.zego.zegoexpress.constants.ZegoScenario;
-import im.zego.aiagent.express.quickstart.R;
-import im.zego.digitalmobile.ZegoPreviewView;
 import im.zego.zegoexpress.constants.ZegoVideoBufferType;
+import im.zego.zegoexpress.constants.ZegoVideoFrameFormatSeries;
 import im.zego.zegoexpress.entity.ZegoCustomVideoRenderConfig;
 import im.zego.zegoexpress.entity.ZegoEngineConfig;
 import im.zego.zegoexpress.entity.ZegoEngineProfile;
 import im.zego.zegoexpress.entity.ZegoRoomConfig;
 import im.zego.zegoexpress.entity.ZegoUser;
-import im.zego.zegoexpress.constants.ZegoVideoFrameFormatSeries;
 import im.zego.zegoexpress.entity.ZegoVideoFrameParam;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -51,25 +48,34 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.logging.HttpLoggingInterceptor.Level;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class VideoChatActivity extends AppCompatActivity {
+
     public static final String TAG = "VideoChatActivity";
     private ZegoPreviewView previewView;
     private View loadingView;
+    private ImageView digitalPic;
     private IZegoDigitalMobile digitalMobileSDK;
+    private String agent_user_id; //agent推流id，数字人推流id
+    private String agent_stream_id; //agent推流id，数字人推流id
+    private String agent_name; //agent推流id，数字人推流id
+    private String agent_instance_id;
 
     private static final OkHttpClient client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS)
-            .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC)).build();
+        .writeTimeout(30, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor(new HttpLoggingInterceptor().setLevel(Level.BODY)).build();
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    init();
-                } else {
-                    showError("Activity", "please enable permission");
-                }
-            });
+        new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted) {
+                init();
+            } else {
+                showError("Activity", "please enable permission");
+            }
+        });
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,6 +83,8 @@ public class VideoChatActivity extends AppCompatActivity {
         setContentView(R.layout.activity_video);
         previewView = findViewById(R.id.preview_view);
         loadingView = findViewById(R.id.loading_view);
+        digitalPic = findViewById(R.id.digital_pic);
+        Picasso.get().load(Uri.parse(Constant.digital_human_image_URL)).into(digitalPic);
         findViewById(R.id.end_call).setOnClickListener(v -> {
             finish();
         });
@@ -129,7 +137,8 @@ public class VideoChatActivity extends AppCompatActivity {
      */
     private void requestZegoToken() {
         Log.i(TAG, "requestZegoToken");
-        Request request = new Request.Builder().url(Constant.BASE_URL + "/api/zego-token?userId=" + Constant.user_id).get().build();
+        Request request = new Request.Builder().url(Constant.BASE_URL + "/api/zego-token?userId=" + Constant.user_id)
+            .get().build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -192,12 +201,14 @@ public class VideoChatActivity extends AppCompatActivity {
         ZegoRoomConfig roomConfig = new ZegoRoomConfig();
         roomConfig.isUserStatusNotify = true;
         roomConfig.token = token;
-        ZegoExpressEngine.getEngine().loginRoom(Constant.room_id, new ZegoUser(userId, userName), roomConfig, (errorCode, extendedData) -> {
-            Log.d(TAG, "loginRoom() called with: errorCode = [" + errorCode + "], extendedData = [" + extendedData + "]");
-            if (callback != null) {
-                callback.onRoomLoginResult(errorCode, extendedData);
-            }
-        });
+        ZegoExpressEngine.getEngine()
+            .loginRoom(Constant.room_id, new ZegoUser(userId, userName), roomConfig, (errorCode, extendedData) -> {
+                Log.d(TAG,
+                    "loginRoom() called with: errorCode = [" + errorCode + "], extendedData = [" + extendedData + "]");
+                if (callback != null) {
+                    callback.onRoomLoginResult(errorCode, extendedData);
+                }
+            });
     }
 
     /**
@@ -213,9 +224,11 @@ public class VideoChatActivity extends AppCompatActivity {
         // 监听视频帧回调
         ZegoExpressEngine.getEngine().setCustomVideoRenderHandler(new IZegoCustomVideoRenderHandler() {
             @Override
-            public void onRemoteVideoFrameRawData(ByteBuffer[] data, int[] dataLength, ZegoVideoFrameParam param, String streamID) {
+            public void onRemoteVideoFrameRawData(ByteBuffer[] data, int[] dataLength, ZegoVideoFrameParam param,
+                String streamID) {
                 IZegoDigitalMobile.ZegoVideoFrameParam digitalParam = new IZegoDigitalMobile.ZegoVideoFrameParam();
-                digitalParam.format = IZegoDigitalMobile.ZegoVideoFrameFormat.getZegoVideoFrameFormat(param.format.value());
+                digitalParam.format = IZegoDigitalMobile.ZegoVideoFrameFormat.getZegoVideoFrameFormat(
+                    param.format.value());
                 digitalParam.height = param.height;
                 digitalParam.width = param.width;
                 digitalParam.rotation = param.rotation;
@@ -250,30 +263,17 @@ public class VideoChatActivity extends AppCompatActivity {
      */
     private void startDigitalHumanChat() {
         Log.i(TAG, "startDigitalHumanChat");
-        String jsonContent;
-        try {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("digital_human_id", Constant.digital_human_id); // 替换为实际的 数字人形象ID
-            jsonObject.put("config_id", "mobile"); // 替换为实际的 callId
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("digital_human_id", Constant.digital_human_id); // 替换为实际的 数字人形象ID
+        jsonObject.addProperty("config_id", Constant.config_id); // 替换为实际的 callId
+        jsonObject.addProperty("user_id", Constant.user_id);
+        jsonObject.addProperty("room_id", Constant.room_id);
+        jsonObject.addProperty("user_stream_id", Constant.user_stream_id);
 
-            jsonObject.put("agent_id", Constant.agent_id);
-            jsonObject.put("agent_name", Constant.agent_name);
-            jsonObject.put("user_id", Constant.user_id);
-            jsonObject.put("room_id", Constant.room_id);
-            jsonObject.put("agent_stream_id", Constant.agent_stream_id);
-            jsonObject.put("agent_user_id", Constant.agent_user_id);
-            jsonObject.put("user_stream_id", Constant.user_stream_id);
-
-
-            jsonContent = jsonObject.toString();
-        } catch (JSONException e) {
-            showError("startDigitalHumanChat", "json error: " + e.getMessage());
-            return;
-        }
-
-        RequestBody body = RequestBody.create(jsonContent, MediaType.parse("application/json; charset=utf-8"));
+        RequestBody body = RequestBody.create(jsonObject.toString(),
+            MediaType.parse("application/json; charset=utf-8"));
         Request request = new Request.Builder().url(Constant.BASE_URL + "/api/start-digital-human").post(body).build();
-        new OkHttpClient.Builder().build().newCall(request).enqueue(new Callback() {
+        client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 showError("startDigitalHumanChat", "http failed: " + e.getMessage());
@@ -286,11 +286,17 @@ public class VideoChatActivity extends AppCompatActivity {
                     try {
                         JSONObject json = new JSONObject(responseBody);
                         int errorCode = (int) json.get("code");
-                        String digitalHumanConfig = (String) json.get("digital_human_config");
+                        String message = (String) json.get("message");
+                        agent_name = (String) json.get("agent_name");
+                        agent_instance_id = (String) json.get("agent_instance_id");
+                        agent_user_id = (String) json.get("agent_user_id");
+                        agent_stream_id = (String) json.get("agent_stream_id");
                         if (errorCode == 0) {
-                            ZegoExpressEngine.getEngine().setPlayStreamBufferIntervalRange(Constant.agent_stream_id, 100, 2000);
-                            ZegoExpressEngine.getEngine().startPlayingStream(Constant.agent_stream_id);
-                            initDigitalMobileSDK(digitalHumanConfig);
+                            ZegoExpressEngine.getEngine().setPlayStreamBufferIntervalRange(agent_stream_id, 100, 2000);
+                            ZegoExpressEngine.getEngine().startPlayingStream(agent_stream_id);
+                            runOnUiThread(
+                                () -> Toast.makeText(VideoChatActivity.this, message, Toast.LENGTH_LONG).show());
+                            initDigitalMobileSDK(Constant.config_id);
                         } else {
                             ZegoExpressEngine.getEngine().logoutRoom();
                             showError("startDigitalHumanChat", "start failed: " + errorCode);
@@ -310,7 +316,11 @@ public class VideoChatActivity extends AppCompatActivity {
      */
     private void stopDigitalHumanChat() {
         Log.i(TAG, "stopDigitalHumanChat");
-        RequestBody body = RequestBody.create("", MediaType.parse("application/json; charset=utf-8"));
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("agent_instance_id", agent_instance_id);
+        RequestBody body = RequestBody.create(jsonObject.toString(),
+            MediaType.parse("application/json; charset=utf-8"));
+
         Request request = new Request.Builder().url(Constant.BASE_URL + "/api/stop").post(body).build();
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -329,6 +339,7 @@ public class VideoChatActivity extends AppCompatActivity {
     private void initDigitalMobileSDK(String digitalHumanConfig) {
         Log.i(TAG, "initDigitalMobileSDK: " + digitalHumanConfig);
         runOnUiThread(() -> {
+
             digitalMobileSDK = ZegoDigitalMobileFactory.create(VideoChatActivity.this);
             digitalMobileSDK.start(digitalHumanConfig, new IZegoDigitalMobile.ZegoDigitalMobileListener() {
                 @Override
@@ -338,7 +349,14 @@ public class VideoChatActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(int i, String s) {
-                    showError("initDigitalMobileSDK", s);
+                    runOnUiThread(() -> {
+                        if (VideoChatActivity.this.isDestroyed()) {
+                            return;
+                        }
+                        String errorMsg = "initDigitalMobileSDK" + ": " + s;
+                        Log.e(TAG, errorMsg);
+                        loadingView.setVisibility(View.GONE);
+                    });
                 }
 
                 @Override

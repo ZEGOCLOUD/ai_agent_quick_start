@@ -1,52 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  tools:context=".voice.VoiceChatActivity">
+
+  <im.zego.digitalmobile.ZegoPreviewView
+    android:id="@+id/preview_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+
+  <ImageView
+    android:id="@+id/digital_pic"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+
+  <ImageView
+    android:id="@+id/end_call"
+    android:layout_width="60dp"
+    android:layout_height="60dp"
+    android:layout_marginBottom="27dp"
+    android:src="@mipmap/icon_hangup"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent" />
+
+  <FrameLayout
+    android:id="@+id/loading_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".voice.VoiceChatActivity">
+    android:background="#80000000"
+    android:visibility="gone">
 
-    <im.zego.digitalmobile.ZegoPreviewView
-        android:id="@+id/preview_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:gravity="center"
+      android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/end_call"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginBottom="27dp"
-        android:src="@mipmap/icon_hangup"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+      <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
-    <FrameLayout
-        android:id="@+id/loading_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#80000000"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="正在初始化数字人"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp" />
-        </LinearLayout>
-    </FrameLayout>
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="正在初始化数字人"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp" />
+    </LinearLayout>
+  </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
