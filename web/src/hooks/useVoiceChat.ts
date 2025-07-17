@@ -70,6 +70,9 @@ export function useVoiceChat(zg: ExpressManager) {
     };
 
     // 缓存新消息
+    if (!userMsgMap[round]) {
+      userMsgMap[round] = [];
+    }
     userMsgMap[round].push({ ...newMessage });
 
     if (index !== -1) {

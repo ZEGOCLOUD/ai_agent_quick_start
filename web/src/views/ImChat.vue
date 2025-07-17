@@ -40,6 +40,7 @@ import PageHeader from "@/components/PageHeader.vue";
 import { useImChat } from "@/hooks/useImChat";
 import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
+import { GetAgentInfo } from "@/api/agent";
 
 const router = useRouter();
 const { messages, initSDK, login, queryHistoryMessages, sendMessage } = useImChat();
@@ -55,6 +56,7 @@ const generateRandomUserInfo = () => {
     roomId: `room_${timestamp}_${randomSuffix}`,
     agentUserId: `agent_user_${timestamp}_${randomSuffix}`,
     userStreamId: `user_stream_${timestamp}_${randomSuffix}`,
+    agentId: `agent_id_${timestamp}_${randomSuffix}`,
   };
 };
 
@@ -74,11 +76,17 @@ const getUserInfo = () => {
   return newUserInfo;
 };
 
+const getAgentInfo = async () => {
+  const response = await GetAgentInfo( agentId, agentName );
+  return response;
+};
+
 const userInfo = getUserInfo();
+const agentId = userInfo.agentId;
 const userId = ref(userInfo.userId);
 const userName = ref(userInfo.userName);
-const agentName = ref("李悦然")
-const conversationID = "@RBT#1530_chuyiyun_726988837747";
+const agentName = "李悦然"
+const conversationID = ref("")
 
 const inputMessage = ref("");
 const loading = ref(false);
@@ -87,7 +95,7 @@ const loading = ref(false);
 const handleSendMessage = async () => {
   if (!inputMessage.value.trim()) return;
   try {
-    await sendMessage(inputMessage.value, conversationID);
+    await sendMessage(inputMessage.value, conversationID.value);
   } catch (error) {
     ElMessage.error((error as Error).message);
   }
@@ -98,9 +106,11 @@ const handleSendMessage = async () => {
 const init = async () => {
   try {
     loading.value = true;
+    const agentInfo = await getAgentInfo();
+    conversationID.value = agentInfo.robot_id;
     await initSDK();
     await login(userId.value, userName.value);
-    await queryHistoryMessages(conversationID);
+    await queryHistoryMessages(conversationID.value);
   } catch (error) {
     console.error(error);
     ElMessage.error("初始化失败");
