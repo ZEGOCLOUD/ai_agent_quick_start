@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AudioChatMessageParser {
@@ -64,9 +65,11 @@ public class AudioChatMessageParser {
     private void updateASRChatMessage(AudioChatMessage newMessage) {
         AudioChatMessage findMessage = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            findMessage = rtcMessageList.stream()
-                .filter(rtcRoomMessage -> rtcRoomMessage.data.messageId.equals(newMessage.data.messageId)).findAny()
-                .get();
+            Optional<AudioChatMessage> any = rtcMessageList.stream()
+                .filter(rtcRoomMessage -> rtcRoomMessage.data.messageId.equals(newMessage.data.messageId)).findAny();
+            if (any.isPresent()) {
+                findMessage = any.get();
+            }
         } else {
 
             // 遍历列表，查找匹配的 messageId
