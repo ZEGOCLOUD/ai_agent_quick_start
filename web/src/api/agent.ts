@@ -11,11 +11,12 @@ const ActionCmd = {
 /**
  * 进房
  */
-export function Start(roomId: string, userID: string, userStreamId: string): Promise<StartRes> {
+export function Start(roomId: string, userID: string, userStreamId: string,agentId:string): Promise<StartRes> {
   return post(ActionCmd.Start, {
     "room_id": roomId,
     "user_id": userID,
     "user_stream_id": userStreamId,
+    "agent_id":agentId
   });
 }
 
@@ -39,9 +40,8 @@ export function GetZegoToken(params: { userId: string; }): Promise<{ token: stri
 /**
  * 进房
  */
-export function GetAgentInfo( agentId: string, agentName: string): Promise<GetAgentInfoRes> {
+export function GetAgentInfo( userId: string): Promise<GetAgentInfoRes> {
   return post(ActionCmd.GetAgentInfo, {
-    agent_id: agentId,
-    agent_name: agentName,
+    user_id:userId
   });
 }

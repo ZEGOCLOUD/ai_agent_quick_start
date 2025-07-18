@@ -48,15 +48,12 @@ const { messages, initSDK, login, queryHistoryMessages, sendMessage } = useImCha
 // 生成随机用户信息
 const generateRandomUserInfo = () => {
   const timestamp = Date.now().toString().slice(-6);
-  const randomSuffix = Math.random().toString(36).substring(2, 6);
   
   return {
-    userId: `user_id_${timestamp}_${randomSuffix}`,
+    userId: `user_id_${timestamp}`,
     userName: `用户_${timestamp}`,
-    roomId: `room_${timestamp}_${randomSuffix}`,
-    agentUserId: `agent_user_${timestamp}_${randomSuffix}`,
-    userStreamId: `user_stream_${timestamp}_${randomSuffix}`,
-    agentId: `agent_id_${timestamp}_${randomSuffix}`,
+    roomId: `room_${timestamp}`,
+    userStreamId: `user_stream_${timestamp}`,
   };
 };
 
@@ -77,20 +74,18 @@ const getUserInfo = () => {
 };
 
 const getAgentInfo = async () => {
-  const response = await GetAgentInfo( agentId, agentName );
+  const response = await GetAgentInfo(userId.value);
   return response;
 };
 
 const userInfo = getUserInfo();
-const agentId = userInfo.agentId;
 const userId = ref(userInfo.userId);
 const userName = ref(userInfo.userName);
-const agentName = "李悦然"
 const conversationID = ref("")
 
 const inputMessage = ref("");
 const loading = ref(false);
-
+const agent_id = ref("")
 
 const handleSendMessage = async () => {
   if (!inputMessage.value.trim()) return;
@@ -108,6 +103,8 @@ const init = async () => {
     loading.value = true;
     const agentInfo = await getAgentInfo();
     conversationID.value = agentInfo.robot_id;
+    agent_id.value = agentInfo.agent_id
+    console.log('mytag agentInfo',conversationID.value)
     await initSDK();
     await login(userId.value, userName.value);
     await queryHistoryMessages(conversationID.value);
@@ -125,6 +122,7 @@ const handleCall = () => {
     path: "/voice-chat",
     query: {
       fromIM: "true",
+      agentId: agent_id.value,
     },
   });
 };

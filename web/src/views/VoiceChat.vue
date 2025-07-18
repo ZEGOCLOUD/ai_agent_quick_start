@@ -19,14 +19,6 @@
                 </div>
               </div>
             </div>
-            <div class="info-card">
-              <div class="info-title">智能体信息</div>
-              <div class="info-content">
-                <div class="info-item">
-                  <span class="value">AgentUserId: {{ agentUserId }}</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- 登录/退出按钮 -->
@@ -87,7 +79,7 @@ import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
 const route = useRoute();
 const fromIM = ref(route.query.fromIM === 'true');
-
+const agentId = ref(route.query.agentId as string);
 const {
   zg,
   isLogin,
@@ -112,7 +104,6 @@ const generateRandomUserInfo = () => {
     userId: `user_${timestamp}_${randomSuffix}`,
     userName: `用户_${timestamp}`,
     roomId: `room_${timestamp}_${randomSuffix}`,
-    agentUserId: `agent_${timestamp}_${randomSuffix}`,
     userStreamId: `stream_${timestamp}_${randomSuffix}`,
   };
 };
@@ -137,9 +128,7 @@ const userInfo = getUserInfo();
 const roomId = ref(userInfo.roomId);
 const userId = ref(userInfo.userId);
 const userName = ref(userInfo.userName);
-const agentUserId = ref(userInfo.agentUserId);
 const userStreamId = ref(userInfo.userStreamId);
-// const agentStreamId = ref("agent_stream_id_1");
 
 // 状态管理
 const fullscreenLoading = ref(false);
@@ -154,7 +143,8 @@ const handleLogin = async () => {
       roomId.value,
       userId.value,
       userName.value,
-      userStreamId.value
+      userStreamId.value,
+      agentId.value
     );
   } catch (error: any) {
     console.error("登录失败", error);

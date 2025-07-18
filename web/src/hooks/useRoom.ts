@@ -22,7 +22,8 @@ export function useRoom() {
     roomId: string,
     userID: string,
     userName: string,
-    localStreamId: string
+    localStreamId: string,
+    agentId: string
   ) {
     console.log("loginRoom");
     const { token } = await GetZegoToken({ userId: userID });
@@ -36,7 +37,7 @@ export function useRoom() {
     console.log("loginRoom", isLogin.value);
     if (!login) throw new Error("登录RTC房间失败");
     await startPublishingStream(localStreamId);
-    const res = await Start(roomId, userID, localStreamId);
+    const res = await Start(roomId, userID, localStreamId,agentId);
     if (res.code !== 0) {
       destroy();
       throw new Error("登录失败");
