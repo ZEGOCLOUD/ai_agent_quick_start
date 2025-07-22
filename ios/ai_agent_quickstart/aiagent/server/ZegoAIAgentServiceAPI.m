@@ -19,9 +19,6 @@
 
 typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
 
-// 环境 URL
-static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/";  // 实际URL需要替换
-
 @interface ZegoAIAgentServiceAPI () <ZegoEventHandler>
 
 @property (nonatomic, copy) NSString *currentBaseURL;
@@ -31,6 +28,7 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
 @property (nonatomic, copy) NSString *agentName;
 @property (nonatomic, copy) NSString *agentRobotId;
 @property (nonatomic, copy) NSString *agentStreamId;
+@property (nonatomic, copy) NSString *agentInstanceId;
 
 @property (nonatomic, copy) NSString *userId;
 @property (nonatomic, copy) NSString *userStreamId;
@@ -48,15 +46,11 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
     dispatch_once(&onceToken, ^{
         instance = [[ZegoAIAgentServiceAPI alloc] init];
         instance.currentBaseURL = kBaseURL;
-        instance.userId = @"user_id_1";
-        instance.roomId = @"room_id_1";
-        instance.userStreamId = @"user_stream_id_1";
         
-        instance.agentId = @"ai_agent_example_1";
-        instance.agentUserId = @"agent_user_id_1";
-        instance.agentName = @"李浩然";
-        instance.agentRobotId = @"@RBT#AIAgentExample1";
-        instance.agentStreamId = @"agent_stream_id_1";
+        // 随机生成的本地用户相关信息
+        instance.userId = [self generateRandomIdWithPrefix:@"user_"];
+        instance.roomId = [self generateRandomIdWithPrefix:@"room_"];
+        instance.userStreamId = [self generateRandomIdWithPrefix:@"stream_user_"];
     });
     return instance;
 }
@@ -100,19 +94,72 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
     }];
 }
 
-- (void)startCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
+- (void)getAgentInfoWithCompletion:(void (^)(ZegoAIGetAgentInfoResponse *response))completion {
+    NSString *url = [NSString stringWithFormat:@"%@/api/getAgentInfo", self.currentBaseURL];
+    
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    params[@"agent_id"] = self.agentId;
+    params[@"agent_name"] = self.agentName;
+    NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
+    
+    __weak typeof(self) weakSelf = self;
+
+    [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) { return; }
+        
+        ZegoAIGetAgentInfoResponse *getAgentInfoResponse = [ZegoAIGetAgentInfoResponse fromServiceResponse:response];
+        
+        if (response.code != 0) {
+            if (completion) {
+                completion(getAgentInfoResponse);
+            }
+            return;
+        }
+        
+        strongSelf.agentId = getAgentInfoResponse.agentId;
+        strongSelf.agentName = getAgentInfoResponse.agentName;
+        strongSelf.agentRobotId = getAgentInfoResponse.robotId;
+        
+        if (completion) {
+            completion(getAgentInfoResponse);
+        }
+    }];
+}
+
+- (void)startAudioCallWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion {
     __weak typeof(self) weakSelf = self;
     
     // 先创建Agent实例
-    [self doStartCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
+    [self doStartAudioCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) { return; }
         
         if (response.code != 0) {
             if (completion) {
-                completion(NO, response.message ?: @"创建Agent实例失败");
+                completion(NO, response.code, response.message ?: @"创建Agent实例失败");
             }
             return;
+        }
+        
+        // 从响应中获取后端返回的信息
+        if (response.data && [response.data isKindOfClass:[NSDictionary class]]) {
+            // 更新从后端返回的agent信息
+            if (response.data[@"agent_id"]) {
+                strongSelf.agentId = response.data[@"agent_id"];
+            }
+            if (response.data[@"agent_id"]) {
+                strongSelf.agentUserId = response.data[@"agent_user_id"];
+            }
+            if (response.data[@"agent_name"]) {
+                strongSelf.agentName = response.data[@"agent_name"];
+            }
+            if (response.data[@"agent_stream_id"]) {
+                strongSelf.agentStreamId = response.data[@"agent_stream_id"];
+            }
+            if (response.data[@"agent_instance_id"]) {
+                strongSelf.agentInstanceId = response.data[@"agent_instance_id"];
+            }
         }
         
         // 创建Agent实例成功后，初始化RTC引擎
@@ -125,7 +172,7 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
             
             if (errorCode != 0) {
                 NSString* errorMsg = [NSString stringWithFormat:@"进入语音房间失败:%d", errorCode];
-                completion(NO, errorMsg);
+                completion(NO, errorCode, errorMsg);
                 return;
             }
             
@@ -136,34 +183,38 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
             // 进房后开始推流
             [strongSelf startPushlishStream];
             
-            // 开始播放Agent的流
-            [strongSelf startPlayStream:strongSelf.agentStreamId];
-            
             if (completion) {
-                completion(YES, nil);
+                completion(YES, 0, nil);
             }
         }];
     }];
 }
 
-- (void)stopCallWithCompletion:(void (^)(BOOL success, NSString * _Nullable errorMessage))completion {
+- (void)stopAudioCallWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion {
     __weak typeof(self) weakSelf = self;
     
     // 先停止聊天
-    [self doStopCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
+    [self doStopAudioCallWithCompletion:^(ZegoAIServiceCommonResponse *response) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) { return; }
         
         // 无论停止聊天是否成功，都释放RTC资源
         [strongSelf unInitZegoExpressEngine];
         
+        // 清空后台返回的agent instance数据
+        strongSelf.agentId = nil;
+        strongSelf.agentUserId = nil;
+        strongSelf.agentName = nil;
+        strongSelf.agentStreamId = nil;
+        strongSelf.agentInstanceId = nil;
+        
         if (response.code == 0) {
             if (completion) {
-                completion(YES, nil);
+                completion(YES, 0, nil);
             }
         } else {
             if (completion) {
-                completion(NO, response.message ?: @"停止聊天失败");
+                completion(NO, response.code, response.message ?: @"停止聊天失败");
             }
         }
     }];
@@ -171,10 +222,15 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
 
 #pragma mark - Agent Instance API Methods
 
-- (void)doStartCallWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
+- (void)doStartAudioCallWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
     NSString *url = [NSString stringWithFormat:@"%@/api/start", self.currentBaseURL];
     
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    // 添加随机生成的参数
+    params[@"room_id"] = self.roomId;
+    params[@"user_id"] = self.userId;
+    params[@"user_stream_id"] = self.userStreamId;
+    params[@"agent_id"] = self.agentId;
     NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
     
     [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
@@ -184,10 +240,14 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
     }];
 }
 
-- (void)doStopCallWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
+- (void)doStopAudioCallWithCompletion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
     NSString *url = [NSString stringWithFormat:@"%@/api/stop", self.currentBaseURL];
     
     NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    // 添加agent_instance_id参数
+    if (self.agentInstanceId) {
+        params[@"agent_instance_id"] = self.agentInstanceId;
+    }
     NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
     
     [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
@@ -340,6 +400,35 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
 
 #pragma mark - delegate ZegoEventHandler
 
+//监听房间流信息更新状态，调用智能体流播放
+- (void)onRoomStreamUpdate:(ZegoUpdateType)updateType
+                streamList:(NSArray<ZegoStream *> *)streamList
+              extendedData:(nullable NSDictionary *)extendedData
+                    roomID:(NSString *)roomID{
+    NSLog(@"房间流更新: roomID=%@, 更新类型=%@, 流数量=%lu", roomID, updateType == ZegoUpdateTypeAdd ? @"新增" : @"移除", (unsigned long)streamList.count);
+    
+    if (updateType == ZegoUpdateTypeAdd) {
+        for (int i=0; i<streamList.count; i++) {
+            ZegoStream* item = [streamList objectAtIndex:i];
+            NSLog(@"检测到新增流: streamID=%@, stream用户=%@, agentStreamId=%@", item.streamID, item.user.userID, self.agentStreamId);
+            
+            if ([item.streamID isEqualToString: self.agentStreamId]) {
+                NSLog(@"匹配到目标流，准备播放: streamID=%@", self.agentStreamId);
+                [self startPlayStream:self.agentStreamId];
+                break;
+            } else {
+                NSLog(@"未匹配到目标流%@", item.streamID);
+            }
+        }
+    } else if(updateType == ZegoUpdateTypeDelete) {
+        for (int i=0; i<streamList.count; i++) {
+            ZegoStream* item = [streamList objectAtIndex:i];
+            NSLog(@"检测到移除流: streamID=%@, 正在停止播放", item.streamID);
+            [[ZegoExpressEngine sharedEngine] stopPlayingStream:item.streamID];
+        }
+    }
+}
+
 //2. RTC房间事件消息协议
 //实时音视频 服务端 API 推送自定义消息 - 开发者中心 - ZEGO即构科技
 //描述： 用户与Agent进行语音对话期间，服务端通过RTC房间自定义消息下发一些状态信息，
@@ -442,5 +531,12 @@ static NSString *const kBaseURL = @"https://cheery-squirrel-1ab760.netlify.app/"
     [task resume];
 }
 
+// 添加随机ID生成方法
++ (NSString *)generateRandomIdWithPrefix:(NSString *)prefix {
+    NSString *randomString = [[NSUUID UUID] UUIDString];
+    // 取UUID的前8位作为随机部分
+    NSString *shortRandomString = [randomString substringToIndex:8];
+    return [NSString stringWithFormat:@"%@%@", prefix, shortRandomString];
+}
 
 @end

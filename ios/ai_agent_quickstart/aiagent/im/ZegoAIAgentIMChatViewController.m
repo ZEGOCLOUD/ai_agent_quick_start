@@ -21,9 +21,16 @@
 // 消息数据
 @property (nonatomic, strong) NSMutableArray<ZIMMessage *> *messages;
 
+// ZIM 登录状态
+@property (nonatomic, assign) BOOL isZIMLoggedIn;
+
 // 添加键盘处理相关属性
 @property (nonatomic, strong) UIView *toolBar;  // 保存工具栏引用
 @property (nonatomic, assign) CGFloat keyboardHeight;  // 保存键盘高度
+
+// Loading 相关属性
+@property (nonatomic, strong) UIView *loadingView;
+@property (nonatomic, strong) UIActivityIndicatorView *activityIndicator;
 
 @end
 
@@ -37,9 +44,12 @@
     self.messages = [NSMutableArray array];
     // 设置UI
     [self setupUI];
+    
+    // 显示 loading
+    [self showLoading];
 
-    // 初始化ZIM
-    [self initializeZIM];
+    // 先初始化Agent Info，完成后再初始化ZIM
+    [self initializeAgentInfo];
 
     // 添加键盘通知监听
     [self setupKeyboardNotifications];
@@ -181,6 +191,33 @@
     [self setupTapGesture];
 }
 
+- (void) initializeAgentInfo{
+    __weak typeof(self) weakSelf = self;
+    [[ZegoAIAgentServiceAPI sharedInstance] getAgentInfoWithCompletion:^(ZegoAIGetAgentInfoResponse * _Nonnull response) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) {
+            return;
+        }
+
+        if (response.code == 0) {
+            NSLog(@"get agent info successful");
+
+            // Agent Info 初始化成功后，开始初始化 ZIM
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [strongSelf initializeZIM];
+            });
+        } else {
+            NSLog(@"get agent info failed: %@", response.message);
+
+            // Agent Info 初始化失败，隐藏 loading 并显示错误
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [strongSelf hideLoading];
+                [strongSelf showToast:[NSString stringWithFormat:@"初始化失败: %@", response.message]];
+            });
+        }
+    }];
+}
+
 #pragma mark - ZIM初始化和聊天
 
 - (void)initializeZIM {
@@ -199,6 +236,16 @@
             return;
         }
 
+        // 检查 token 获取是否成功
+        if (!response.token || response.token.length == 0) {
+            NSLog(@"Failed to get token");
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [strongSelf hideLoading];
+                [strongSelf showToast:@"获取Token失败"];
+            });
+            return;
+        }
+
         // 登录ZIM
         ZIMLoginConfig *config = [[ZIMLoginConfig alloc] init];
         config.userName = [[ZegoAIAgentServiceAPI sharedInstance] getUserId];
@@ -206,12 +253,22 @@
 
         // 使用用户ID登录
         [strongSelf.zim loginWithUserID:[[ZegoAIAgentServiceAPI sharedInstance] getUserId] config:config callback:^(ZIMError * _Nonnull errorInfo) {
+            // 隐藏 loading（无论登录成功还是失败）
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [strongSelf hideLoading];
+            });
+
             if (errorInfo.code == 0) {
                 NSLog(@"ZIM login successful, userID: %@", [[ZegoAIAgentServiceAPI sharedInstance] getUserId]);
 
-                [self fetchHistoryMessagesIfNeeded];
+                // 设置登录状态
+                strongSelf.isZIMLoggedIn = YES;
+
+                // 登录成功后获取历史消息
+                [strongSelf fetchHistoryMessagesIfNeeded];
             } else {
                 NSLog(@"ZIM login failed: %@", errorInfo.message);
+                strongSelf.isZIMLoggedIn = NO;
                 [strongSelf showToast:[NSString stringWithFormat:@"ZIM login failed: %@", errorInfo.message]];
             }
         }];
@@ -423,6 +480,9 @@
         // 退出登录
         [self.zim logout];
 
+        // 重置登录状态
+        self.isZIMLoggedIn = NO;
+
         // 销毁ZIM实例
         [self.zim destroy];
     }
@@ -583,7 +643,15 @@
 }
 
 - (void)fetchHistoryMessagesIfNeeded {
+    // 检查 ZIM 实例是否存在
     if (!self.zim) {
+        NSLog(@"ZIM instance not available, skipping history message fetch");
+        return;
+    }
+
+    // 检查是否已经登录成功
+    if (!self.isZIMLoggedIn) {
+        NSLog(@"ZIM not logged in yet, skipping history message fetch");
         return;
     }
 
@@ -607,6 +675,68 @@
             NSLog(@"Failed to fetch history messages: %@", errorInfo.message);
         }
     }];
+}
+
+#pragma mark - Loading Methods
+
+- (void)showLoading {
+    if (self.loadingView) {
+        return; // 已经在显示 loading
+    }
+
+    // 创建 loading 背景视图
+    self.loadingView = [[UIView alloc] init];
+    self.loadingView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.5];
+    self.loadingView.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:self.loadingView];
+
+    // 创建活动指示器
+    self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleLarge];
+    self.activityIndicator.color = [UIColor whiteColor];
+    self.activityIndicator.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.loadingView addSubview:self.activityIndicator];
+
+    // 创建加载文本
+    UILabel *loadingLabel = [[UILabel alloc] init];
+    loadingLabel.text = @"正在初始化...";
+    loadingLabel.textColor = [UIColor whiteColor];
+    loadingLabel.font = [UIFont systemFontOfSize:16];
+    loadingLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.loadingView addSubview:loadingLabel];
+
+    // 设置约束
+    [NSLayoutConstraint activateConstraints:@[
+        // loading 视图约束
+        [self.loadingView.topAnchor constraintEqualToAnchor:self.view.topAnchor],
+        [self.loadingView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+        [self.loadingView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+        [self.loadingView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
+
+        // 活动指示器约束
+        [self.activityIndicator.centerXAnchor constraintEqualToAnchor:self.loadingView.centerXAnchor],
+        [self.activityIndicator.centerYAnchor constraintEqualToAnchor:self.loadingView.centerYAnchor constant:-20],
+
+        // 加载文本约束
+        [loadingLabel.centerXAnchor constraintEqualToAnchor:self.loadingView.centerXAnchor],
+        [loadingLabel.topAnchor constraintEqualToAnchor:self.activityIndicator.bottomAnchor constant:16]
+    ]];
+
+    // 开始动画
+    [self.activityIndicator startAnimating];
+}
+
+- (void)hideLoading {
+    if (!self.loadingView) {
+        return; // 没有 loading 视图
+    }
+
+    // 停止动画
+    [self.activityIndicator stopAnimating];
+
+    // 移除视图
+    [self.loadingView removeFromSuperview];
+    self.loadingView = nil;
+    self.activityIndicator = nil;
 }
 
 @end

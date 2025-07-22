@@ -91,7 +91,6 @@
 
     // AgentId
     self.agentUserIdLabel = [[UILabel alloc] init];
-    self.agentUserIdLabel.text = [NSString stringWithFormat:@"%@", [[ZegoAIAgentServiceAPI sharedInstance] getAgentUserId]];
     self.agentUserIdLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
     self.agentUserIdLabel.textAlignment = NSTextAlignmentCenter;
     self.agentUserIdLabel.backgroundColor = [UIColor colorWithWhite:0.95 alpha:1];
@@ -194,7 +193,7 @@
             return;
         }
         __weak typeof(self) weakSelf = self;
-        [[ZegoAIAgentServiceAPI sharedInstance] startCallWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+        [[ZegoAIAgentServiceAPI sharedInstance] startAudioCallWithCompletion:^(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) return;
             [strongSelf.loadingIndicator stopAnimating];
@@ -205,6 +204,8 @@
                 // 登录成功后更新按钮状态
                 [strongSelf.logoutButton setTitle:@"LogoutRoom" forState:UIControlStateNormal];
                 strongSelf.logoutButton.backgroundColor = [UIColor colorWithRed:0.9 green:0.4 blue:0.4 alpha:1];
+                
+                self.agentUserIdLabel.text = [NSString stringWithFormat:@"%@", [[ZegoAIAgentServiceAPI sharedInstance] getAgentUserId]];
             } else {
                 [strongSelf showToast:[NSString stringWithFormat:@"Failed to start audio chat: %@", errorMessage]];
             }
@@ -236,7 +237,7 @@
     [self unregisterEventHandler];
 
     __weak typeof(self) weakSelf = self;
-    [[ZegoAIAgentServiceAPI sharedInstance] stopCallWithCompletion:^(BOOL success, NSString * _Nullable errorMessage) {
+    [[ZegoAIAgentServiceAPI sharedInstance] stopAudioCallWithCompletion:^(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) return;
         [strongSelf.loadingIndicator stopAnimating];

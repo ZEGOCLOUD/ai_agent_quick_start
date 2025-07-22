@@ -26,6 +26,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// ZEGO分配的应用ID，用于身份认证
 extern unsigned int const kZegoAppId;
 
+/// 业务后台服务器地址
+extern NSString * const kBaseURL;
 @end
 
 NS_ASSUME_NONNULL_END 
