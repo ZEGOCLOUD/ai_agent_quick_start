@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "config:check": "echo '配置检查将在开发模式启动时自动运行'",
+    "config:template": "echo '请手动创建 .env 文件，参考 README.md 中的环境变量模板'"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",

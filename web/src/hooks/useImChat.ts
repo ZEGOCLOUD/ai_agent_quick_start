@@ -15,7 +15,7 @@ export function useImChat() {
   // 初始化 IM SDK
   const initSDK = () => {
     try {
-      zim.init(config.appId);
+      zim.init(config.zego.appId);
       // 设置监听
       setupEventListener();
       console.log("IM SDK 初始化成功");

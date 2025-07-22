@@ -19,14 +19,6 @@
                 </div>
               </div>
             </div>
-            <div class="info-card">
-              <div class="info-title">智能体信息</div>
-              <div class="info-content">
-                <div class="info-item">
-                  <span class="value">AgentUserId: {{ agentUserId }}</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- 登录/退出按钮 -->
@@ -87,7 +79,7 @@ import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
 const route = useRoute();
 const fromIM = ref(route.query.fromIM === 'true');
-
+const agentId = ref(route.query.agentId as string);
 const {
   zg,
   isLogin,
@@ -103,13 +95,40 @@ const {
   clearMessages,
 } = useVoiceChat(zg);
 
-// 用户信息 - 可根据实际需求修改
-const roomId = ref("room_id_1");
-const userId = ref("user_id_1");
-const userName = ref("user_name_1");
-const agentUserId = ref("agent_user_id_1");
-const userStreamId = ref("user_stream_id_1");
-// const agentStreamId = ref("agent_stream_id_1");
+// 生成随机用户信息
+const generateRandomUserInfo = () => {
+  const timestamp = Date.now().toString().slice(-6);
+  const randomSuffix = Math.random().toString(36).substring(2, 6);
+  
+  return {
+    userId: `user_${timestamp}_${randomSuffix}`,
+    userName: `用户_${timestamp}`,
+    roomId: `room_${timestamp}_${randomSuffix}`,
+    userStreamId: `stream_${timestamp}_${randomSuffix}`,
+  };
+};
+
+// 获取或生成用户信息
+const getUserInfo = () => {
+  try {
+    const stored = localStorage.getItem('ai_agent_user_info');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    console.warn('读取用户信息失败:', error);
+  }
+  
+  const newUserInfo = generateRandomUserInfo();
+  localStorage.setItem('ai_agent_user_info', JSON.stringify(newUserInfo));
+  return newUserInfo;
+};
+
+const userInfo = getUserInfo();
+const roomId = ref(userInfo.roomId);
+const userId = ref(userInfo.userId);
+const userName = ref(userInfo.userName);
+const userStreamId = ref(userInfo.userStreamId);
 
 // 状态管理
 const fullscreenLoading = ref(false);
@@ -124,7 +143,8 @@ const handleLogin = async () => {
       roomId.value,
       userId.value,
       userName.value,
-      userStreamId.value
+      userStreamId.value,
+      agentId.value
     );
   } catch (error: any) {
     console.error("登录失败", error);

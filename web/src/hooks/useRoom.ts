@@ -12,16 +12,18 @@ export function useRoom() {
   const zegoLocalStream = ref<ZegoLocalStream | null>();
   const isLogin = ref(false);
   const permissionValid = ref(false);
+  const agentInstanceId = ref("")
 
   async function initSDK() {
-    return zg.initSDK(config.appId, config.server);
+    return zg.initSDK(config.zego.appId, config.zego.server);
   }
 
   async function loginRoom(
     roomId: string,
     userID: string,
     userName: string,
-    localStreamId: string
+    localStreamId: string,
+    agentId: string
   ) {
     console.log("loginRoom");
     const { token } = await GetZegoToken({ userId: userID });
@@ -35,12 +37,14 @@ export function useRoom() {
     console.log("loginRoom", isLogin.value);
     if (!login) throw new Error("登录RTC房间失败");
     await startPublishingStream(localStreamId);
-    const { code } = await Start();
-    if (code !== 0) {
+    const res = await Start(roomId, userID, localStreamId,agentId);
+    if (res.code !== 0) {
       destroy();
       throw new Error("登录失败");
     }
+    agentInstanceId.value = res.agent_instance_id
     isLogin.value = true;
+    return res;
   }
 
   async function startPublishingStream(
@@ -96,7 +100,7 @@ export function useRoom() {
         console.log("roomStateChanged", roomID, state, errorCode, extendedData);
         if (state === "KICKOUT") {
           ElMessage.error("您已在其他设备登录");
-          destroy();
+          // destroy();
           isLogin.value = false;
         }
       }
@@ -108,15 +112,17 @@ export function useRoom() {
       zg.destroyLocalStream(zegoLocalStream.value);
       zegoLocalStream.value = null;
     }
+    console.log('mytag 退出 rtc 房间')
     await zg.logoutRoom();
   }
   /*
    * 退出房间
    */
   async function logoutRoom() {
-    isLogin.value && (await Stop());
+    isLogin.value && (await Stop(agentInstanceId.value));
     await destroy();
     isLogin.value = false;
+    agentInstanceId.value = ""
   }
 
   // 检查设备权限

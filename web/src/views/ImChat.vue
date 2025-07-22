@@ -40,24 +40,57 @@ import PageHeader from "@/components/PageHeader.vue";
 import { useImChat } from "@/hooks/useImChat";
 import { ElMessage } from "element-plus";
 import { useRouter } from "vue-router";
+import { GetAgentInfo } from "@/api/agent";
 
 const router = useRouter();
 const { messages, initSDK, login, queryHistoryMessages, sendMessage } = useImChat();
 
-// 用户信息 - 可根据实际需求修改
-const userId = ref("user_id_1");
-const userName = ref("user_name_1");
-const agentName = ref("李悦然")
-const conversationID = "@RBT#1530_chuyiyun_726988837747";
+// 生成随机用户信息
+const generateRandomUserInfo = () => {
+  const timestamp = Date.now().toString().slice(-6);
+  
+  return {
+    userId: `user_id_${timestamp}`,
+    userName: `用户_${timestamp}`,
+    roomId: `room_${timestamp}`,
+    userStreamId: `user_stream_${timestamp}`,
+  };
+};
+
+// 获取或生成用户信息
+const getUserInfo = () => {
+  try {
+    const stored = localStorage.getItem('ai_agent_user_info');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (error) {
+    console.warn('读取用户信息失败:', error);
+  }
+  
+  const newUserInfo = generateRandomUserInfo();
+  localStorage.setItem('ai_agent_user_info', JSON.stringify(newUserInfo));
+  return newUserInfo;
+};
+
+const getAgentInfo = async () => {
+  const response = await GetAgentInfo(userId.value);
+  return response;
+};
+
+const userInfo = getUserInfo();
+const userId = ref(userInfo.userId);
+const userName = ref(userInfo.userName);
+const conversationID = ref("")
 
 const inputMessage = ref("");
 const loading = ref(false);
-
+const agent_id = ref("")
 
 const handleSendMessage = async () => {
   if (!inputMessage.value.trim()) return;
   try {
-    await sendMessage(inputMessage.value, conversationID);
+    await sendMessage(inputMessage.value, conversationID.value);
   } catch (error) {
     ElMessage.error((error as Error).message);
   }
@@ -68,9 +101,13 @@ const handleSendMessage = async () => {
 const init = async () => {
   try {
     loading.value = true;
+    const agentInfo = await getAgentInfo();
+    conversationID.value = agentInfo.robot_id;
+    agent_id.value = agentInfo.agent_id
+    console.log('mytag agentInfo',conversationID.value)
     await initSDK();
     await login(userId.value, userName.value);
-    await queryHistoryMessages(conversationID);
+    await queryHistoryMessages(conversationID.value);
   } catch (error) {
     console.error(error);
     ElMessage.error("初始化失败");
@@ -85,6 +122,7 @@ const handleCall = () => {
     path: "/voice-chat",
     query: {
       fromIM: "true",
+      agentId: agent_id.value,
     },
   });
 };
