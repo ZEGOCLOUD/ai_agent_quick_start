@@ -74,7 +74,7 @@ class ZegoAIAgentService {
   late final String _userStreamId;
 
   /// 数字人相关配置
-  final String _digitalHumanConfigId = 'mobile';
+  final String _digitalHumanConfigId = 'web';
   ZegoDigitalHumanStreamInfo? digitalHumanStreamInfo;
 
   /// 后台返回的 agent 信息（动态赋值）

@@ -81,10 +81,7 @@ class _ZegoAIAgentDigitalHumanPageState
                 return ValueListenableBuilder<Widget?>(
                   valueListenable: streamInfo.viewNotifier,
                   builder: (context, streamView, child) {
-                    return Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.red, width: 10),
-                      ),
+                    return SizedBox(
                       width: constraints.maxWidth,
                       height: constraints.maxHeight,
                       child: streamView ?? staticImage(),
