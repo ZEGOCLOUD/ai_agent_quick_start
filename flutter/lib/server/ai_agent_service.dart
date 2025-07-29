@@ -520,7 +520,22 @@ class ZegoAIAgentService {
   Future<void> _startPlayingStream(String streamId) async {
     debugPrint('开始拉流$streamId...');
 
-    await ZegoExpressEngine.instance.startPlayingStream(streamId);
+    if (digitalHumanStreamInfo != null) {
+      /// 视频流
+      await ZegoExpressEngine.instance.createCanvasView((viewID) {
+        debugPrint('数字人流widget成功渲染');
+
+        digitalHumanStreamInfo?.viewIDNotifier.value = viewID;
+
+        ZegoCanvas canvas = ZegoCanvas.view(viewID);
+        ZegoExpressEngine.instance.startPlayingStream(streamId, canvas: canvas);
+      }).then((widget) {
+        debugPrint('数字人流widget成功构建');
+        digitalHumanStreamInfo?.viewNotifier.value = widget;
+      });
+    } else {
+      await ZegoExpressEngine.instance.startPlayingStream(streamId);
+    }
 
     await ZegoExpressEngine.instance.callExperimentalAPI(
       '{"method":"liveroom.audio.set_play_latency_mode","params":{"mode":1,"stream_id":"$streamId"}}',
