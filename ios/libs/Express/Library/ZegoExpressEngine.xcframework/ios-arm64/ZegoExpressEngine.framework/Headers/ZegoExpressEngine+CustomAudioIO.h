@@ -251,6 +251,19 @@ NS_ASSUME_NONNULL_BEGIN
                        dataLength:(unsigned int)dataLength
                             param:(ZegoAudioFrameParam *)param;
 
+#if defined(TARGET_OS_IOS) && TARGET_OS_IOS
+/// Set the audio route after enabling the custom audio IO function.
+///
+/// Available since: 3.21.0
+/// Description: Set the audio route after enabling the custom audio IO function.
+/// Use cases：The current audio route is specified by the APP to optimize the AEC effect.
+/// When to call: After [enableCustomAudioIO] and [startPublishingStream].
+/// Restrictions: Only support iOS and Android.
+///
+/// @param audioRoute Audio route.
+- (void)setCustomAudioIOAudioRoute:(ZegoAudioRoute)audioRoute;
+#endif
+
 @end
 
 NS_ASSUME_NONNULL_END

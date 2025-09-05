@@ -831,8 +831,8 @@ typedef NS_ENUM(NSUInteger, ZegoAECMode) {
     ZegoAECModeAI = 3,
     /// AI Aggressive echo cancellation, Similar to ZegoAECModeAI, it offers cleaner echo cancellation in scenarios with significant reverberation, making it recommended for use in chat rooms with large reverberation. It can be left off in other scenarios, especially in KTV settings where music is played out loud, as it may cause slightly more distortion to the human voice.
     ZegoAECModeAIAggressive = 4,
-    /// AI Aggressive echo cancellation 2, Compared with ZegoAECModeAIAggressive, the echo suppression is cleaner, but the human voice will be more damaged. It is recommended to use it in voice chat scenarios.
-    ZegoAECModeAIAggressive2 = 5
+    /// Balanced AI echo cancellation, Compared with ZegoAECModeAIAggressive, the echo suppression is cleaner, but the human voice will be more damaged. It is recommended to use it in voice chat scenarios.
+    ZegoAECModeAIBalanced = 5
 };
 
 /// Active Noise Suppression mode.
@@ -889,6 +889,14 @@ typedef NS_ENUM(NSUInteger, ZegoMixImageCheckMode) {
     ZegoMixImageCheckModePath = 1,
     /// The mixed flow can be initiated successfully without checking the related parameters of the picture.
     ZegoMixImageCheckModeNothing = 2
+};
+
+/// Stream alignment volume control mode.
+typedef NS_ENUM(NSUInteger, ZegoStreamAlignmentVolumeControlMode) {
+    /// Disable volume control when stream alignment.
+    ZegoStreamAlignmentVolumeControlModeClose = 0,
+    /// Enable volume control when stream alignment.
+    ZegoStreamAlignmentVolumeControlModeOpen = 1
 };
 
 /// Traffic control property (bitmask enumeration).
@@ -977,6 +985,14 @@ typedef NS_ENUM(NSUInteger, ZegoStreamResourceSwitchMode) {
     ZegoStreamResourceSwitchModeKeepOriginal = 2
 };
 
+/// Switch playing stream type.
+typedef NS_ENUM(NSUInteger, ZegoSwitchPlayingStreamType) {
+    /// Default, smooth switching.
+    ZegoSwitchPlayingStreamTypeDefault = 0,
+    /// Force switching, Only the timestamp is guaranteed not to be refunded, and smooth switching is not guaranteed.
+    ZegoSwitchPlayingStreamTypeForce = 1
+};
+
 /// Stream Resource Type
 typedef NS_ENUM(NSUInteger, ZegoStreamResourceType) {
     /// Default mode. The SDK will automatically select the streaming resource according to the parameters set by the player config and the ready-made background configuration.
@@ -985,6 +1001,16 @@ typedef NS_ENUM(NSUInteger, ZegoStreamResourceType) {
     ZegoStreamResourceTypeCDN = 1,
     /// L3 resource.
     ZegoStreamResourceTypeL3 = 2
+};
+
+/// Update type.
+typedef NS_ENUM(NSUInteger, ZegoViewUpdateType) {
+    /// Add
+    ZegoViewUpdateTypeAdd = 0,
+    /// Delete
+    ZegoViewUpdateTypeDelete = 1,
+    /// Update
+    ZegoViewUpdateTypeUpdate = 2
 };
 
 /// Update type.
@@ -1699,6 +1725,16 @@ typedef NS_ENUM(NSUInteger, ZegoStreamEvent) {
     ZegoStreamEventPlayEnd = 206
 };
 
+/// Screen capture audio device mode.
+typedef NS_ENUM(NSUInteger, ZegoScreenCaptureAudioDeviceMode) {
+    /// Default mode.
+    ZegoScreenCaptureAudioDeviceModeNone = 0,
+    /// General mode.
+    ZegoScreenCaptureAudioDeviceModeGeneral = 1,
+    /// Communication mode.
+    ZegoScreenCaptureAudioDeviceModeCommunication = 2
+};
+
 /// Type of capture target.
 typedef NS_ENUM(NSUInteger, ZegoScreenCaptureSourceType) {
     /// Unknow.
@@ -1765,6 +1801,14 @@ typedef NS_ENUM(NSUInteger, ZegoSceneState) {
     ZegoSceneStateKickOut = 6,
     /// Logout of the scene is successful. It is in this state by default before logging into the scene. When calling [logoutScene] to log out of the scene successfully, it will enter this state.
     ZegoSceneStateLogout = 7
+};
+
+/// The position of taking snapshot.
+typedef NS_ENUM(NSUInteger, ZegoPublisherTakeSnapshotPosition) {
+    /// After video process.
+    ZegoPublisherTakeSnapshotPositionAfterProcess = 0,
+    /// On capture.
+    ZegoPublisherTakeSnapshotPositionOnCapture = 1
 };
 
 /// Stream state.
@@ -1865,7 +1909,9 @@ typedef NS_ENUM(NSUInteger, ZegoVideoSourceType) {
     /// @deprecated Same as [ScreenCapture], that is, video source from screen capture
     ZegoVideoSourceScreenCapture DEPRECATED_ATTRIBUTE = 13,
     /// Video source from secondary camera, the rear camera when [useFrontCamera] is set to true, otherwise the front camera, only support iOS.
-    ZegoVideoSourceTypeSecondaryCamera = 14
+    ZegoVideoSourceTypeSecondaryCamera = 14,
+    /// Video source from picture capture.
+    ZegoVideoSourceTypePicture = 15
 };
 
 /// Screen capture source exception type.
@@ -1878,6 +1924,30 @@ typedef NS_ENUM(NSUInteger, ZegoScreenCaptureSourceExceptionType) {
     ZegoScreenCaptureSourceExceptionTypeFailed = 2,
     /// The set publish region is invalid, and the publish region is not within the capture screen region.
     ZegoScreenCaptureSourceExceptionTypePublishRegionInvalid = 3
+};
+
+/// Screen capture orientation.
+typedef NS_ENUM(NSUInteger, ZegoScreenCaptureOrientation) {
+    /// Auto follow system orientation.
+    ZegoScreenCaptureOrientationAuto = 0,
+    /// Fixed portrait.
+    ZegoScreenCaptureOrientationPortrait = 1,
+    /// Fixed landscape.
+    ZegoScreenCaptureOrientationLandscape = 2
+};
+
+/// Screen capture source exception type. (only for Android and iOS)
+typedef NS_ENUM(NSUInteger, ZegoScreenCaptureExceptionType) {
+    /// Unknown exception type.
+    ZegoScreenCaptureExceptionTypeUnknown = 0,
+    /// Screen capture has already started, repeated calls failed. You need to stop the capture with [stopScreenCapture] first.
+    ZegoScreenCaptureExceptionTypeAlreadyStarted = 6,
+    /// System error exception. For example, low memory, etc.
+    ZegoScreenCaptureExceptionTypeSystemError = 9,
+    /// Exception interrupted. For example, the user clicks the stop button in the control center during the capture process.
+    ZegoScreenCaptureExceptionTypeExceptionInterrupted = 10,
+    /// Audio device exception. You need to restart the capture.
+    ZegoScreenCaptureExceptionTypeAudioDeviceException = 11
 };
 
 /// Reasons attached to the end of the screen capture extension.
@@ -2159,6 +2229,9 @@ typedef NS_ENUM(NSUInteger, ZegoDummyCaptureImageMode) {
 
 /// The bitmask marker for capability negotiation, refer to enum [ZegoRoomCapabilityNegotiationTypesBitMask], when this param converted to binary, 0b01 that means 1 << 0 for enable the capability negotiation of all user in the room, 0x10 that means 1 << 1 for enable the capability negotiation of publisher in the room. The masks can be combined to allow different types of capability negotiation.
 @property (nonatomic, assign) unsigned int capabilityNegotiationTypes;
+
+/// The type of the room, the default is 0.
+@property (nonatomic, assign) unsigned int roomType;
 
 /// Create a default room configuration
 ///
@@ -2473,6 +2546,15 @@ typedef NS_ENUM(NSUInteger, ZegoDummyCaptureImageMode) {
 /// If enable alpha blend render, default is false.
 @property (nonatomic, assign) BOOL alphaBlend;
 
+/// Rotate the angle counterclockwise, the default is 0. The media player canvas is not supported.
+@property (nonatomic, assign) int rotation;
+
+/// If enable the view mirror, default is false. Only play stream canvas is supported, for publish stream please use [setVideoMirrorMode] interface, for media player please use [enableViewMirror] interface.
+@property (nonatomic, assign) BOOL mirror;
+
+/// Context of view, default is empty string. A utf8 string with a maximum length of 63 bytes or less. Generally no attention is required, it can be used for slitting rendering of mixed stream, to understand the specific use, you need to contact ZEGO technical support.
+@property (nonatomic, copy) NSString *viewContext;
+
 /// Create a ZegoCanvas, default viewMode is ZegoViewModeAspectFit, default background color is black
 ///
 /// @return ZegoCanvas instance
@@ -2504,6 +2586,9 @@ typedef NS_ENUM(NSUInteger, ZegoDummyCaptureImageMode) {
 
 /// Codec capability negotiation type. By default, no reference to the outcome of the capability negotiation. If you want to use this function, contact ZEGO technical support.
 @property (nonatomic, assign) ZegoCapabilityNegotiationType codecNegotiationType;
+
+/// Stream title, a utf8 string with a maximum length of 255 bytes or less.
+@property (nonatomic, copy) NSString *streamTitle;
 
 @end
 
@@ -2646,6 +2731,16 @@ typedef NS_ENUM(NSUInteger, ZegoDummyCaptureImageMode) {
 
 @end
 
+/// Extended parameters for the [switchPlayingStream] interface.
+///
+/// Extended parameters for the [switchPlayingStream] interface.
+@interface ZegoSwitchPlayingStreamConfig : NSObject
+
+/// Switch playing stream type.
+@property (nonatomic, assign) ZegoSwitchPlayingStreamType switchType;
+
+@end
+
 /// Advanced player configuration.
 ///
 /// Configure stream resource mode, CDN configuration and other advanced configurations.
@@ -2678,11 +2773,14 @@ typedef NS_ENUM(NSUInteger, ZegoDummyCaptureImageMode) {
 /// Whether to enable adaptive switching of streams, 1 means on, 0 means off. Valid only if [resourceMode] is ZegoStreamResourceModeOnlyL3. Please contact ZEGO technical support if you need to use it, otherwise this parameter can be ignored.
 @property (nonatomic, assign) int adaptiveSwitch;
 
-/// Stream adaptive transcoding template ID list. Valid only if [resourceMode] is ZegoStreamResourceModeOnlyL3. Please contact ZEGO technical support if you need to use it, otherwise this parameter can be ignored.
+/// Stream adaptive transcoding template ID list. Please contact ZEGO technical support if you need to use it, otherwise this parameter can be ignored.
 @property (nonatomic, copy) NSArray<NSNumber *> *adaptiveTemplateIDList;
 
 /// Play stream resource type configuration when [resourceMode] is ZegoStreamResourceModeCustom.
 @property (nonatomic, strong, nullable) ZegoCustomPlayerResourceConfig *customResourceConfig;
+
+/// Extended parameters for the [switchPlayingStream] interface.
+@property (nonatomic, strong, nullable) ZegoSwitchPlayingStreamConfig *switchStreamConfig;
 
 @end
 
@@ -2850,6 +2948,9 @@ typedef NS_ENUM(NSUInteger, ZegoDummyCaptureImageMode) {
 
 /// Device name
 @property (nonatomic, copy) NSString *deviceName;
+
+/// Device extra info, Format: key="value"\nkey2="value2"..., use line break \n to separate key-value pairs, and use equal sign = to separate key and "value", and there are double quotes around the value
+@property (nonatomic, copy) NSString *deviceExtraInfo;
 
 @end
 
@@ -3389,6 +3490,12 @@ typedef NS_ENUM(NSUInteger, ZegoDummyCaptureImageMode) {
 
 /// Description: Sets the lower limit of the interval range for the adaptive adjustment of the stream playing cache of the stream mixing server. In the real-time chorus KTV scenario, slight fluctuations in the network at the push end may cause the mixed stream to freeze. At this time, when the audience pulls the mixed stream, there is a high probability of the problem of freeze. By adjusting the lower limit of the interval range for the adaptive adjustment of the stream playing cache of the stream mixing server, it can optimize the freezing problem that occurs when playing mixing streams at the player end, but it will increase the delay. It is not set by default, that is, the server uses its own configuration values. It only takes effect for the new input stream setting, and does not take effect for the input stream that has already started mixing.Value Range: [0,10000], exceeding the maximum value will result in a failure of the stream mixing request. On web platforms, this property does not take effect.
 @property (nonatomic, assign) int minPlayStreamBufferLength;
+
+/// Stream mixing alignment scene volume adjustment mode.
+@property (nonatomic, assign) ZegoStreamAlignmentVolumeControlMode streamAlignmentVolumeControlMode;
+
+/// Stream mixing alignment scene baseline streamID.
+@property (nonatomic, copy) NSString *streamAlignmentBaselineStreamID;
 
 @end
 
@@ -4033,11 +4140,24 @@ typedef NS_ENUM(NSUInteger, ZegoDummyCaptureImageMode) {
 /// Set Microphone audio volume for ReplayKit. The range is 0 ~ 200. The default is 100. (only for iOS)
 @property (nonatomic, assign) unsigned int microphoneVolume;
 
-/// Set Application audio volume for ReplayKit. The range is 0 ~ 200. The default is 100. (only for iOS)
+/// Set Application audio volume for ReplayKit. The range is 0 ~ 200. The default is 100. (only for iOS and Android)
 @property (nonatomic, assign) unsigned int applicationVolume;
 
 /// Set the crop rectangle during screen capture. The crop rectangle must be included in the rectangle of the original data, unit is pixel. (only for iOS/Android)
 @property (nonatomic, assign) CGRect cropRect;
+
+/// Set the capture orientation of the screen capture. The capture orientation will be fixed, ignoring the system returned orientation. (only for iOS/Android)
+@property (nonatomic, assign) ZegoScreenCaptureOrientation orientation;
+
+/// Set whether to mute the microphone of the extension process. The default is false. (only for iOS)
+@property (nonatomic, assign) BOOL muteExtensMicrophone;
+
+/// Set the audio device mode for the specified scene, the default is None. (only for iOS) Notes:
+/// 1. Only works when the audio main source is always a microphone;
+/// 2. Only works for [startScreenCapture] interface, [updateScreenCapture] does not take effect;
+/// 3. The audio device mode changes during screen capture may cause the audio output of the screen capture to be abnormal, which can be monitored through [onMobileScreenCaptureExceptionOccurred] callback, and if necessary, the screen capture needs to be restarted.;
+/// 4. After the screen capture is stopped, the audio device mode before the screen capture will be restored.
+@property (nonatomic, assign) ZegoScreenCaptureAudioDeviceMode audioDeviceMode;
 
 @end
 
@@ -4090,6 +4210,9 @@ typedef NS_ENUM(NSUInteger, ZegoDummyCaptureImageMode) {
 
 /// Audio effect player instance count.
 @property (nonatomic, assign) int audioEffectPlayerCount;
+
+/// Enable or disable mix screen capture into publish stream, the input source cannot be set to screen capture. (only for Android and iOS)
+@property (nonatomic, assign) BOOL enableMixScreenCapture;
 
 /// Create a default audio source mix config object
 ///
@@ -4306,6 +4429,14 @@ typedef NS_ENUM(NSUInteger, ZegoDummyCaptureImageMode) {
 
 /// Description: Low light enhancement type. Default value: Normal.
 @property (nonatomic, assign) ZegoExpLowlightEnhancementType type;
+
+@end
+
+/// The config of publish stream snapshot.
+@interface ZegoPublisherTakeSnapshotConfig : NSObject
+
+/// The position of taking snapshot. Default value: .
+@property (nonatomic, assign) ZegoPublisherTakeSnapshotPosition position;
 
 @end
 
@@ -6531,7 +6662,7 @@ typedef NS_ENUM(NSUInteger, ZegoDummyCaptureImageMode) {
 #if TARGET_OS_OSX
 /// Set whether to highlight the capture area
 ///
-/// Available since: 3.20.0
+/// Available since: 3.21.0
 /// Description: Set whether to highlight the capture area.
 /// When to call: It can be called after the engine by [createScreenCaptureSource] has been initialized.
 /// Restrictions: Only available on Windows/macOS.
@@ -6660,6 +6791,24 @@ typedef NS_ENUM(NSUInteger, ZegoDummyCaptureImageMode) {
 ///
 /// Please use the [createAIVoiceChanger] function in ZegoExpressEngine class instead.
 + (instancetype)init NS_UNAVAILABLE;
+
+@end
+
+@interface ZegoPictureCapturer : NSObject
+
+/// Set the path of the picture capturer source.
+///
+/// Available since: 3.22.0
+/// Description: Set the path of the picture capturer source.
+/// Related APIs: User can call [createPictureCapturer] function to create a picture capturer instance.
+///
+/// @param path The path of the picture.
+- (void)setPath:(NSString *)path;
+
+/// Get picture capturer instance index.
+///
+/// @return Picture capturer instance index.
+- (int)getIndex;
 
 @end
 

@@ -231,7 +231,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// Available since: 2.1.0
 /// Description: Set the range of adaptive adjustment of the internal buffer of the sdk when streaming is 0-4000ms.
 /// Use cases: Generally, in the case of a poor network environment, adjusting and increasing the playback buffer of the pull stream will significantly reduce the audio and video freezes, but will increase the delay.
-/// When to call: after called [createEngine].
+/// When to call: after called [createEngine], if it has been set, you need to reset it every time you play the stream again.
 /// Restrictions: None.
 /// Caution: When the upper limit of the cache interval set by the developer exceeds 4000ms, the value will be 4000ms. When the upper limit of the cache interval set by the developer is less than the lower limit of the cache interval, the upper limit will be automatically set as the lower limit.
 ///
@@ -462,6 +462,28 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param canvas The view used to display the play audio and video stream's image. When the view is set to [nil], no video is displayed, only audio is played.
 /// @return Error code, please refer to the error codes document https://doc-en.zego.im/en/5548.html for details.
 - (int)updatePlayingCanvas:(NSString *)streamID canvas:(nullable ZegoCanvas *)canvas;
+
+#if defined(TARGET_OS_IOS) && TARGET_OS_IOS
+/// Setting up playing canvas.
+///
+/// Available: since 3.21.0
+/// Description: This interface can add, delete and update playing view.
+/// Use case: The user can call this function to add, delete and update canvas display video.
+/// When to call: After calling the [startPlayingStream] interface.
+/// Restrictions: None.
+/// Caution: None.
+/// Note: This function is only available in ZegoExpressVideo SDK!
+///
+/// @param streamID Stream ID, a string of up to 256 characters.
+///   Caution:
+///   Only support numbers, English characters and '-', '_'.
+/// @param updateType Update type.
+/// @param canvas The view used to display the play audio and video stream's image.
+/// @return Error code, please refer to the error codes document https://doc-en.zego.im/en/5548.html for details.
+- (int)setPlayingCanvas:(NSString *)streamID
+             updateType:(ZegoViewUpdateType)updateType
+                 canvas:(nullable ZegoCanvas *)canvas;
+#endif
 
 /// [Deprecated] Set the adaptive adjustment interval range of the buffer for playing stream.
 ///

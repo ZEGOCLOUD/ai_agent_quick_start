@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'ZegoExpressEngine'
-  s.version          = '3.19.0'
+  s.version          = '3.22.0'
   s.summary          = 'Zego Express Engine Framework'
   s.description      = 'Zego Express Engine Framework for iOS'
   
