@@ -16,6 +16,7 @@
 #include "./include/zego-express-media-data-publisher.h"
 #include "./include/zego-express-mediaplayer.h"
 #include "./include/zego-express-mixer.h"
+#include "./include/zego-express-picture-capturer.h"
 #include "./include/zego-express-player.h"
 #include "./include/zego-express-preprocess.h"
 #include "./include/zego-express-publisher.h"
@@ -311,6 +312,11 @@ class ZegoExpressEngineBridge {
 
     void takePublishStreamSnapshot(zego_publish_channel channel) {
         zego_express_take_publish_stream_snapshot(channel);
+    }
+
+    void takePublishStreamSnapshotByConfig(zego_publisher_take_snapshot_config config,
+                                           zego_publish_channel channel) {
+        zego_express_take_publish_stream_snapshot_by_config(config, channel);
     }
 
     void mutePublishStreamAudio(bool mute, zego_publish_channel channel) {
@@ -1983,6 +1989,31 @@ class ZegoExpressEngineBridge {
         return result;
     }
 
+    int screenCaptureSetAppGroupID(const std::string &groupID) {
+        int result = zego_express_screen_capture_set_app_group_id_ios(groupID.c_str());
+        return result;
+    }
+
+    int screenCaptureStartScreenCaptureInApp(const zego_screen_capture_config &config) {
+        int result = zego_express_start_screen_capture_in_app_ios(config);
+        return result;
+    }
+
+    int screenCaptureStartScreenCapture(const zego_screen_capture_config &config) {
+        int result = zego_express_start_screen_capture_mobile(config);
+        return result;
+    }
+
+    int screenCaptureStopScreenCapture() {
+        int result = zego_express_screen_capture_stop_capture_mobile();
+        return result;
+    }
+
+    int screenCaptureUpdateScreenCaptureConfig(const zego_screen_capture_config &config) {
+        int result = zego_express_update_screen_capture_config_mobile(config);
+        return result;
+    }
+
     zego_instance createMediaDataPublisher(ZegoMediaDataPublisherConfig config) {
         zego_media_data_publisher_config publisher_config;
         publisher_config.mode = (zego_media_data_publisher_mode)config.mode;
@@ -2190,6 +2221,18 @@ class ZegoExpressEngineBridge {
 
     int aiVoiceChangerSetSpeaker(int index, int speaker_id) {
         return zego_express_ai_voice_changer_set_speaker(index, speaker_id);
+    }
+
+    int createPictureCapturer() {
+        int index = -1;
+        zego_express_create_picture_capturer(&index);
+        return index;
+    }
+
+    void destroyPictureCapturer(int index) { zego_express_destroy_picture_capturer(index); }
+
+    void setPictureCapturerPath(int index, const std::string &path) {
+        zego_express_picture_capturer_set_path(index, path.c_str());
     }
 
     int mediaPlayerSetPlayMediaStreamType(zego_media_stream_type stream_type,
@@ -3000,6 +3043,16 @@ class ZegoExpressEngineBridge {
     void registerScreenCaptureSourceCaptureRectCallback(void *callback_func, void *user_context) {
         zego_register_screen_capture_rect_changed_callback(
             zego_on_screen_capture_rect_changed(callback_func), user_context);
+    }
+
+    void registerScreenCaptureExceptionOccurred(void *callback_func, void *user_context) {
+        zego_register_screen_capture_mobile_exception_occurred_callback(
+            zego_on_screen_capture_mobile_exception_occurred(callback_func), user_context);
+    }
+
+    void registerScreenCaptureStart(void *callback_func, void *user_context) {
+        zego_register_screen_capture_mobile_start_callback(
+            zego_on_screen_capture_mobile_start(callback_func), user_context);
     }
 
     void registerNetworkTimeSynchronizedCallback(void *callback_func, void *user_context) {

@@ -69,6 +69,7 @@
 #define ZEGO_EXPRESS_MAX_ROOM_TOKEN_VALUE_LEN (2048)
 #define ZEGO_EXPRESS_MAX_SET_CONFIG_VALUE_LEN (2048)
 #define ZEGO_EXPRESS_MAX_STREAM_TITLE_LEN (256)
+#define ZEGO_EXPRESS_MAX_DEVICE_EXTRA_INFO_LEN (2048)
 
 /// Room scenario.
 enum zego_scenario {
@@ -766,8 +767,8 @@ enum zego_aec_mode {
     /// AI Aggressive echo cancellation, Similar to ZegoAECModeAI, it offers cleaner echo cancellation in scenarios with significant reverberation, making it recommended for use in chat rooms with large reverberation. It can be left off in other scenarios, especially in KTV settings where music is played out loud, as it may cause slightly more distortion to the human voice.
     zego_aec_mode_ai_aggressive = 4,
 
-    /// AI Aggressive echo cancellation 2, Compared with ZegoAECModeAIAggressive, the echo suppression is cleaner, but the human voice will be more damaged. It is recommended to use it in voice chat scenarios.
-    zego_aec_mode_ai_aggressive2 = 5
+    /// Balanced AI echo cancellation, Compared with ZegoAECModeAIAggressive, the echo suppression is cleaner, but the human voice will be more damaged. It is recommended to use it in voice chat scenarios.
+    zego_aec_mode_ai_balanced = 5
 
 };
 
@@ -842,6 +843,16 @@ enum zego_mix_image_check_mode {
 
     /// The mixed flow can be initiated successfully without checking the related parameters of the picture.
     zego_mix_image_check_mode_nothing = 2
+
+};
+
+/// Stream alignment volume control mode.
+enum zego_stream_alignment_volume_control_mode {
+    /// Disable volume control when stream alignment.
+    zego_stream_alignment_volume_control_mode_close = 0,
+
+    /// Enable volume control when stream alignment.
+    zego_stream_alignment_volume_control_mode_open = 1
 
 };
 
@@ -958,6 +969,16 @@ enum zego_stream_resource_switch_mode {
 
 };
 
+/// Switch playing stream type.
+enum zego_switch_playing_stream_type {
+    /// Default, smooth switching.
+    zego_switch_playing_stream_type_default = 0,
+
+    /// Force switching, Only the timestamp is guaranteed not to be refunded, and smooth switching is not guaranteed.
+    zego_switch_playing_stream_type_force = 1
+
+};
+
 /// Stream Resource Type
 enum zego_stream_resource_type {
     /// Default mode. The SDK will automatically select the streaming resource according to the parameters set by the player config and the ready-made background configuration.
@@ -968,6 +989,19 @@ enum zego_stream_resource_type {
 
     /// L3 resource.
     zego_stream_resource_type_l3 = 2
+
+};
+
+/// Update type.
+enum zego_view_update_type {
+    /// Add
+    zego_view_update_type_add = 0,
+
+    /// Delete
+    zego_view_update_type_delete = 1,
+
+    /// Update
+    zego_view_update_type_update = 2
 
 };
 
@@ -2005,6 +2039,19 @@ enum zego_stream_event {
 
 };
 
+/// Screen capture audio device mode.
+enum zego_screen_capture_audio_device_mode {
+    /// Default mode.
+    zego_screen_capture_audio_device_mode_none = 0,
+
+    /// General mode.
+    zego_screen_capture_audio_device_mode_general = 1,
+
+    /// Communication mode.
+    zego_screen_capture_audio_device_mode_communication = 2
+
+};
+
 /// Type of capture target.
 enum zego_screen_capture_source_type {
     /// Unknow.
@@ -2092,6 +2139,19 @@ enum zego_scene_state {
 
     /// Logout of the scene is successful. It is in this state by default before logging into the scene. When calling [logoutScene] to log out of the scene successfully, it will enter this state.
     zego_scene_state_logout = 7
+
+};
+
+/// The position of taking snapshot.
+enum zego_publisher_take_snapshot_position {
+    /// After video process.
+    zego_publisher_take_snapshot_position_after_process = 0,
+
+    /// On capture.
+    zego_publisher_take_snapshot_position_on_capture = 1,
+
+    /// On preview. Only support harmonyos
+    zego_publisher_take_snapshot_position_on_preview = 2
 
 };
 
@@ -2228,7 +2288,10 @@ enum zego_video_source_type {
     zego_video_source_screen_capture = 13,
 
     /// Video source from secondary camera, the rear camera when [useFrontCamera] is set to true, otherwise the front camera, only support iOS.
-    zego_video_source_type_secondary_camera = 14
+    zego_video_source_type_secondary_camera = 14,
+
+    /// Video source from picture capture.
+    zego_video_source_type_picture = 15
 
 };
 
@@ -2248,7 +2311,20 @@ enum zego_screen_capture_source_exception_type {
 
 };
 
-/// Screen capture source exception type. (only for Android)
+/// Screen capture orientation.
+enum zego_screen_capture_orientation {
+    /// Auto follow system orientation.
+    zego_screen_capture_orientation_auto = 0,
+
+    /// Fixed portrait.
+    zego_screen_capture_orientation_portrait = 1,
+
+    /// Fixed landscape.
+    zego_screen_capture_orientation_landscape = 2
+
+};
+
+/// Screen capture source exception type. (only for Android and iOS)
 enum zego_screen_capture_exception_type {
     /// Unknown exception type.
     zego_screen_capture_exception_type_unknown = 0,
@@ -2278,7 +2354,13 @@ enum zego_screen_capture_exception_type {
     zego_screen_capture_exception_type_source_not_specified = 8,
 
     /// System error exception. For example, low memory, etc.
-    zego_screen_capture_exception_type_system_error = 9
+    zego_screen_capture_exception_type_system_error = 9,
+
+    /// Exception interrupted. For example, the user clicks the stop button in the control center during the capture process.
+    zego_screen_capture_exception_type_exception_interrupted = 10,
+
+    /// Audio device exception. You need to restart the capture.
+    zego_screen_capture_exception_type_audio_device_exception = 11
 
 };
 
@@ -2577,6 +2659,9 @@ struct zego_room_config {
 
     /// The bitmask marker for capability negotiation, refer to enum [ZegoRoomCapabilityNegotiationTypesBitMask], when this param converted to binary, 0b01 that means 1 << 0 for enable the capability negotiation of all user in the room, 0x10 that means 1 << 1 for enable the capability negotiation of publisher in the room. The masks can be combined to allow different types of capability negotiation.
     unsigned int capability_negotiation_types;
+
+    /// The type of the room, the default is 0.
+    unsigned int room_type;
 };
 
 /// Video config.
@@ -2832,6 +2917,15 @@ struct zego_canvas {
 
     /// If enable alpha blend render, default is false.
     bool alpha_blend;
+
+    /// Rotate the angle counterclockwise, the default is 0. The media player canvas is not supported.
+    int rotation;
+
+    /// If enable the view mirror, default is false. Only play stream canvas is supported, for publish stream please use [setVideoMirrorMode] interface, for media player please use [enableViewMirror] interface.
+    bool mirror;
+
+    /// Context of view, default is empty string. A utf8 string with a maximum length of 63 bytes or less. Generally no attention is required, it can be used for slitting rendering of mixed stream, to understand the specific use, you need to contact ZEGO technical support.
+    char view_context[ZEGO_EXPRESS_MAX_USERID_LEN];
 };
 
 /// Advanced publisher configuration.
@@ -2987,6 +3081,14 @@ struct zego_custom_player_resource_config {
     enum zego_resource_type after_publish;
 };
 
+/// Extended parameters for the [switchPlayingStream] interface.
+///
+/// Extended parameters for the [switchPlayingStream] interface.
+struct zego_switch_playing_stream_config {
+    /// Switch playing stream type.
+    enum zego_switch_playing_stream_type switch_type;
+};
+
 /// Advanced player configuration.
 ///
 /// Configure stream resource mode, CDN configuration and other advanced configurations.
@@ -3011,6 +3113,9 @@ struct zego_player_config {
 
     /// Play stream resource type configuration when [resourceMode] is ZegoStreamResourceModeCustom.
     struct zego_custom_player_resource_config *custom_resource_config;
+
+    /// Extended parameters for the [switchPlayingStream] interface.
+    struct zego_switch_playing_stream_config *switch_stream_config;
 
     /// Play resource switching strategy mode, the default is zego_stream_resource_switch_mode_default
     zego_stream_resource_switch_mode resource_switch_mode;
@@ -3186,6 +3291,9 @@ struct zego_device_info {
 
     /// Device name
     char device_name[ZEGO_EXPRESS_MAX_COMMON_LEN];
+
+    /// Device extra info, Format: key="value"\nkey2="value2"..., use line break \n to separate key-value pairs, and use equal sign = to separate key and "value", and there are double quotes around the value
+    char device_extra_info[ZEGO_EXPRESS_MAX_DEVICE_EXTRA_INFO_LEN];
 };
 
 /// System performance monitoring status
@@ -3572,6 +3680,12 @@ struct zego_auto_mixer_task {
 
     /// Description: Sets the lower limit of the interval range for the adaptive adjustment of the stream playing cache of the stream mixing server. In the real-time chorus KTV scenario, slight fluctuations in the network at the push end may cause the mixed stream to freeze. At this time, when the audience pulls the mixed stream, there is a high probability of the problem of freeze. By adjusting the lower limit of the interval range for the adaptive adjustment of the stream playing cache of the stream mixing server, it can optimize the freezing problem that occurs when playing mixing streams at the player end, but it will increase the delay. It is not set by default, that is, the server uses its own configuration values. It only takes effect for the new input stream setting, and does not take effect for the input stream that has already started mixing.Value Range: [0,10000], exceeding the maximum value will result in a failure of the stream mixing request. On web platforms, this property does not take effect.
     int min_play_stream_buffer_length;
+
+    /// Stream mixing alignment scene volume adjustment mode.
+    enum zego_stream_alignment_volume_control_mode stream_alignment_volume_control_mode;
+
+    /// Stream mixing alignment scene baseline streamID.
+    char stream_alignment_baseline_stream_id[ZEGO_EXPRESS_MAX_STREAM_LEN];
 
     /// The output list count of the auto mixer task
     unsigned int output_list_count;
@@ -4164,7 +4278,7 @@ struct zego_screen_capture_config {
     /// Set Microphone audio volume for ReplayKit. The range is 0 ~ 200. The default is 100. (only for iOS)
     unsigned int microphone_volume;
 
-    /// Set Application audio volume for ReplayKit. The range is 0 ~ 200. The default is 100. (only for iOS)
+    /// Set Application audio volume for ReplayKit. The range is 0 ~ 200. The default is 100. (only for iOS and Android)
     unsigned int application_volume;
 
     /// Set the audio capture parameters during screen capture. (only for Android)
@@ -4172,6 +4286,19 @@ struct zego_screen_capture_config {
 
     /// Set the crop rectangle during screen capture. The crop rectangle must be included in the rectangle of the original data, unit is pixel. (only for iOS/Android)
     struct zego_rect crop_rect;
+
+    /// Set the capture orientation of the screen capture. The capture orientation will be fixed, ignoring the system returned orientation. (only for iOS/Android)
+    enum zego_screen_capture_orientation orientation;
+
+    /// Set whether to mute the microphone of the extension process. The default is false. (only for iOS)
+    bool mute_extens_microphone;
+
+    /// Set the audio device mode for the specified scene, the default is None. (only for iOS) Notes:
+    /// 1. Only works when the audio main source is always a microphone;
+    /// 2. Only works for [startScreenCapture] interface, [updateScreenCapture] does not take effect;
+    /// 3. The audio device mode changes during screen capture may cause the audio output of the screen capture to be abnormal, which can be monitored through [onMobileScreenCaptureExceptionOccurred] callback, and if necessary, the screen capture needs to be restarted.;
+    /// 4. After the screen capture is stopped, the audio device mode before the screen capture will be restored.
+    enum zego_screen_capture_audio_device_mode audio_device_mode;
 };
 
 /// The screen captures source information.
@@ -4224,6 +4351,9 @@ struct zego_audio_source_mix_config {
 
     /// Enable or disable mix SDK playout into publish stream.
     bool enable_mix_engine_playout;
+
+    /// Enable or disable mix screen capture into publish stream, the input source cannot be set to screen capture. (only for Android and iOS)
+    bool enable_mix_screen_capture;
 };
 
 /// Multimedia resource for ZEGO media player.
@@ -4433,6 +4563,12 @@ struct zego_exp_low_light_enhancement_params {
 
     /// Description: Low light enhancement type. Default value: Normal.
     enum zego_exp_low_light_enhancement_type type;
+};
+
+/// The config of publish stream snapshot.
+struct zego_publisher_take_snapshot_config {
+    /// The position of taking snapshot. Default value: .
+    enum zego_publisher_take_snapshot_position position;
 };
 
 #endif /* __ZEGO_EXPRESS_DEFINE_H__ */
