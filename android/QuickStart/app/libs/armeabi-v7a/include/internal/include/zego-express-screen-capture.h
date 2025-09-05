@@ -226,7 +226,7 @@ typedef zego_error(EXP_CALL *pfnzego_express_screen_capture_enable_cursor_visibl
 
 /// Set whether to highlight the capture area
 ///
-/// Available since: 3.20.0
+/// Available since: 3.21.0
 /// Description: Set whether to highlight the capture area.
 /// When to call: It can be called after the engine by [createScreenCaptureSource] has been initialized.
 /// Restrictions: Only available on Windows/macOS.
@@ -246,7 +246,7 @@ typedef zego_error(EXP_CALL *pfnzego_express_screen_capture_enable_hight_light)(
 ///
 /// Available since: 3.13.0
 /// Description: Whether to collect the sound of the window process during window collection.
-/// When to call: Before starting the collection [startScreencapture].
+/// When to call: Before starting the collection [startScreencapture]. [setAudioSource] Set the acquisition source to ZegoAudioSourceTypeCustom, and the screen acquisition and streaming channels are the same.
 /// Restrictions: Only applicable to Windows 10 and above versions.
 ///
 /// @param enable Whether to collect sound. true for collection, false for no collection, default false.
@@ -457,7 +457,7 @@ typedef zego_error(EXP_CALL *pfnzego_express_update_screen_capture_config_mobile
 /// Description: The callback triggered when the mobile screen capture source exception occurred.
 /// Trigger: This callback is triggered when an exception occurs after the mobile screen capture started.
 /// Caution: The callback does not actually take effect until call [setEventHandler] to set.
-/// Restrictions: Only available on Android.
+/// Restrictions: Only available on Android and iOS.
 ///
 /// @param exception_type Screen capture exception type.
 /// @param user_context Context of user.
@@ -478,7 +478,7 @@ typedef void(EXP_CALL *pfnzego_register_screen_capture_mobile_exception_occurred
 /// Description: The callback triggered when calling the start mobile screen capture.
 /// Trigger: After calling [startScreenCapture], this callback will be triggered when starting screen capture successfully, and [onScreenCaptureExceptionOccurred] will be triggered when failing.
 /// Caution: The callback does not actually take effect until call [setEventHandler] to set.
-/// Restrictions: Only available on Android.
+/// Restrictions: Only available on Android and iOS.
 ///
 /// @param user_context Context of user.
 typedef void (*zego_on_screen_capture_mobile_start)(void *user_context);

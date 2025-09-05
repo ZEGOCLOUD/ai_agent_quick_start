@@ -230,7 +230,7 @@ typedef zego_error(EXP_CALL *pfnzego_express_set_play_stream_video_type)(
 /// Available since: 2.1.0
 /// Description: Set the range of adaptive adjustment of the internal buffer of the sdk when streaming is 0-4000ms.
 /// Use cases: Generally, in the case of a poor network environment, adjusting and increasing the playback buffer of the pull stream will significantly reduce the audio and video freezes, but will increase the delay.
-/// When to call: after called [createEngine].
+/// When to call: after called [createEngine], if it has been set, you need to reset it every time you play the stream again.
 /// Restrictions: None.
 /// Caution: When the upper limit of the cache interval set by the developer exceeds 4000ms, the value will be 4000ms. When the upper limit of the cache interval set by the developer is less than the lower limit of the cache interval, the upper limit will be automatically set as the lower limit.
 ///
@@ -539,6 +539,30 @@ typedef zego_error(EXP_CALL *pfnzego_express_update_playing_canvas)(const char *
                                                                     struct zego_canvas *canvas);
 #endif
 
+/// Setting up playing canvas.
+///
+/// Available: since 3.21.0
+/// Description: This interface can add, delete and update playing view.
+/// Use case: The user can call this function to add, delete and update canvas display video.
+/// When to call: After calling the [startPlayingStream] interface.
+/// Restrictions: None.
+/// Caution: None.
+/// Note: This function is only available in ZegoExpressVideo SDK!
+///
+/// @param stream_id Stream ID, a string of up to 256 characters.
+///   Caution:
+///   Only support numbers, English characters and '-', '_'.
+/// @param update_type Update type.
+/// @param canvas The view used to display the play audio and video stream's image.
+/// @return Error code, please refer to the error codes document https://doc-en.zego.im/en/5548.html for details.
+#ifndef ZEGOEXP_EXPLICIT
+ZEGOEXP_API zego_error EXP_CALL zego_express_set_playing_canvas(
+    const char *stream_id, enum zego_view_update_type update_type, struct zego_canvas *canvas);
+#else
+typedef zego_error(EXP_CALL *pfnzego_express_set_playing_canvas)(
+    const char *stream_id, enum zego_view_update_type update_type, struct zego_canvas *canvas);
+#endif
+
 /// The callback triggered when the state of stream playing changes.
 ///
 /// Available since: 1.1.0
@@ -711,6 +735,30 @@ ZEGOEXP_API void EXP_CALL zego_register_player_render_camera_video_first_frame_c
 #else
 typedef void(EXP_CALL *pfnzego_register_player_render_camera_video_first_frame_callback)(
     zego_on_player_render_camera_video_first_frame callback_func, void *user_context);
+#endif
+
+/// When multiple playing canvas are set, the callback will be triggered after one view renders the first frame of the video.
+///
+/// Available since: 3.21.0
+/// Description: Call [startPlayingStream] to play stream and call [setPlayingCanvas] to add multiple views, this callback will be called when SDK rendered the first frame of video data.
+/// Use cases: Developer can use this callback to update the UI for playing stream.
+/// Trigger: The user playing the mixed stream, adds multiple views through [setPlayingCanvas], and sets the correct viewContext parameters, which will trigger this callback after the corresponding view has rendered the first frame of video data.
+/// Related callbacks: After a successful call to [startPlayingStream], the callback function [onPlayerRecvAudioFirstFrame] determines whether the SDK has received the audio data, and the callback [onPlayerRecvVideoFirstFrame] determines whether the SDK has received the video data.
+/// Note: This function is only available in ZegoExpressVideo SDK!
+///
+/// @param stream_id Stream ID.
+/// @param view_context Context of view.
+/// @param user_context Context of user.
+typedef void (*zego_on_player_render_multi_view_first_frame)(const char *stream_id,
+                                                             const char *view_context,
+                                                             void *user_context);
+
+#ifndef ZEGOEXP_EXPLICIT
+ZEGOEXP_API void EXP_CALL zego_register_player_render_multi_view_first_frame_callback(
+    zego_on_player_render_multi_view_first_frame callback_func, void *user_context);
+#else
+typedef void(EXP_CALL *pfnzego_register_player_render_multi_view_first_frame_callback)(
+    zego_on_player_render_multi_view_first_frame callback_func, void *user_context);
 #endif
 
 /// The callback triggered when the stream playback resolution changes.

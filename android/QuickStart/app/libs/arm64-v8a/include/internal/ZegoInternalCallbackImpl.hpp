@@ -618,6 +618,13 @@ class ZegoInternalCallbackCenter {
         oInternalOriginBridge->registerScreenCaptureSourceCaptureRectCallback(
             ZegoVoidPtr(&ZegoInternalCallbackCenter::zego_on_screen_capture_source_rect_changed),
             ZegoVoidPtr(this));
+        oInternalOriginBridge->registerScreenCaptureExceptionOccurred(
+            ZegoVoidPtr(
+                &ZegoInternalCallbackCenter::zego_on_screen_capture_mobile_exception_occurred),
+            ZegoVoidPtr(this));
+        oInternalOriginBridge->registerScreenCaptureStart(
+            ZegoVoidPtr(&ZegoInternalCallbackCenter::zego_on_screen_capture_mobile_start),
+            ZegoVoidPtr(this));
         oInternalOriginBridge->registerNetworkTimeSynchronizedCallback(
             ZegoVoidPtr(&ZegoInternalCallbackCenter::zego_on_network_time_synchronized),
             ZegoVoidPtr(this));
@@ -1592,6 +1599,10 @@ class ZegoInternalCallbackCenter {
         auto handler = oInternalCallbackCenter->getIZegoEventHandler();
         std::string streamID = stream_id;
 
+        // sync callback
+        if (handler) {
+            handler->onPlayerSyncRecvAudioFirstFrame(streamID);
+        }
         auto weakHandler = std::weak_ptr<IZegoEventHandler>(handler);
         ZEGO_SWITCH_THREAD_PRE_STATIC
         auto handlerInMain = weakHandler.lock();
@@ -1623,6 +1634,10 @@ class ZegoInternalCallbackCenter {
         auto handler = oInternalCallbackCenter->getIZegoEventHandler();
         std::string streamID = stream_id;
 
+        // sync callback
+        if (handler) {
+            handler->onPlayerSyncRecvRenderVideoFirstFrame(streamID);
+        }
         auto weakHandler = std::weak_ptr<IZegoEventHandler>(handler);
         ZEGO_SWITCH_THREAD_PRE_STATIC
         auto handlerInMain = weakHandler.lock();
@@ -3237,6 +3252,28 @@ class ZegoInternalCallbackCenter {
 
         if (screenCaptureSource) {
             screenCaptureSource->zego_on_screen_capture_source_rect_changed(rect);
+        }
+    }
+
+    static void zego_on_screen_capture_mobile_exception_occurred(
+        enum zego_screen_capture_exception_type exception_type, void *user_context) {
+        ZEGO_UNUSED_VARIABLE(user_context);
+
+        // Android 特有回调，C++ 无法切线程
+        auto handler = oInternalCallbackCenter->getIZegoEventHandler();
+        if (handler) {
+            handler->onScreenCaptureExceptionOccurred(
+                static_cast<ZegoScreenCaptureExceptionType>(exception_type));
+        }
+    }
+
+    static void zego_on_screen_capture_mobile_start(void *user_context) {
+        ZEGO_UNUSED_VARIABLE(user_context);
+
+        // Android 特有回调，C++ 无法切线程
+        auto handler = oInternalCallbackCenter->getIZegoEventHandler();
+        if (handler) {
+            handler->onScreenCaptureStart();
         }
     }
 

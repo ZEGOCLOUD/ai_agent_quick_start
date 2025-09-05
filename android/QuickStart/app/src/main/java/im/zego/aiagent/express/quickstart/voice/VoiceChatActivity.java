@@ -357,7 +357,7 @@ public class VoiceChatActivity extends AppCompatActivity {
         ZegoExpressEngine.getEngine().setAudioDeviceMode(ZegoAudioDeviceMode.GENERAL);
 
         ZegoExpressEngine.getEngine().enableAEC(true);
-        ZegoExpressEngine.getEngine().setAECMode(ZegoAECMode.AI_AGGRESSIVE2);
+        ZegoExpressEngine.getEngine().setAECMode(ZegoAECMode.AI_BALANCED);
         ZegoExpressEngine.getEngine().enableAGC(true);
         ZegoExpressEngine.getEngine().enableANS(true);
         ZegoExpressEngine.getEngine().setANSMode(ZegoANSMode.MEDIUM);
