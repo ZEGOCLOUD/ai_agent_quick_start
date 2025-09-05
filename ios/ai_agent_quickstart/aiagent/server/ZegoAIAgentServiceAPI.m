@@ -433,7 +433,7 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
     
     NSLog(@"启用AEC（回声消除），模式：ZegoAECModeAIAggressive");
     [[ZegoExpressEngine sharedEngine] enableAEC:TRUE];
-    [[ZegoExpressEngine sharedEngine] setAECMode:ZegoAECModeAIAggressive2];
+    [[ZegoExpressEngine sharedEngine] setAECMode:ZegoAECModeAIBalanced];
     
     NSLog(@"启用ANS（噪声抑制），模式：ZegoANSModeAggressive");
     [[ZegoExpressEngine sharedEngine] enableANS:TRUE];
