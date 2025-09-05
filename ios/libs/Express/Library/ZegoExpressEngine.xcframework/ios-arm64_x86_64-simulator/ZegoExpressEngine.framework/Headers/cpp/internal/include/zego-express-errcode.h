@@ -730,6 +730,9 @@
 /** Description: The MediaPlayer is already start. <br>Cause: [Load] has been called. <br> Solutions: Please call [Stop] first, then call [Load]. */
 #define ZEGO_ERRCODE_MEDIAPLAYER_ALREADY_START 1008014
 
+/** Description: The MediaPlayer failed to load the file. <br>Cause: Permission denied. <br> Solutions: Check the validity of the media file path. */
+#define ZEGO_ERRCODE_MEDIAPLAYER_PERMISSION_DENIED 1008015
+
 /** Description: The MediaPlayer failed to seek. <br>Cause: The file hasn't been loaded yet. <br> Solutions: The media player loads the media resource [loadResource] before seeking [seekTo]. */
 #define ZEGO_ERRCODE_MEDIAPLAYER_SEEK_ERROR 1008016
 

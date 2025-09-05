@@ -421,6 +421,24 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)takePublishStreamSnapshot:(ZegoPublisherTakeSnapshotCallback)callback
                           channel:(ZegoPublishChannel)channel;
 
+/// Take a snapshot of the publishing stream for the specified publish channel.
+///
+/// Available since: 3.22.0
+/// Description: Take a snapshot of the publishing stream.
+/// When to call: Called this function after calling [startPublishingStream] or [startPreview].
+/// Restrictions: None.
+/// Caution: The resolution of the snapshot is the encoding resolution set in [setVideoConfig]. If you need to change it to capture resolution, please call [setCapturePipelineScaleMode] to change the capture pipeline scale mode to [Post].
+/// Related callbacks: The screenshot result will be called back through [ZegoPublisherTakeSnapshotCallback].
+/// Related APIs: [takePlayStreamSnapshot].
+/// Note: This function is only available in ZegoExpressVideo SDK!
+///
+/// @param config The config of snapshot
+/// @param callback Results of take publish stream snapshot.
+/// @param channel Publish stream channel.
+- (void)takePublishStreamSnapshotByConfig:(ZegoPublisherTakeSnapshotConfig *)config
+                                 callback:(ZegoPublisherTakeSnapshotCallback)callback
+                                  channel:(ZegoPublishChannel)channel;
+
 /// Stops or resumes sending the audio part of a stream.
 ///
 /// Available since: 1.1.0
@@ -766,7 +784,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// Use cases: Generally used in scenes such as synchronizing music lyrics or precise video layout, you can choose to send SEI.
 /// When to call: After starting to push the stream [startPublishingStream].
 /// Restrictions: Do not exceed 30 times per second, and the SEI data length is limited to 4096 bytes.
-/// Caution: Since the SEI information follows the video frame, there may be frame loss due to network problems, so the SEI information may also be lost. In order to solve this situation, it should be sent several times within the restricted frequency.
+/// Caution: 1. Due to network issues, frame loss may occur, which means SEI information may also be lost. To address this situation, it is advisable to send it multiple times within a limited frequency. 2. Even if the [enableCamera] interface is called to turn off the camera or [mutePublishStreamVideo] is used to stop sending video data, SEI can still be successfully sent; as long as the playback side does not call the [mutePlayStreamVideo] interface to stop pulling audio data, SEI can still be received normally. 3. If the SDK does not support the video module but does support the SEI functional module, SEI information can still be sent normally.
 /// Related APIs: After the pusher sends the SEI, the puller can obtain the SEI content by monitoring the callback of [onPlayerRecvSEI].
 ///
 /// @param data SEI data.
@@ -779,7 +797,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// Use cases: Generally used in scenes such as synchronizing music lyrics or precise video layout, you can choose to send SEI.
 /// When to call: After starting to push the stream [startPublishingStream].
 /// Restrictions: Do not exceed 30 times per second, and the SEI data length is limited to 4096 bytes.
-/// Caution: Since the SEI information follows the video frame, there may be frame loss due to network problems, so the SEI information may also be lost. In order to solve this situation, it should be sent several times within the restricted frequency.
+/// Caution: 1. Due to network issues, frame loss may occur, which means SEI information may also be lost. To address this situation, it is advisable to send it multiple times within a limited frequency. 2. Even if the [enableCamera] interface is called to turn off the camera or [mutePublishStreamVideo] is used to stop sending video data, SEI can still be successfully sent; as long as the playback side does not call the [mutePlayStreamVideo] interface to stop pulling audio data, SEI can still be received normally. 3. If the SDK does not support the video module but does support the SEI functional module, SEI information can still be sent normally.
 /// Related APIs: After the pusher sends the SEI, the puller can obtain the SEI content by monitoring the callback of [onPlayerRecvSEI].
 ///
 /// @param data SEI data.
@@ -854,6 +872,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///   1. The static picture cannot be seen in the local preview.
 ///   2. External filters, mirroring, watermarks, and snapshots are all invalid.
 ///   3. If the picture aspect ratio is inconsistent with the set code aspect ratio, it will be cropped according to the code aspect ratio.
+///   4. To publish the audio stream, you must call this interface again and set the image path to empty to avoid video billing.
 /// Platform differences:
 ///   1. Windows: Fill in the location of the picture directly, such as "D://dir//image.jpg".
 ///   2. iOS: If it is a full path, add the prefix "file:", such as @"file:/var/image.png"; If it is a assets picture path, add the prefix "asset:", such as @"asset:watermark".
@@ -879,6 +898,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///   1. The static picture cannot be seen in the local preview.
 ///   2. External filters, mirroring, watermarks, and snapshots are all invalid.
 ///   3. If the picture aspect ratio is inconsistent with the set code aspect ratio, it will be cropped according to the code aspect ratio.
+///   4. To publish the audio stream, you must call this interface again and set the image path to empty to avoid video billing.
 /// Platform differences:
 ///   1. Windows: Fill in the location of the picture directly, such as "D://dir//image.jpg".
 ///   2. iOS: If it is a full path, add the prefix "file:", such as @"file:/var/image.png"; If it is a assets picture path, add the prefix "asset:", such as @"asset:watermark".

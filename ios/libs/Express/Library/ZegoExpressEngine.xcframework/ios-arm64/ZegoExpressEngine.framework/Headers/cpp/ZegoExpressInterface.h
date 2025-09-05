@@ -16,6 +16,7 @@ class IZegoRangeScene;
 class IZegoRealTimeSequentialDataManager;
 class IZegoScreenCaptureSource;
 class IZegoMediaDataPublisher;
+class IZegoPictureCapturer;
 
 class IZegoExpressEngine {
   protected:
@@ -236,7 +237,7 @@ class IZegoExpressEngine {
     /// Use cases: You can set some room-related business attributes, such as whether someone is Co-hosting.
     /// When to call /Trigger: After logging in the room successful.
     /// Restrictions: For restrictions on the use of this function, please refer to https://docs.zegocloud.com/article/7611 or contact ZEGO technical support.
-    /// Caution: 'key' is non nullptr. The length of key and value is limited, please refer to Restrictions. The newly set key and value will overwrite the old setting.
+    /// Caution: For key and value restrictions, please refer to Restrictions. Newly set values ​​will overwrite old ones.
     /// Related callbacks: Other users in the same room will be notified through the [onRoomExtraInfoUpdate] callback function.
     /// Related APIs: None.
     ///
@@ -526,6 +527,25 @@ class IZegoExpressEngine {
     takePublishStreamSnapshot(ZegoPublisherTakeSnapshotCallback callback,
                               ZegoPublishChannel channel = ZEGO_PUBLISH_CHANNEL_MAIN) = 0;
 
+    /// Take a snapshot of the publishing stream for the specified publish channel.
+    ///
+    /// Available since: 3.22.0
+    /// Description: Take a snapshot of the publishing stream.
+    /// When to call: Called this function after calling [startPublishingStream] or [startPreview].
+    /// Restrictions: None.
+    /// Caution: The resolution of the snapshot is the encoding resolution set in [setVideoConfig]. If you need to change it to capture resolution, please call [setCapturePipelineScaleMode] to change the capture pipeline scale mode to [Post].
+    /// Related callbacks: The screenshot result will be called back through [ZegoPublisherTakeSnapshotCallback].
+    /// Related APIs: [takePlayStreamSnapshot].
+    /// Note: This function is only available in ZegoExpressVideo SDK!
+    ///
+    /// @param config The config of snapshot
+    /// @param callback Results of take publish stream snapshot.
+    /// @param channel Publish stream channel.
+    virtual void
+    takePublishStreamSnapshotByConfig(ZegoPublisherTakeSnapshotConfig config,
+                                      ZegoPublisherTakeSnapshotCallback callback,
+                                      ZegoPublishChannel channel = ZEGO_PUBLISH_CHANNEL_MAIN) = 0;
+
     /// Stops or resumes sending the audio part of a stream for the specified channel.
     ///
     /// Available since: 1.1.0
@@ -784,7 +804,7 @@ class IZegoExpressEngine {
     /// Use cases: Generally used in scenes such as synchronizing music lyrics or precise video layout, you can choose to send SEI.
     /// When to call: After starting to push the stream [startPublishingStream].
     /// Restrictions: Do not exceed 30 times per second, and the SEI data length is limited to 4096 bytes.
-    /// Caution: Since the SEI information follows the video frame, there may be frame loss due to network problems, so the SEI information may also be lost. In order to solve this situation, it should be sent several times within the restricted frequency.
+    /// Caution: 1. Due to network issues, frame loss may occur, which means SEI information may also be lost. To address this situation, it is advisable to send it multiple times within a limited frequency. 2. Even if the [enableCamera] interface is called to turn off the camera or [mutePublishStreamVideo] is used to stop sending video data, SEI can still be successfully sent; as long as the playback side does not call the [mutePlayStreamVideo] interface to stop pulling audio data, SEI can still be received normally. 3. If the SDK does not support the video module but does support the SEI functional module, SEI information can still be sent normally.
     /// Related APIs: After the pusher sends the SEI, the puller can obtain the SEI content by monitoring the callback of [onPlayerRecvSEI].
     ///
     /// @param data SEI data.
@@ -864,6 +884,7 @@ class IZegoExpressEngine {
     ///   1. The static picture cannot be seen in the local preview.
     ///   2. External filters, mirroring, watermarks, and snapshots are all invalid.
     ///   3. If the picture aspect ratio is inconsistent with the set code aspect ratio, it will be cropped according to the code aspect ratio.
+    ///   4. To publish the audio stream, you must call this interface again and set the image path to empty to avoid video billing.
     /// Platform differences:
     ///   1. Windows: Fill in the location of the picture directly, such as "D://dir//image.jpg".
     ///   2. iOS: If it is a full path, add the prefix "file:", such as @"file:/var/image.png"; If it is a assets picture path, add the prefix "asset:", such as @"asset:watermark".
@@ -891,6 +912,7 @@ class IZegoExpressEngine {
     ///   1. The static picture cannot be seen in the local preview.
     ///   2. External filters, mirroring, watermarks, and snapshots are all invalid.
     ///   3. If the picture aspect ratio is inconsistent with the set code aspect ratio, it will be cropped according to the code aspect ratio.
+    ///   4. To publish the audio stream, you must call this interface again and set the image path to empty to avoid video billing.
     /// Platform differences:
     ///   1. Windows: Fill in the location of the picture directly, such as "D://dir//image.jpg".
     ///   2. iOS: If it is a full path, add the prefix "file:", such as @"file:/var/image.png"; If it is a assets picture path, add the prefix "asset:", such as @"asset:watermark".
@@ -1378,7 +1400,7 @@ class IZegoExpressEngine {
     /// Available since: 2.1.0
     /// Description: Set the range of adaptive adjustment of the internal buffer of the sdk when streaming is 0-4000ms.
     /// Use cases: Generally, in the case of a poor network environment, adjusting and increasing the playback buffer of the pull stream will significantly reduce the audio and video freezes, but will increase the delay.
-    /// When to call: after called [createEngine].
+    /// When to call: after called [createEngine], if it has been set, you need to reset it every time you play the stream again.
     /// Restrictions: None.
     /// Caution: When the upper limit of the cache interval set by the developer exceeds 4000ms, the value will be 4000ms. When the upper limit of the cache interval set by the developer is less than the lower limit of the cache interval, the upper limit will be automatically set as the lower limit.
     ///
@@ -1932,7 +1954,7 @@ class IZegoExpressEngine {
     ///
     /// Available since: 2.14.0
     /// Description: Whether the camera supports focusing.
-    /// Trigger: Called after turn on preview [startPreivew].
+    /// Trigger: Called after turn on preview [startPreview].
     /// Caution: Need to start the camera successfully.
     /// Note: This function is only available in ZegoExpressVideo SDK!
     ///
@@ -1946,7 +1968,7 @@ class IZegoExpressEngine {
     ///
     /// Available since: 2.14.0
     /// Description: Set the camera focus mode.
-    /// Trigger: Called after turn on preview [startPreivew].
+    /// Trigger: Called after turn on preview [startPreview].
     /// Restrictions: Currently only supports iOS and Android platforms.
     /// Note: This function is only available in ZegoExpressVideo SDK!
     ///
@@ -1961,7 +1983,7 @@ class IZegoExpressEngine {
     ///
     /// Available since: 2.14.0
     /// Description: Set the focus point in the preview view. (x, y) are the normalized coordinates in the preview view, that is, the ratio of the position of the focus point relative to the preview view and the width and height of the preview view. The upper left corner is (0, 0).
-    /// Trigger: Called after turn on preview [startPreivew].
+    /// Trigger: Called after turn on preview [startPreview].
     /// Restrictions: Currently only supports iOS and Android platforms.
     /// Caution: Every time the camera restarts the acquisition, the settings will become invalid and need to be reset.
     /// Note: This function is only available in ZegoExpressVideo SDK!
@@ -1979,7 +2001,7 @@ class IZegoExpressEngine {
     ///
     /// Available since: 2.14.0
     /// Description: Set the camera exposure mode.
-    /// Trigger: Called after turn on preview [startPreivew].
+    /// Trigger: Called after turn on preview [startPreview].
     /// Restrictions: Currently only supports iOS and Android platforms.
     /// Note: This function is only available in ZegoExpressVideo SDK!
     ///
@@ -1994,7 +2016,7 @@ class IZegoExpressEngine {
     ///
     /// Available since: 2.14.0
     /// Description: Set the exposure point in the preview view. (x, y) are the normalized coordinates in the preview view, that is, the ratio of the position of the exposure point relative to the preview view and the width and height of the preview view. The upper left corner is (0, 0).
-    /// Trigger: Called after turn on preview [startPreivew].
+    /// Trigger: Called after turn on preview [startPreview].
     /// Restrictions: Currently only supports iOS and Android platforms.
     /// Caution: Every time the camera restarts the acquisition, the settings will become invalid and need to be reset.
     /// Note: This function is only available in ZegoExpressVideo SDK!
@@ -2642,9 +2664,9 @@ class IZegoExpressEngine {
     ///
     /// Available since: 1.2.1
     /// Description: Send a broadcast message to the room, users who have entered the same room can receive the message, and the message is reliable.
-    /// Use cases: Generally used when the number of people in the live room does not exceed 500.
+    /// Use cases: Generally used in the live room.
     /// When to call: After calling [loginRoom] to log in to the room.
-    /// Restrictions: It is not supported when the number of people online in the room exceeds 500. If you need to increase the limit, please contact ZEGO technical support to apply for evaluation. The frequency of sending broadcast messages in the same room cannot be higher than 10 messages/s. The maximum QPS for a single user calling this interface from the client side is 2. For restrictions on the use of this function, please contact ZEGO technical support.
+    /// Restrictions: The frequency of sending broadcast messages in the same room cannot be higher than 10 messages/s. The maximum QPS for a single user calling this interface from the client side is 2. For restrictions on the use of this function, please contact ZEGO technical support.
     /// Related callbacks: The room broadcast message can be received through [onIMRecvBroadcastMessage].
     /// Related APIs: Barrage messages can be sent through the [sendBarrageMessage] function, and custom command can be sent through the [sendCustomCommand] function.
     ///
@@ -2681,10 +2703,10 @@ class IZegoExpressEngine {
     /// Sends a Custom Command to the specified users in the same room.
     ///
     /// Available since: 1.2.1
-    /// Description: After calling this function, users in the same room who have entered the room can receive the message, the message is unreliable.
-    /// Use cases: Generally used in scenarios where there is a large number of messages sent and received in the room and the reliability of the messages is not required, such as live barrage.
+    /// Description: Send point-to-point signaling to other users who have logged into the same room, and the message is reliable.
+    /// Use cases: Generally used for remote control signaling or message sending between users.
     /// When to call: After calling [loginRoom] to log in to the room.
-    /// Restrictions: Generally used when the number of people in the live room does not exceed 500.The frequency of sending barrage messages in the same room cannot be higher than 20 messages/s. For restrictions on the use of this function, please contact ZEGO technical support.
+    /// Restrictions: The frequency of sending barrage messages in the same room cannot be higher than 20 messages/s. For restrictions on the use of this function, please contact ZEGO technical support.
     /// Related callbacks: The room custom command can be received through [onIMRecvCustomCommand].
     /// Related APIs: Broadcast messages can be sent through the [sendBroadcastMessage] function, and barrage messages can be sent through the [sendBarrageMessage] function.
     /// Privacy reminder: Please do not fill in sensitive user information in this interface, including but not limited to mobile phone number, ID number, passport number, real name, etc.
@@ -2704,10 +2726,10 @@ class IZegoExpressEngine {
     /// Sends a transparent message in room.
     ///
     /// Available since: 1.2.1
-    /// Description: After calling this function, users in the same room who have entered the room can receive the message, the message is unreliable.
-    /// Use cases: It is generally used when the number of people in the live room is not more than 500. The frequency of custom messages sent to a single user in the same room cannot be higher than 200 /s .
+    /// Description: Send point-to-point signaling to other users who have logged into the same room.
+    /// Use cases: Generally used for remote control signaling or message sending between users.
     /// When to call: After calling [loginRoom] to log in to the room.
-    /// Restrictions: Generally used when the number of people in the live room does not exceed 500.The frequency of sending barrage messages in the same room cannot be higher than 20 messages/s. For restrictions on the use of this function, please contact ZEGO technical support.
+    /// Restrictions: The frequency of sending barrage messages in the same room cannot be higher than 20 messages/s. For restrictions on the use of this function, please contact ZEGO technical support.
     /// Related callbacks: When sending a message, Mode is specified for ZegoRoomTransparentMessageModeOnlyClient or ZegoRoomTransparentMessageModeClientAndServer can pass [onRecvRoomTransparentMessage] received sends the message content.
     /// Privacy reminder: Please do not fill in sensitive user information in this interface, including but not limited to mobile phone number, ID number, passport number, real name, etc.
     ///
@@ -3571,6 +3593,51 @@ class IZegoExpressEngine {
     /// @param source The screen capture source instance to be destroyed.
     virtual void destroyScreenCaptureSource(IZegoScreenCaptureSource *&source) = 0;
 
+    /// Set the App Group configuration item.
+    ///
+    /// Available since: 3.3.0
+    /// Use cases: You need to use the iOS cross-process screen sharing function, and you need to start the App Group, which can provide better performance and stability. Must be used with [setupWithAppGroupID:] in the `ZegoReplayKit` extension class.
+    /// When to call: Called after [createEngine], before calling [startScreenCapture].
+    /// Restrictions: Only available on iOS platform.
+    ///
+    /// @param groupID The host app and the extension app should belong to the same App Group, and the AppGroupID needs to be passed in here.
+    virtual void setAppGroupID(const std::string &groupID) = 0;
+
+    /// Start screen capture, in-app capture only.
+    ///
+    /// Available since: 3.1.0
+    /// Description: Start screen capture.
+    /// When to call: After calling the [setVideoSource]、[setAudioSource] function to set the capture source to `ScreenCapture`.
+    /// Restrictions: Only valid for iOS system
+    ///
+    /// @param config Screen capture parameter configuration.
+    virtual void startScreenCaptureInApp(ZegoScreenCaptureConfig config) = 0;
+
+    /// Start screen capture.
+    ///
+    /// Available since: 3.1.0
+    /// Description: Start screen capture.
+    /// When to call: After calling the [setVideoSource]、[setAudioSource] function to set the capture source to `ScreenCapture`.
+    ///
+    /// @param config Screen capture parameter configuration.
+    virtual void startScreenCapture(ZegoScreenCaptureConfig config) = 0;
+
+    /// Stop screen capture.
+    ///
+    /// Available since: 3.1.0
+    /// Description: Stop screen capture.
+    virtual void stopScreenCapture() = 0;
+
+    /// Update screen capture parameter configuration.
+    ///
+    /// Available since: 3.1.0
+    /// Description: Update screen capture parameter configuration.
+    /// When to call: After calling [startScreenCapture] to start capturing.
+    /// Restrictions: Only valid for iOS system. Only available on iOS 12.0 or newer
+    ///
+    /// @param config Screen capture parameter configuration.
+    virtual void updateScreenCaptureConfig(ZegoScreenCaptureConfig config) = 0;
+
     /// Creates an AI voice changer instance.
     ///
     /// Available since: 3.10.0
@@ -3601,6 +3668,27 @@ class IZegoExpressEngine {
     ///
     /// @return Return true if the device can run AI voice changer, otherwise return false.
     virtual bool isAIVoiceChangerSupported() = 0;
+
+    /// Create picture capturer instance.
+    ///
+    /// Available since: 3.22.0
+    /// Description: Creates a picture capturer instance.
+    /// Use case: Often used in pushing static images.
+    /// When to call: It can be called after the SDK by [createEngine] has been initialized.
+    /// Restrictions: None.
+    /// Related APIs: User can call [destroyPictureCapturer] function to destroy a picture capturer instance. Use [setVideoSource] to set the picture capturer as the push stream video source.
+    ///
+    /// @return Picture capturer instance.
+    virtual IZegoPictureCapturer *createPictureCapturer() = 0;
+
+    /// Destroys a picture capturer instance.
+    ///
+    /// Available since: 3.22.0
+    /// Description: Destroys the picture capturer instance.
+    /// Related APIs: User can call [createPictureCapturer] function to create a picture capturer instance.
+    ///
+    /// @param pictureCapturer The picture capturer instance to be destroyed.
+    virtual void destroyPictureCapturer(IZegoPictureCapturer *&pictureCapturer) = 0;
 };
 
 class IZegoRealTimeSequentialDataManager {
@@ -5708,7 +5796,7 @@ class IZegoScreenCaptureSource {
 
     /// Set whether to highlight the capture area
     ///
-    /// Available since: 3.20.0
+    /// Available since: 3.21.0
     /// Description: Set whether to highlight the capture area.
     /// When to call: It can be called after the engine by [createScreenCaptureSource] has been initialized.
     /// Restrictions: Only available on Windows/macOS.
@@ -5722,7 +5810,7 @@ class IZegoScreenCaptureSource {
     ///
     /// Available since: 3.13.0
     /// Description: Whether to collect the sound of the window process during window collection.
-    /// When to call: Before starting the collection [startScreencapture].
+    /// When to call: Before starting the collection [startScreencapture]. [setAudioSource] Set the acquisition source to ZegoAudioSourceTypeCustom, and the screen acquisition and streaming channels are the same.
     /// Restrictions: Only applicable to Windows 10 and above versions.
     ///
     /// @param enable Whether to collect sound. true for collection, false for no collection, default false.
@@ -5770,6 +5858,26 @@ class IZegoAIVoiceChanger {
     ///
     /// @param speakerID Speaker ID.
     virtual void setSpeaker(int speakerID) = 0;
+};
+
+class IZegoPictureCapturer {
+  protected:
+    virtual ~IZegoPictureCapturer() {}
+
+  public:
+    /// Set the path of the picture capturer source.
+    ///
+    /// Available since: 3.22.0
+    /// Description: Set the path of the picture capturer source.
+    /// Related APIs: User can call [createPictureCapturer] function to create a picture capturer instance.
+    ///
+    /// @param path The path of the picture.
+    virtual void setPath(const std::string &path) = 0;
+
+    /// Get picture capturer instance index.
+    ///
+    /// @return Picture capturer instance index.
+    virtual int getIndex() = 0;
 };
 
 } // namespace EXPRESS

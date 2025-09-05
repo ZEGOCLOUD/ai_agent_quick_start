@@ -439,6 +439,17 @@ class IZegoEventHandler {
     /// @param streamID Stream ID.
     virtual void onPlayerRecvAudioFirstFrame(const std::string & /*streamID*/) {}
 
+    /// The callback triggered when the first audio frame is received. Please do not call the SDK interface in the callback thread.
+    ///
+    /// Available since: 3.22.0
+    /// Description: After the [startPlayingStream] function is called successfully, this callback will be called when SDK received the first frame of audio data.
+    /// Use cases: Developer can use this callback to count time consuming that take the first frame time or update the UI for playing stream.
+    /// Trigger: This callback is triggered when SDK receives the first frame of audio data from the network.
+    /// Related callbacks: After a successful call to [startPlayingStream], the callback function [onPlayerSyncRecvVideoFirstFrame] determines whether the SDK has received the video data, and the callback [onPlayerSyncRecvRenderVideoFirstFrame] determines whether the SDK has rendered the first frame of the received video data.
+    ///
+    /// @param streamID Stream ID.
+    virtual void onPlayerSyncRecvAudioFirstFrame(const std::string & /*streamID*/) {}
+
     /// The callback triggered when the first video frame is received.
     ///
     /// Available since: 1.1.0
@@ -457,7 +468,7 @@ class IZegoEventHandler {
     /// Description: After the [startPlayingStream] function is called successfully, this callback will be called when SDK received the first frame of video data.
     /// Use cases: Developer can use this callback to count time consuming that take the first frame time.
     /// Trigger: This callback is triggered when SDK receives the first frame of video data from the network.
-    /// Related callbacks: After a successful call to [startPlayingStream], the callback function [onPlayerRecvAudioFirstFrame] determines whether the SDK has received the audio data, and the callback [onPlayerRenderVideoFirstFrame] determines whether the SDK has rendered the first frame of the received video data.
+    /// Related callbacks: After a successful call to [startPlayingStream], the callback function [onPlayerSyncRecvAudioFirstFrame] determines whether the SDK has received the audio data, and the callback [onPlayerSyncRecvRenderVideoFirstFrame] determines whether the SDK has rendered the first frame of the received video data.
     /// Note: This function is only available in ZegoExpressVideo SDK!
     ///
     /// @param streamID Stream ID.
@@ -474,6 +485,18 @@ class IZegoEventHandler {
     ///
     /// @param streamID Stream ID.
     virtual void onPlayerRenderVideoFirstFrame(const std::string & /*streamID*/) {}
+
+    /// The callback triggered when the first video frame is rendered. Please do not call the SDK interface in the callback thread.
+    ///
+    /// Available since: 3.22.0
+    /// Description: After the [startPlayingStream] function is called successfully, this callback will be called when SDK rendered the first frame of video data.
+    /// Use cases: Developer can use this callback to count time consuming that take the first frame time or update the UI for playing stream.
+    /// Trigger: This callback is triggered when SDK rendered the first frame of video data from the network.
+    /// Related callbacks: After a successful call to [startPlayingStream], the callback function [onPlayerSyncRecvAudioFirstFrame] determines whether the SDK has received the audio data, and the callback [onPlayerSyncRecvVideoFirstFrame] determines whether the SDK has received the video data.
+    /// Note: This function is only available in ZegoExpressVideo SDK!
+    ///
+    /// @param streamID Stream ID.
+    virtual void onPlayerSyncRecvRenderVideoFirstFrame(const std::string & /*streamID*/) {}
 
     /// Calls back when the stream playing end renders the first frame of the video from the remote camera.
     ///
@@ -857,7 +880,7 @@ class IZegoEventHandler {
     ///
     /// Available since: 1.2.1
     /// Description: This callback is used to receive broadcast messages sent by other users in the same room.
-    /// Use cases: Generally used when the number of people in the live room does not exceed 500
+    /// Use cases: Generally used in the live room.
     /// When to trigger: After calling [loginRoom] to log in to the room, if a user in the room sends a broadcast message via [sendBroadcastMessage] function, this callback will be triggered.
     /// Restrictions: None
     /// Caution: The broadcast message sent by the user will not be notified through this callback.
@@ -887,7 +910,7 @@ class IZegoEventHandler {
     ///
     /// Available since: 1.2.1
     /// Description: This callback is used to receive custom command sent by other users in the same room.
-    /// Use cases: Generally used when the number of people in the live room does not exceed 500
+    /// Use cases: Generally used in the live room.
     /// When to trigger: After calling [loginRoom] to log in to the room, if other users in the room send custom signaling to the developer through the [sendCustomCommand] function, this callback will be triggered.
     /// Restrictions: None
     /// Caution: The custom command sent by the user himself will not be notified through this callback.
@@ -1027,6 +1050,27 @@ class IZegoEventHandler {
     ///
     /// @param errorCode Error code.
     virtual void onUploadDumpData(int /*errorCode*/) {}
+
+    /// The callback triggered when a screen capture source exception occurred.
+    ///
+    /// Available since: 3.6.0
+    /// Description: The callback triggered when the mobile screen capture source exception occurred.
+    /// Trigger: This callback is triggered when an exception occurs after the mobile screen capture started.
+    /// Caution: The callback does not actually take effect until call [setEventHandler] to set.
+    /// Restrictions: Only available on Android and iOS.
+    ///
+    /// @param exceptionType Screen capture exception type.
+    virtual void
+    onScreenCaptureExceptionOccurred(ZegoScreenCaptureExceptionType /*exceptionType*/) {}
+
+    /// The callback triggered when start screen capture.
+    ///
+    /// Available since: 3.16.0
+    /// Description: The callback triggered when calling the start mobile screen capture.
+    /// Trigger: After calling [startScreenCapture], this callback will be triggered when starting screen capture successfully, and [onScreenCaptureExceptionOccurred] will be triggered when failing.
+    /// Caution: The callback does not actually take effect until call [setEventHandler] to set.
+    /// Restrictions: Only available on Android and iOS.
+    virtual void onScreenCaptureStart() {}
 };
 
 class IZegoApiCalledEventHandler {
@@ -1593,7 +1637,7 @@ class IZegoCustomAudioProcessHandler {
     ///
     /// Available: Since 2.13.0
     /// Description: In this callback, you can receive the PCM audio frames captured locally after used headphone monitor. Developers can modify the audio frame data, as well as the audio channels and sample rate. The timestamp can be used for data synchronization, such as lyrics, etc. If you need the data after used headphone monitor, please use the [onProcessCapturedAudioDataAfterUsedHeadphoneMonitor] callback.
-    /// When to trigger: You need to call [enableCustomAudioCaptureProcessing] to enable the function first, and call [startPreivew] or [startPublishingStream] to trigger this callback function.
+    /// When to trigger: You need to call [enableCustomAudioCaptureProcessing] to enable the function first, and call [startPreview] or [startPublishingStream] to trigger this callback function.
     /// Restrictions: None.
     /// Caution: This callback is a high-frequency callback, please do not perform time-consuming operations in this callback.
     ///
@@ -1610,7 +1654,7 @@ class IZegoCustomAudioProcessHandler {
     ///
     /// Available: Since 2.13.0
     /// Description: In this callback, you can receive the PCM audio frames captured locally after used headphone monitor. Developers can modify the audio frame data, as well as the audio channels and sample rate. The timestamp can be used for data synchronization, such as lyrics, etc.
-    /// When to trigger: You need to call [enableCustomAudioCaptureProcessingAfterHeadphoneMonitor] to enable the function first, and call [startPreivew] or [startPublishingStream] to trigger this callback function.
+    /// When to trigger: You need to call [enableCustomAudioCaptureProcessingAfterHeadphoneMonitor] to enable the function first, and call [startPreview] or [startPublishingStream] to trigger this callback function.
     /// Caution: This callback is a high-frequency callback, please do not perform time-consuming operations in this callback.
     ///
     /// @param data Audio data in PCM format
@@ -1694,7 +1738,7 @@ class IZegoAudioDataHandler {
     ///
     /// Available: Since 1.1.0
     /// Description: This function will callback all the mixed audio data to be playback. This callback can be used for that you needs to fetch all the mixed audio data to be playback to proccess.
-    /// When to trigger: On the premise of calling [setAudioDataHandler] to set the listener callback, after calling [startAudioDataObserver] to set the mask 0b10 that means 1 << 1, this callback will be triggered only when it is in the SDK inner audio and video engine started(called the [startPreivew] or [startPlayingStream] or [startPublishingStream]).
+    /// When to trigger: On the premise of calling [setAudioDataHandler] to set the listener callback, after calling [startAudioDataObserver] to set the mask 0b10 that means 1 << 1, this callback will be triggered only when it is in the SDK inner audio and video engine started(called the [startPreview] or [startPlayingStream] or [startPublishingStream]).
     /// Restrictions: When playing copyrighted music, this callback will be disabled by default. If necessary, please contact ZEGO technical support.
     /// Caution: This callback is a high-frequency callback. Please do not perform time-consuming operations in this callback. When the engine is not in the stream publishing state and the media player is not used to play media files, the audio data in the callback is muted audio data.
     ///
@@ -2123,6 +2167,22 @@ class IZegoScreenCaptureSourceEventHandler {
     /// @param exceptionType Capture source exception type.
     virtual void onExceptionOccurred(IZegoScreenCaptureSource * /*source*/,
                                      ZegoScreenCaptureSourceExceptionType /*exceptionType*/) {}
+
+    /// The callback triggered when a screen capture source capture type exception occurred
+    ///
+    /// Available since: 3.21.0
+    /// Description: The callback triggered when a screen capture source capture type exception occurred.
+    /// Trigger: This callback is triggered when an exception occurs after the screen start capture.
+    /// Caution: The callback does not actually take effect until call [setEventHandler] to set.
+    /// Restrictions: Only available on Windows/macOS.
+    ///
+    /// @param source Callback screen capture source object.
+    /// @param sourceType Capture source type.
+    /// @param exceptionType Capture source exception type.
+    virtual void
+    onCaptureTypeExceptionOccurred(IZegoScreenCaptureSource * /*source*/,
+                                   ZegoScreenCaptureSourceType /*sourceType*/,
+                                   ZegoScreenCaptureSourceExceptionType /*exceptionType*/) {}
 
     /// The callback will be triggered when the state of the capture target window change.
     ///
