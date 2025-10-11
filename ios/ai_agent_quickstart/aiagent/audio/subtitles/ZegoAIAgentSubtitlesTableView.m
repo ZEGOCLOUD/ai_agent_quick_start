@@ -15,7 +15,7 @@
 @interface ZegoAIAgentSubtitlesTableView ()<UITableViewDataSource, UITableViewDelegate>
 @property (nonatomic, strong) NSMutableArray<ZegoAIAgentSubtitlesMessageModel*>* chatMsgList;                       // 存储所有聊天消息的有序数组
 @property (nonatomic, strong) NSMutableDictionary<NSString*,ZegoAIAgentSubtitlesMessageModel*>* tempAsrMsgList;    // 临时存储ASR(语音识别)消息的字典，键为message_id
-@property (nonatomic, strong) NSMutableDictionary<NSNumber*,NSMutableDictionary<NSNumber*, ZegoAIAgentSubtitlesMessageModel*>*>* tempLLMMsgList;  // 临时存储LLM(大语言模型)消息的嵌套字典，外层键为message_id，内层键为round id
+@property (nonatomic, strong) NSMutableDictionary<NSNumber*,NSMutableDictionary<NSNumber*, ZegoAIAgentSubtitlesMessageModel*>*>* tempLLMMsgList;  // 临时存储LLM(大语言模型)消息的嵌套字典，外层键为round id，内层键为seq id
 @property (nonatomic, strong) NSMutableOrderedSet<NSNumber*>* roundEndFlag;
 
 @end
