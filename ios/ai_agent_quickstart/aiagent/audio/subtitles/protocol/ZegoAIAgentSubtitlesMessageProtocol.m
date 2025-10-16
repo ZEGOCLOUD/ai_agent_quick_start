@@ -161,6 +161,7 @@
     self = [super init];
     if (self) {
         _timestamp = 0;
+        _timestampms = 0;
         _seqId = 0;
         _round = 0;
         _cmdType = 0;
@@ -174,6 +175,10 @@
     if (self) {
         if (jsonDict[@"Timestamp"]) {
             _timestamp = [jsonDict[@"Timestamp"] longLongValue];
+        }
+        
+        if (jsonDict[@"TimestampMs"]) {
+            _timestampms = [jsonDict[@"TimestampMs"] longLongValue];
         }
         
         if (jsonDict[@"SeqId"]) {

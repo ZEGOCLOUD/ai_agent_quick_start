@@ -43,9 +43,9 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * 接收到元数据消息
  * @param metadata 元数据字典，包含所有key-value键值对
- * @param timestamp 时间戳(秒)
+ * @param timestampMs 时间戳(毫秒)
  */
-- (void)onRecvMetaDataMsg:(NSDictionary *)metadata timestamp:(int64_t)timestamp;
+- (void)onRecvMetaDataMsg:(NSDictionary *)metadata timestampMs:(int64_t)timestampMs;
 
 /**
  * 接收到Express实验性API内容

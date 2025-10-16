@@ -121,6 +121,7 @@
     int64_t seqId = messageProtocol.seqId;
     int64_t round = messageProtocol.round;
     int64_t timeStamp = messageProtocol.timestamp;
+    int64_t timeStampMs = messageProtocol.timestampms;
     
     ZegoAIAgentAudioSubtitlesMessage* cmdMsg = [[ZegoAIAgentAudioSubtitlesMessage alloc] init];
     cmdMsg.cmd = (int)cmd;
@@ -213,10 +214,10 @@
         if(messageProtocol.metaData) {
             NSDictionary* metadata = messageProtocol.metaData.metadata;
             
-            NSLog(@"recvmetadata userID=%@, userName=%@, cmd=%d, seqId=%llu, round=%llu, timeStamp=%llu, metadata=%@",
-                    userID, userName, (int)cmd, seqId, round, timeStamp, metadata);
+            NSLog(@"recvmetadata userID=%@, userName=%@, cmd=%d, seqId=%llu, round=%llu, timeStamp=%llu, timeStampMs=%llu, metadata=%@",
+                    userID, userName, (int)cmd, seqId, round, timeStamp, timeStampMs, metadata);
             
-            [self dispatchMetaDataMsg:metadata timestamp:timeStamp];
+            [self dispatchMetaDataMsg:metadata timestampMs:timeStampMs];
         }
     }
 }
@@ -279,11 +280,11 @@
     }
 }
 
-- (void)dispatchMetaDataMsg:(NSDictionary *)metadata timestamp:(int64_t)timestamp {
+- (void)dispatchMetaDataMsg:(NSDictionary *)metadata timestampMs:(int64_t)timestampMs {
     @synchronized (self.eventHandlers) {
         for (id<ZegoAIAgentSubtitlesEventHandler> handler in self.eventHandlers) {
-            if ([handler respondsToSelector:@selector(onRecvMetaDataMsg:timestamp:)]) {
-                [handler onRecvMetaDataMsg:metadata timestamp:timestamp];
+            if ([handler respondsToSelector:@selector(onRecvMetaDataMsg:timestampMs:)]) {
+                [handler onRecvMetaDataMsg:metadata timestampMs:timestampMs];
             }
         }
     }

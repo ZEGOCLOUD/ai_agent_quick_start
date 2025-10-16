@@ -326,14 +326,24 @@
         [rootVC.view addSubview:toastLabel];
         
         // 计算位置 - 根据当前toast数量堆叠显示
-        CGFloat topOffset = 80 + (self.toastCount * 44);
-        CGSize textSize = [message sizeWithAttributes:@{NSFontAttributeName: toastLabel.font}];
-        CGFloat width = MIN(textSize.width + 32, [UIScreen mainScreen].bounds.size.width - 80);
+        CGFloat maxWidth = [UIScreen mainScreen].bounds.size.width - 40; // 左右各留20边距
+        CGSize maxSize = CGSizeMake(maxWidth, CGFLOAT_MAX);
+        
+        // 计算多行文本的实际大小
+        CGRect textRect = [message boundingRectWithSize:maxSize
+                                                options:(NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading)
+                                             attributes:@{NSFontAttributeName: toastLabel.font}
+                                                context:nil];
+        
+        CGFloat width = MIN(ceil(textRect.size.width) + 32, maxWidth);
+        CGFloat height = ceil(textRect.size.height) + 24; // 上下各留12边距
+        
+        CGFloat topOffset = 80 + (self.toastCount * (height + 10));
         
         toastLabel.frame = CGRectMake(([UIScreen mainScreen].bounds.size.width - width) / 2,
                                       topOffset,
                                       width,
-                                      36);
+                                      height);
         toastLabel.alpha = 0;
         
         // 保存window引用
@@ -371,14 +381,21 @@
     [self.subtitlesTableView handleRecvLLMMessage:message];
 }
 
-- (void)onRecvMetaDataMsg:(NSDictionary *)metadata timestamp:(int64_t)timestamp {
-    NSLog(@"📢 收到元数据消息 - metadata: %@, timestamp: %lld", metadata, timestamp);
+- (void)onRecvMetaDataMsg:(NSDictionary *)metadata timestampMs:(int64_t)timestampMs {
+    NSLog(@"📢 收到元数据消息 - metadata: %@, timestampMs: %lld", metadata, timestampMs);
     
-    // 格式化时间戳
-    NSDate *date = [NSDate dateWithTimeIntervalSince1970:timestamp];
-    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    NSString *formattedTime = [formatter stringFromDate:date];
+    // 获取本地时间戳（毫秒）
+    int64_t localTimestampMs = (int64_t)([[NSDate date] timeIntervalSince1970] * 1000);
+    
+    // timestampMs 参数是毫秒时间戳（发送时间）
+    int64_t sendTimestampMs = timestampMs;
+    
+    // 计算延迟
+    int64_t delay = localTimestampMs - sendTimestampMs;
+    
+    // 格式化时间戳为 HH:mm:ss.SSS 格式
+    NSString *sendTimeStr = [self formatTimestampMs:sendTimestampMs];
+    NSString *recvTimeStr = [self formatTimestampMs:localTimestampMs];
     
     // 格式化metadata字典为 key:value; 格式
     NSMutableString *metadataStr = [NSMutableString string];
@@ -389,9 +406,23 @@
         [metadataStr appendFormat:@"%@:%@", key, obj];
     }];
     
-    // 显示toast
-    NSString *message = [NSString stringWithFormat:@"%@\nTimestamp: %@", metadataStr, formattedTime];
+    // 显示toast，包含metadata和三行时间信息
+    NSString *message = [NSString stringWithFormat:@"%@\nsendTime: %@\nrecieveTime: %@\ndelay: %lldms", 
+                        metadataStr, sendTimeStr, recvTimeStr, delay];
     [self showToast:message];
+}
+
+// 格式化毫秒时间戳为 HH:mm:ss.SSS 格式
+- (NSString *)formatTimestampMs:(int64_t)timestampMs {
+    NSDate *date = [NSDate dateWithTimeIntervalSince1970:timestampMs / 1000.0];
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"HH:mm:ss"];
+    NSString *timeStr = [formatter stringFromDate:date];
+    
+    // 获取毫秒部分
+    int milliseconds = (int)(timestampMs % 1000);
+    
+    return [NSString stringWithFormat:@"%@.%03d", timeStr, milliseconds];
 }
 
 #pragma mark - ZegoAIAgentAudioEventHandler
@@ -400,6 +431,7 @@
 // 比如用户说话状态、机器人说话状态、ASR识别的文本、大模型回答的文本。客户端监听房间自定义消息，解析对应的状态事件来渲染UI
 - (void)onRecvExperimentalAPI:(NSString *)content {
     // 处理实验性API消息，转发给字幕消息分发器
+    NSLog(@"onRecvExperimentalAPI - content: %@", content);
     [[ZegoAIAgentSubtitlesMessageDispatcher sharedInstance] handleExpressExperimentalAPIContent:content];
 }
 

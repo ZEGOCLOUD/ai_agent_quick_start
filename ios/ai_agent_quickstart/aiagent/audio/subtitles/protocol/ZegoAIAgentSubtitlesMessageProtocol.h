@@ -165,6 +165,9 @@ typedef NS_ENUM(NSInteger, ZegoAIAgentSubtitlesSpeakStatus) {
 /** 时间戳(秒)，消息产生的时间 */
 @property (nonatomic, assign) int64_t timestamp;
 
+/** 时间戳(豪秒)，消息产生的时间 */
+@property (nonatomic, assign) int64_t timestampms;
+
 /** 包序列号，保证消息处理的有序性(不保证连续) */
 @property (nonatomic, assign) int64_t seqId;
 
