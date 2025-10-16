@@ -1,8 +1,8 @@
 platform :ios, '13.0'
 
 target 'ai_agent_quickstart' do
-  # 使用 use_frameworks! 确保生成动态框架
-  use_frameworks!
+  # 使用静态链接的框架，避免 Archive 分发问题
+  use_frameworks! :linkage => :static
   
   # 添加 modular_headers
   use_modular_headers!
@@ -44,6 +44,9 @@ post_install do |installer|
       
       # 禁用沙盒化以解决文件访问权限问题
       config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
+      
+      # 确保所有 Pods targets 都不被安装到 Archive 中
+      config.build_settings['SKIP_INSTALL'] = 'YES'
     end
   end
   
