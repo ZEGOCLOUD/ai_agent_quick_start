@@ -1,10 +1,13 @@
 package im.zego.aiagent.express.quickstart.voice;
 
 import android.Manifest;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -34,8 +37,11 @@ import im.zego.zegoexpress.entity.ZegoEngineProfile;
 import im.zego.zegoexpress.entity.ZegoRoomConfig;
 import im.zego.zegoexpress.entity.ZegoUser;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -312,6 +318,35 @@ public class VoiceChatActivity extends AppCompatActivity {
 
                         // 假设 AudioChatTextMessage 有构造函数或方法来解析 JSON 字符串
                         audioChatMessageParser.parseAudioChatMessage(msgContent);
+
+                        try {
+                            // 创建 JSONObject
+                            JSONObject jsonObject = new JSONObject(msgContent);
+
+                            // 获取 Data 字段
+                            int cmd = jsonObject.getInt("Cmd");
+                            if (cmd == 102) {
+                                JSONObject dataObject = jsonObject.getJSONObject("Data");
+                                long timestampMs = jsonObject.getLong("TimestampMs");
+                                // 设置时间格式为 HH:mm:ss.SSS（小时:分钟:秒.毫秒）
+                                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS", Locale.getDefault());
+                                // 格式化时间
+                                String sendTime = sdf.format(new Date(timestampMs));
+                                String currentTime = sdf.format(new Date(System.currentTimeMillis()));
+                                long elapsed = System.currentTimeMillis() - timestampMs;
+
+                                String toastString = dataObject + "\n" +
+                                    "sendTime:" + sendTime + "\n" +
+                                    "receiveTime:" + currentTime + "\n" +
+                                    "delay:" + elapsed;
+
+                                showMultiLineToast(VoiceChatActivity.this, toastString, Toast.LENGTH_SHORT);
+                                //                                Toast.makeText(VoiceChatActivity.this, toastString, Toast.LENGTH_SHORT).show();
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -416,5 +451,31 @@ public class VoiceChatActivity extends AppCompatActivity {
             ZegoExpressEngine.getEngine().setEventHandler(null);
             ZegoExpressEngine.destroyEngine(null);
         }
+    }
+
+    public static void showMultiLineToast(Context context, String message, int duration) {
+        // 创建自定义 Toast
+        Toast toast = new Toast(context);
+
+        // 使用 LayoutInflater 加载自定义布局
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View layout = inflater.inflate(android.R.layout.simple_list_item_1, null);
+
+        // 获取 TextView 并设置多行文本
+        TextView textView = layout.findViewById(android.R.id.text1);
+        textView.setText(message);
+        textView.setTextSize(14);
+        textView.setSingleLine(false); // 允许多行
+        textView.setMaxLines(Integer.MAX_VALUE); // 不限制行数
+        textView.setBackgroundColor(Color.parseColor("#FF333333"));
+        textView.setTextColor(Color.WHITE);
+
+        // 设置 Toast 的视图和属性
+        toast.setView(layout);
+        toast.setDuration(duration);
+        toast.setGravity(Gravity.CENTER, 0, 0); // 可选：设置显示位置
+
+        // 显示 Toast
+        toast.show();
     }
 }

@@ -5,8 +5,8 @@ import im.zego.aiagent.express.quickstart.util.StringUtil;
 public class Constant {
 
     // 需要接入方填入
-    public static final long appId = ;  // 这个需要在即构控制台申请
-    public static final String BASE_URL = ;  // 你部署的业务后台地址
+    public static final long appId = 1698971106;  // 这个需要在即构控制台申请
+    public static final String BASE_URL = "https://ai-agent-quick-start-server.netlify.app";  // 你部署的业务后台地址
 
 
     // 固定字符串

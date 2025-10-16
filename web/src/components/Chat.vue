@@ -72,13 +72,26 @@
             </el-collapse-item>
           </el-collapse>
         </div>
+        <div class="command-container">
+          <el-collapse v-model="activeCollapse">
+            <el-collapse-item title="自定义消息" name="custom">
+              <div class="custom-message-box" ref="customMessageBoxRef">
+                <div class="custom-message" v-for="(msg, index) in customMessages" :key="index">
+                  <div v-for="(value, key) in msg" :key="key">
+                    {{key}}: {{value}}
+                  </div>
+                </div>
+              </div>
+            </el-collapse-item>
+          </el-collapse>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch, nextTick } from "vue";
 import ChatMessage from "./ChatMessage.vue";
 import RemoteSteamView from "./RemoteSteamView.vue";
 import { useChat } from "../hooks/useChat";
@@ -98,6 +111,7 @@ const {
 } = useRoom();
 const {
   messages,
+  customMessages,
   setupEventListeners: setupChatEventListeners,
   clearMessages,
 } = useChat(zg);
@@ -116,9 +130,19 @@ const userStreamId = ref(randomId("stream_user_"));
 // 状态管理
 const loading = ref(false);
 const digitalHumanLoading = ref(false);
-const activeCollapse = ref(["chat"]);
+const activeCollapse = ref(["chat", "custom"]);
 const isDigitalHuman = ref(false);
 let agentInstanceId = ref("");
+const customMessageBoxRef = ref<HTMLElement | null>(null);
+
+// 监听customMessages变化，自动滚动到底部
+watch(() => customMessages.value.length, () => {
+  nextTick(() => {
+    if (customMessageBoxRef.value) {
+      customMessageBoxRef.value.scrollTop = customMessageBoxRef.value.scrollHeight;
+    }
+  });
+});
 
 // 处理登录房间
 const handleLogin = async (type: "normal" | "digitalHuman") => {
@@ -221,7 +245,7 @@ onMounted(async () => {
 }
 
 .voice-chat-section {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -320,23 +344,35 @@ onMounted(async () => {
 }
 .room-container {
   display: flex;
+  padding: 0 20px;
 }
 .stream-container {
-  padding: 0 0 0 20px;
+  padding: 0 20px 0 0 ;
+}
+.command-container {
+  width: 200px;
 }
 
 .chat-container {
-  padding: 0 20px;
+  padding: 0 20px 0 0;
   flex: 1;
 }
 
-.chat-section {
+.chat-section, .custom-message-box {
   flex: 1;
   border-top: 1px solid #e4e7ed;
   display: flex;
   flex-direction: column;
   height: calc(100vh - 500px);
   overflow: hidden;
+}
+.custom-message-box {
+  overflow: scroll;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+.custom-message {
+  margin-bottom: 8px;
 }
 /* 移动端适配 */
 @media screen and (max-width: 768px) {
