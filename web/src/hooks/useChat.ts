@@ -217,6 +217,7 @@ export function useChat(zg: ExpressManager) {
 
   function clearMessages() {
     messages.value = [];
+    customMessages.value = [];
     agentMsgMap = {};
     userMsgMap = {};
   }
