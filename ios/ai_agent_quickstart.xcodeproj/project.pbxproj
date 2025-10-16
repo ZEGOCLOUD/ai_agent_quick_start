@@ -290,6 +290,7 @@
 				410B35062DA7CE0A00CFA563 /* Resources */,
 				07223FD6C1516011AE4FCB37 /* [CP] Embed Pods Frameworks */,
 				41868CA02E0D321D009F9692 /* Embed Frameworks */,
+				166E5255441C872A54E98748 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -355,17 +356,30 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
-			outputPaths = (
-			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		166E5255441C872A54E98748 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		8C6939A73D4A8B4678166915 /* [CP] Check Pods Manifest.lock */ = {
@@ -569,17 +583,19 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ai_agent_quickstart/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要访问麦克风以进行语音聊天";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "im.zego.aiagent.quickstart.ai-agent-quickstart";
+				PRODUCT_BUNDLE_IDENTIFIER = im.zego.aiagent.quickstart;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -598,17 +614,19 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ai_agent_quickstart/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要访问麦克风以进行语音聊天";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "im.zego.aiagent.quickstart.ai-agent-quickstart";
+				PRODUCT_BUNDLE_IDENTIFIER = im.zego.aiagent.quickstart;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
