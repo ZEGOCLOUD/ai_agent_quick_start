@@ -15,7 +15,7 @@ interface RoomMessage {
   SeqId: number;
   Round: number;
   Cmd: number;
-  Data: MessageData;
+  Data: MessageData | any;
 }
 
 export interface Message {
@@ -27,11 +27,16 @@ export interface Message {
   round: number;
 }
 
+export interface CustomMessage {
+  [key: string]: any;
+}
+
 export function useChat(zg: ExpressManager) {
   // 状态管理
   const messages = ref<Message[]>([]);
   let agentMsgMap: Record<string, Message[]> = {};
   let userMsgMap: Record<string, Message[]> = {};
+  const customMessages = ref<CustomMessage[]>([]);
 
   /**
    * 处理房间命令消息
@@ -39,18 +44,20 @@ export function useChat(zg: ExpressManager) {
    */
   function handleRoomCommandMessage(msg: RoomMessage) {
 
-    const { Cmd, SeqId, Data, Round } = msg;
+    const { Cmd, SeqId, Data, Round, Timestamp } = msg;
 
     switch (Cmd) {
-
       // 用户说话文本处理
       case 3:
         handleUserMessage(SeqId, Data, Round);
         break;
-
       // 智能体说话文本处理
       case 4:
         handleAgentMessage(SeqId, Data, Round);
+        break;
+      // 客户自定义信息处理
+      case 102: 
+        handleCustomMessage(SeqId, Data, Round, Timestamp);
         break;
 
       default:
@@ -141,6 +148,21 @@ export function useChat(zg: ExpressManager) {
     }
   }
 
+  // 处理自定义消息
+  function handleCustomMessage(seqId: number, data: any, round: number, timestamp: number) {
+    logger.debug('CHAT', '客户自定义消息', { seqId, text: data, round, timestamp });
+    // 遍历data对象并打印key和value
+    const obj: Record<string, any> = {};
+    for (const [key, value] of Object.entries(data)) {
+      obj[key] = value;
+    }
+    // 创建Date对象，并根据中国时区（UTC+8）调整时间
+    const date = new Date(timestamp * 1000);
+    const chinaTime = new Date(date.getTime() + (8 * 60 * 60 * 1000));
+    obj.time = chinaTime;
+    customMessages.value.push(obj);
+  }
+
   /**
    * 设置事件监听
    */
@@ -201,6 +223,7 @@ export function useChat(zg: ExpressManager) {
 
   return {
     messages,
+    customMessages,
     setupEventListeners,
     clearMessages,
   };
