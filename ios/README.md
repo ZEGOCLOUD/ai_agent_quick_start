@@ -8,6 +8,8 @@ ZEGO 实时互动 AI Agent（下文简称"互动AI"或"AI Agent"），通过接�
 
 本文介绍如何跑通 iOS 平台的示例代码，连接到 AI Agent 测试业务服务，实现与数字人进行语音对话。
 
+⚠️ 在运行客户端前，请先启动[您的业务后台](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server/tree/main)，分支需和客户端匹配
+
 ## 前提条件
 
 - 已在 [ZEGO 控制台](https://console.zego.im/) 创建项目，并申请有效的 AppID 和 AppSign，详情请参考 [控制台 - 项目信息](https://doc-zh.zego.im/article/12107)。
