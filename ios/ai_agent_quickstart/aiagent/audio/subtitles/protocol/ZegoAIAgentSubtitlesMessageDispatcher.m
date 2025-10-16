@@ -208,6 +208,16 @@
                 [self dispatchChatStateChange:    SubtitlesSessionState_AI_LISTEN];
             }
         }
+    } else if(cmd == ZegoAgentMessageCmdMetaData) {
+        // 收到元数据，更新信息
+        if(messageProtocol.metaData) {
+            NSDictionary* metadata = messageProtocol.metaData.metadata;
+            
+            NSLog(@"recvmetadata userID=%@, userName=%@, cmd=%d, seqId=%llu, round=%llu, timeStamp=%llu, metadata=%@",
+                    userID, userName, (int)cmd, seqId, round, timeStamp, metadata);
+            
+            [self dispatchMetaDataMsg:metadata timestamp:timeStamp];
+        }
     }
 }
 
@@ -264,6 +274,16 @@
         for (id<ZegoAIAgentSubtitlesEventHandler> handler in self.eventHandlers) {
             if ([handler respondsToSelector:@selector(onRecvLLMChatMsg:)]) {
                 [handler onRecvLLMChatMsg:message];
+            }
+        }
+    }
+}
+
+- (void)dispatchMetaDataMsg:(NSDictionary *)metadata timestamp:(int64_t)timestamp {
+    @synchronized (self.eventHandlers) {
+        for (id<ZegoAIAgentSubtitlesEventHandler> handler in self.eventHandlers) {
+            if ([handler respondsToSelector:@selector(onRecvMetaDataMsg:timestamp:)]) {
+                [handler onRecvMetaDataMsg:metadata timestamp:timestamp];
             }
         }
     }

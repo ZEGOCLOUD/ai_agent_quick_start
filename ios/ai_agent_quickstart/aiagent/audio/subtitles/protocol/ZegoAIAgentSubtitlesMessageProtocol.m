@@ -119,6 +119,34 @@
 
 @end
 
+#pragma mark - ZegoAgentMetaData
+
+@implementation ZegoAIAgentSubtitlesMetaData
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        _metadata = @{};
+    }
+    return self;
+}
+
+- (instancetype)initWithDictionary:(NSDictionary *)dict {
+    self = [self init];
+    
+    if (self) {
+        // 直接存储整个字典，不进行特定字段解析
+        _metadata = dict ?: @{};
+    }
+    return self;
+}
+
+- (NSDictionary *)toDictionary {
+    return self.metadata ?: @{};
+}
+
+@end
+
 #pragma mark - ZegoAgentMessageContent
 
 @implementation ZegoAIAgentSubtitlesMessageProtocol {
@@ -126,6 +154,7 @@
     ZegoAIAgentSubtitlesSpeakStatusData *_agentSpeakData;
     ZegoAIAgentSubtitlesASRTextData *_asrTextData;
     ZegoAIAgentSubtitlesLLMTextData *_llmTextData;
+    ZegoAIAgentSubtitlesMetaData *_metaData;
 }
 
 - (instancetype)init {
@@ -186,6 +215,10 @@
             _llmTextData = [[ZegoAIAgentSubtitlesLLMTextData alloc] initWithDictionary:_data];
             break;
             
+        case ZegoAgentMessageCmdMetaData:
+            _metaData = [[ZegoAIAgentSubtitlesMetaData alloc] initWithDictionary:_data];
+            break;
+            
         default:
             break;
     }
@@ -233,6 +266,14 @@
         case ZegoAgentMessageCmdLLMText:
             if (_llmTextData) {
                 dict[@"Data"] = [_llmTextData toDictionary];
+            } else {
+                dict[@"Data"] = @{};
+            }
+            break;
+            
+        case ZegoAgentMessageCmdMetaData:
+            if (_metaData) {
+                dict[@"Data"] = [_metaData toDictionary];
             } else {
                 dict[@"Data"] = @{};
             }

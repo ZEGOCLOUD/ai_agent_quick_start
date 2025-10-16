@@ -41,6 +41,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)onRecvLLMChatMsg:(ZegoAIAgentAudioSubtitlesMessage*)message;
 
 /**
+ * 接收到元数据消息
+ * @param metadata 元数据字典，包含所有key-value键值对
+ * @param timestamp 时间戳(秒)
+ */
+- (void)onRecvMetaDataMsg:(NSDictionary *)metadata timestamp:(int64_t)timestamp;
+
+/**
  * 接收到Express实验性API内容
  * @param content API内容
  */

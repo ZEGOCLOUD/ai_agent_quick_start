@@ -10,6 +10,7 @@ target 'ai_agent_quickstart' do
   # 修改路径到正确的 podspec 位置
   pod 'ZegoExpressEngine', :path => 'libs/Express'
   pod 'Masonry', '1.1.0'
+  pod 'Toast', '~> 4.1.0'  # Toast 提示库
 end
 
 # 添加 post_install 钩子来处理权限问题

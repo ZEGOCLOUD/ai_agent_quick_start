@@ -23,6 +23,8 @@
 @property (nonatomic, assign) BOOL subtitlesExpanded;
 @property (nonatomic, strong) UILabel *tipLabel;
 @property (nonatomic, strong) UIActivityIndicatorView *loginLogoutLoading;
+@property (nonatomic, strong) NSMutableArray<UIWindow *> *toastWindows;
+@property (nonatomic, assign) NSInteger toastCount;
 
 @end
 
@@ -33,6 +35,8 @@
     self.view.backgroundColor = [UIColor whiteColor];
     self.isLoggedIn = NO;
     self.subtitlesExpanded = YES; // 默认展开字幕
+    self.toastWindows = [NSMutableArray array];
+    self.toastCount = 0;
 
     [self setupUI];
 
@@ -276,16 +280,84 @@
 }
 
 - (void)showToast:(NSString *)message {
+    if (!message || message.length == 0) {
+        NSLog(@"❌ 消息为空，取消显示");
+        return;
+    }
+    
     dispatch_async(dispatch_get_main_queue(), ^{
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:nil
-                                                                     message:message
-                                                              preferredStyle:UIAlertControllerStyleAlert];
+        NSLog(@"✅ 开始创建toast window...");
+        // 创建独立的window来显示toast
+        UIWindow *toastWindow = nil;
         
-        [self presentViewController:alert animated:YES completion:^{
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                [alert dismissViewControllerAnimated:YES completion:nil];
-            });
+        // iOS 13+ 需要设置 windowScene
+        if (@available(iOS 13.0, *)) {
+            UIWindowScene *windowScene = (UIWindowScene *)[UIApplication sharedApplication].connectedScenes.allObjects.firstObject;
+            if (windowScene) {
+                toastWindow = [[UIWindow alloc] initWithWindowScene:windowScene];
+            } else {
+                toastWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+            }
+        } else {
+            toastWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+        }
+        
+        toastWindow.frame = [UIScreen mainScreen].bounds;
+        toastWindow.windowLevel = UIWindowLevelAlert + 1000 + self.toastCount; // 确保在最上层
+        toastWindow.backgroundColor = [UIColor clearColor];
+        toastWindow.userInteractionEnabled = NO; // 不拦截触摸事件
+        
+        // 创建根视图控制器（iOS 13+ 必需）
+        UIViewController *rootVC = [[UIViewController alloc] init];
+        rootVC.view.backgroundColor = [UIColor clearColor];
+        toastWindow.rootViewController = rootVC;
+        
+        // 创建toast label
+        UILabel *toastLabel = [[UILabel alloc] init];
+        toastLabel.backgroundColor = [UIColor colorWithWhite:0.2 alpha:0.9];
+        toastLabel.textColor = [UIColor whiteColor];
+        toastLabel.font = [UIFont systemFontOfSize:14];
+        toastLabel.textAlignment = NSTextAlignmentCenter;
+        toastLabel.numberOfLines = 0;
+        toastLabel.layer.cornerRadius = 8;
+        toastLabel.layer.masksToBounds = YES;
+        toastLabel.text = [NSString stringWithFormat:@"  %@  ", message];
+        
+        [rootVC.view addSubview:toastLabel];
+        
+        // 计算位置 - 根据当前toast数量堆叠显示
+        CGFloat topOffset = 80 + (self.toastCount * 44);
+        CGSize textSize = [message sizeWithAttributes:@{NSFontAttributeName: toastLabel.font}];
+        CGFloat width = MIN(textSize.width + 32, [UIScreen mainScreen].bounds.size.width - 80);
+        
+        toastLabel.frame = CGRectMake(([UIScreen mainScreen].bounds.size.width - width) / 2,
+                                      topOffset,
+                                      width,
+                                      36);
+        toastLabel.alpha = 0;
+        
+        // 保存window引用
+        [self.toastWindows addObject:toastWindow];
+        self.toastCount++;
+        
+        // 显示window和动画
+        toastWindow.hidden = NO;
+        [toastWindow makeKeyAndVisible]; // 确保window可见
+        
+        [UIView animateWithDuration:0.3 animations:^{
+            toastLabel.alpha = 1.0;
         }];
+        
+        // 1.5秒后自动隐藏
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [UIView animateWithDuration:0.3 animations:^{
+                toastLabel.alpha = 0.0;
+            } completion:^(BOOL finished) {
+                toastWindow.hidden = YES;
+                [self.toastWindows removeObject:toastWindow];
+                self.toastCount--;
+            }];
+        });
     });
 }
 
@@ -297,6 +369,29 @@
 
 - (void)onRecvLLMChatMsg:(ZegoAIAgentAudioSubtitlesMessage *)message {
     [self.subtitlesTableView handleRecvLLMMessage:message];
+}
+
+- (void)onRecvMetaDataMsg:(NSDictionary *)metadata timestamp:(int64_t)timestamp {
+    NSLog(@"📢 收到元数据消息 - metadata: %@, timestamp: %lld", metadata, timestamp);
+    
+    // 格式化时间戳
+    NSDate *date = [NSDate dateWithTimeIntervalSince1970:timestamp];
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    NSString *formattedTime = [formatter stringFromDate:date];
+    
+    // 格式化metadata字典为 key:value; 格式
+    NSMutableString *metadataStr = [NSMutableString string];
+    [metadata enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        if (metadataStr.length > 0) {
+            [metadataStr appendString:@"; "];
+        }
+        [metadataStr appendFormat:@"%@:%@", key, obj];
+    }];
+    
+    // 显示toast
+    NSString *message = [NSString stringWithFormat:@"%@\nTimestamp: %@", metadataStr, formattedTime];
+    [self showToast:message];
 }
 
 #pragma mark - ZegoAIAgentAudioEventHandler

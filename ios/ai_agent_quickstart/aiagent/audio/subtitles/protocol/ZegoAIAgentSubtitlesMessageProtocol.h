@@ -24,7 +24,9 @@ typedef NS_ENUM(NSInteger, ZegoAIAgentSubtitlesMessageCommand) {
     /** 识别的ASR文本 - 语音识别结果 */
     ZegoAgentMessageCmdASRText = 3,
     /** LLM文本 - 大语言模型生成的回复文本 */
-    ZegoAgentMessageCmdLLMText = 4
+    ZegoAgentMessageCmdLLMText = 4,
+    /** 元数据  */
+    ZegoAgentMessageCmdMetaData = 102
 };
 
 /**
@@ -124,6 +126,31 @@ typedef NS_ENUM(NSInteger, ZegoAIAgentSubtitlesSpeakStatus) {
 @end
 
 /**
+ * @class ZegoAIAgentSubtitlesMetaData
+ * @brief 元数据模型
+ *
+ * 封装了智能体的元数据信息，支持任意key-value键值对。
+ * 此类用于存储和传递智能体在对话过程中的元信息。
+ */
+@interface ZegoAIAgentSubtitlesMetaData : NSObject
+/** 元数据字典，支持任意key-value键值对 */
+@property (nonatomic, strong) NSDictionary *metadata;
+
+/**
+ * 从字典创建元数据对象
+ * @param dict 包含元数据的字典
+ * @return 新创建的元数据对象
+ */
+- (instancetype)initWithDictionary:(NSDictionary *)dict;
+
+/**
+ * 将元数据转换为字典
+ * @return 包含元数据的字典
+ */
+- (NSDictionary *)toDictionary;
+@end
+
+/**
  * @class ZegoAIAgentSubtitlesMessageProtocol
  * @brief RTC房间事件消息协议类
  *
@@ -173,6 +200,12 @@ typedef NS_ENUM(NSInteger, ZegoAIAgentSubtitlesSpeakStatus) {
  * 仅当cmdType = ZegoAgentMessageCmdLLMText时有效
  */
 @property (nonatomic, strong, readonly, nullable) ZegoAIAgentSubtitlesLLMTextData *llmTextData;
+
+/** 
+ * 元数据
+ * 仅当cmdType = ZegoAgentMessageCmdMetaData时有效
+ */
+@property (nonatomic, strong, readonly, nullable) ZegoAIAgentSubtitlesMetaData *metaData;
 
 /**
  * 根据JSON数据初始化消息内容
