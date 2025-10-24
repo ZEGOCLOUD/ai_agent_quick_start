@@ -346,7 +346,6 @@ public class VideoChatActivity extends AppCompatActivity {
                 @Override
                 public void onDigitalMobileStartSuccess() {
                     Log.i(TAG, "onDigitalMobileStartSuccess");
-                    digitalPic.setVisibility(View.GONE);
                 }
 
                 @Override
@@ -366,6 +365,7 @@ public class VideoChatActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         Log.i(TAG, "onSurfaceFirstFrameDraw");
                         loadingView.setVisibility(View.GONE);
+                        digitalPic.setVisibility(View.GONE);
                     });
                 }
             });
