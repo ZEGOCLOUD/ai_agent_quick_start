@@ -18,8 +18,8 @@ import com.squareup.picasso.Picasso;
 import im.zego.aiagent.express.quickstart.Constant;
 import im.zego.aiagent.express.quickstart.R;
 import im.zego.digitalmobile.IZegoDigitalMobile;
-import im.zego.digitalmobile.ZegoDigitalMobileFactory;
-import im.zego.digitalmobile.ZegoPreviewView;
+import im.zego.digitalmobile.ZegoDigitalHuman;
+import im.zego.digitalmobile.ZegoDigitalView;
 import im.zego.zegoexpress.ZegoExpressEngine;
 import im.zego.zegoexpress.callback.IZegoCustomVideoRenderHandler;
 import im.zego.zegoexpress.callback.IZegoEventHandler;
@@ -55,7 +55,7 @@ import org.json.JSONObject;
 public class VideoChatActivity extends AppCompatActivity {
 
     public static final String TAG = "VideoChatActivity";
-    private ZegoPreviewView previewView;
+    private ZegoDigitalView previewView;
     private View loadingView;
     private ImageView digitalPic;
     private IZegoDigitalMobile digitalMobileSDK;
@@ -296,7 +296,8 @@ public class VideoChatActivity extends AppCompatActivity {
                             ZegoExpressEngine.getEngine().startPlayingStream(agent_stream_id);
                             runOnUiThread(
                                 () -> Toast.makeText(VideoChatActivity.this, message, Toast.LENGTH_LONG).show());
-                            initDigitalMobileSDK(Constant.config_id);
+                            final var digitalHumanConfig = (String) json.get("digital_human_config");
+                            initDigitalMobileSDK(digitalHumanConfig);
                         } else {
                             ZegoExpressEngine.getEngine().logoutRoom();
                             showError("startDigitalHumanChat", "start failed: " + errorCode);
@@ -340,11 +341,12 @@ public class VideoChatActivity extends AppCompatActivity {
         Log.i(TAG, "initDigitalMobileSDK: " + digitalHumanConfig);
         runOnUiThread(() -> {
 
-            digitalMobileSDK = ZegoDigitalMobileFactory.create(VideoChatActivity.this);
+            digitalMobileSDK = ZegoDigitalHuman.create(VideoChatActivity.this);
             digitalMobileSDK.start(digitalHumanConfig, new IZegoDigitalMobile.ZegoDigitalMobileListener() {
                 @Override
                 public void onDigitalMobileStartSuccess() {
                     Log.i(TAG, "onDigitalMobileStartSuccess");
+                    digitalPic.setVisibility(View.GONE);
                 }
 
                 @Override
