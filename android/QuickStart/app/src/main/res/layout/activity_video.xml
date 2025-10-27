@@ -7,7 +7,7 @@
   tools:context=".voice.VoiceChatActivity">
 
   <im.zego.digitalmobile.ZegoDigitalView
-    android:id="@+id/preview_view"
+    android:id="@+id/digital_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
 

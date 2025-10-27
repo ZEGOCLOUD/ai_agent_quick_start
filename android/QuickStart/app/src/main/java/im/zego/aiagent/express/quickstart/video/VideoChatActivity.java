@@ -55,7 +55,7 @@ import org.json.JSONObject;
 public class VideoChatActivity extends AppCompatActivity {
 
     public static final String TAG = "VideoChatActivity";
-    private ZegoDigitalView previewView;
+    private ZegoDigitalView digitalView;
     private View loadingView;
     private ImageView digitalPic;
     private IZegoDigitalMobile digitalMobileSDK;
@@ -81,7 +81,7 @@ public class VideoChatActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
-        previewView = findViewById(R.id.preview_view);
+        digitalView = findViewById(R.id.digital_view);
         loadingView = findViewById(R.id.loading_view);
         digitalPic = findViewById(R.id.digital_pic);
         Picasso.get().load(Uri.parse(Constant.digital_human_image_URL)).into(digitalPic);
@@ -369,7 +369,7 @@ public class VideoChatActivity extends AppCompatActivity {
                     });
                 }
             });
-            digitalMobileSDK.attach(previewView);
+            digitalMobileSDK.attach(digitalView);
         });
     }
 
