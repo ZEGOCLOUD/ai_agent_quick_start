@@ -1,6 +1,0 @@
-framework module ZegoDigitalMobile {
-  umbrella header "ZegoDigitalMobile.h"
-  export *
-
-  module * { export * }
-}
