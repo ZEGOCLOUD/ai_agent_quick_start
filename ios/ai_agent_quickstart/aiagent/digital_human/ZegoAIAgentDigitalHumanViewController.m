@@ -29,7 +29,7 @@
 
 // digital human
 @property (nonatomic, strong) id<IZegoDigitalMobile> digitalMobile;
-@property (nonatomic, strong) ZegoPreviewView *previewView;
+@property (nonatomic, strong) ZegoDigitalView *digitalView;
 
 // 静态图片视图
 @property (nonatomic, strong) UIImageView *staticImageView;
@@ -52,7 +52,7 @@
     // 界面销毁时自动停止数字人聊天
     [self stopDigitalHumanChat];
 
-    self.previewView = nil;
+    self.digitalView = nil;
     self.staticImageView = nil;
 }
 
@@ -76,15 +76,15 @@
 
 - (void)setupPreviewView {
     // 创建并添加previewView
-    self.previewView = [[ZegoPreviewView alloc] init];
+    self.digitalView = [[ZegoDigitalView alloc] init];
 
     // 设置透明背景，让底层的静态图片可以显示
-    self.previewView.backgroundColor = [UIColor clearColor];
+    self.digitalView.backgroundColor = [UIColor clearColor];
 
-    [self.view addSubview:self.previewView];
+    [self.view addSubview:self.digitalView];
 
     // previewView全屏显示
-    [self.previewView mas_makeConstraints:^(MASConstraintMaker *make) {
+    [self.digitalView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self.view);
     }];
 }
@@ -133,7 +133,7 @@
     }
 
     // 添加到previewView下方
-    [self.view insertSubview:self.staticImageView belowSubview:self.previewView];
+    [self.view insertSubview:self.staticImageView belowSubview:self.digitalView];
 
     // 设置约束，让staticImageView覆盖整个屏幕（作为加载时的占位图）
     [self.staticImageView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -227,7 +227,7 @@
             
             if (success) {
                 // 创建数字人实例
-                strongSelf.digitalMobile = [ZegoDigitalMobileFactory create];
+                strongSelf.digitalMobile = [ZegoDigitalHuman create];
                 if (!strongSelf.digitalMobile) {
                     [strongSelf showToast:@"创建数字人实例失败"];
                 } else {
@@ -245,9 +245,9 @@
                     [strongSelf.digitalMobile start:configToUse delegate:strongSelf];
 
                     // 绑定渲染视图
-                    if (strongSelf.previewView) {
-                        NSLog(@"开始绑定数字人到 previewView，frame: %@", NSStringFromCGRect(strongSelf.previewView.frame));
-                        [strongSelf.digitalMobile attach:strongSelf.previewView];
+                    if (strongSelf.digitalView) {
+                        NSLog(@"开始绑定数字人到 previewView，frame: %@", NSStringFromCGRect(strongSelf.digitalView.frame));
+                        [strongSelf.digitalMobile attach:strongSelf.digitalView];
                         NSLog(@"数字人已绑定到 previewView");
                     } else {
                         NSLog(@"previewView is nil, cannot attach");
@@ -345,7 +345,7 @@
     // 隐藏静态图片，显示真实的数字人视频
     dispatch_async(dispatch_get_main_queue(), ^{
         // 设置背景色
-        self.previewView.backgroundColor = [UIColor whiteColor];
+        self.digitalView.backgroundColor = [UIColor whiteColor];
 
         self.staticImageView.hidden = YES;
         NSLog(@"静态图片已隐藏");

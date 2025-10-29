@@ -13,8 +13,6 @@
 		410B35182DA7CE0D00CFA563 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 410B35172DA7CE0D00CFA563 /* Assets.xcassets */; };
 		410B351B2DA7CE0D00CFA563 /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 410B351A2DA7CE0D00CFA563 /* Base */; };
 		410B351E2DA7CE0D00CFA563 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 410B351D2DA7CE0D00CFA563 /* main.m */; };
-		41868C9E2E0D321D009F9692 /* ZegoDigitalMobile.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 41868C9D2E0D321D009F9692 /* ZegoDigitalMobile.xcframework */; };
-		41868C9F2E0D321D009F9692 /* ZegoDigitalMobile.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 41868C9D2E0D321D009F9692 /* ZegoDigitalMobile.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		41868CAA2E0D3A79009F9692 /* ZegoAIAgentHomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 41868CA92E0D3A79009F9692 /* ZegoAIAgentHomeViewController.m */; };
 		41868CB22E0D3A9B009F9692 /* ZegoAIAgentDigitalHumanViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 41868CB02E0D3A9B009F9692 /* ZegoAIAgentDigitalHumanViewController.m */; };
 		419158A02DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m in Sources */ = {isa = PBXBuildFile; fileRef = 4191588B2DB782ED009BAA71 /* ZegoAIAgentSubtitlesColors.m */; };
@@ -34,20 +32,6 @@
 		41CD42CA2DB104F5008F13F4 /* ZegoAIGetTokenRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 41CD42C82DB104F5008F13F4 /* ZegoAIGetTokenRequest.m */; };
 		B7A0E32150EA6585986D6DA4 /* Pods_ai_agent_quickstart.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD7DBC0F763F357DC3BD209B /* Pods_ai_agent_quickstart.framework */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		41868CA02E0D321D009F9692 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				41868C9F2E0D321D009F9692 /* ZegoDigitalMobile.xcframework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		410B35082DA7CE0A00CFA563 /* ai_agent_quickstart.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ai_agent_quickstart.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,7 +93,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				B7A0E32150EA6585986D6DA4 /* Pods_ai_agent_quickstart.framework in Frameworks */,
-				41868C9E2E0D321D009F9692 /* ZegoDigitalMobile.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,8 +272,6 @@
 				410B35052DA7CE0A00CFA563 /* Frameworks */,
 				410B35062DA7CE0A00CFA563 /* Resources */,
 				07223FD6C1516011AE4FCB37 /* [CP] Embed Pods Frameworks */,
-				41868CA02E0D321D009F9692 /* Embed Frameworks */,
-				166E5255441C872A54E98748 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -363,23 +344,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		166E5255441C872A54E98748 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ai_agent_quickstart/Pods-ai_agent_quickstart-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		8C6939A73D4A8B4678166915 /* [CP] Check Pods Manifest.lock */ = {
@@ -582,10 +546,10 @@
 				DEVELOPMENT_TEAM = B82BHJ5H89;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-			INFOPLIST_FILE = ai_agent_quickstart/Info.plist;
-			INFOPLIST_KEY_NSCameraUsageDescription = "需要访问相机以使用数字人视频功能";
-			INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要访问麦克风以进行语音聊天";
-			INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_FILE = ai_agent_quickstart/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "需要访问相机以使用数字人视频功能";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要访问麦克风以进行语音聊天";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -614,10 +578,10 @@
 				DEVELOPMENT_TEAM = B82BHJ5H89;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-			INFOPLIST_FILE = ai_agent_quickstart/Info.plist;
-			INFOPLIST_KEY_NSCameraUsageDescription = "需要访问相机以使用数字人视频功能";
-			INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要访问麦克风以进行语音聊天";
-			INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_FILE = ai_agent_quickstart/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "需要访问相机以使用数字人视频功能";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要访问麦克风以进行语音聊天";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
