@@ -20,7 +20,7 @@ class Logger {
   }
 
   private formatMessage(level: string, tag: string): string {
-    const timestamp = new Date().toISOString();
+    const timestamp = new Date().toLocaleString();
     return `[${timestamp}] [${level}] [${tag}]`;
   }
 

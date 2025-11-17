@@ -191,7 +191,7 @@ export class ErrorHandler {
 
     // 默认错误处理
     return new AppError(
-      error?.message || '未知错误',
+      error?.message || error?.msg || error || '未知错误',
       ErrorType.UNKNOWN_ERROR,
       ErrorSeverity.MEDIUM,
       { context, code: error?.code }

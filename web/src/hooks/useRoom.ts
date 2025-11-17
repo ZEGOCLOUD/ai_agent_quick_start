@@ -39,43 +39,38 @@ export function useRoom() {
     userName: string,
     userStreamId: string
   ) {
+    logger.info('ROOM', '开始登录房间', { type, roomId, userID });
+    
+    const login = await zg.loginRoom(roomId, currentToken, {
+      userID,
+      userName,
+    });
+    
+    if (!login) {
+      throw createError.sdk("登录RTC房间失败", { canRetry: true });
+    }
+    
+    isLogin.value = true;
+    logger.info('ROOM', 'RTC房间登录成功', { roomId, userID });
+
+    await startPublishingStream(userStreamId);
+
     try {
-      logger.info('ROOM', '开始登录房间', { type, roomId, userID });
-      
-      const login = await zg.loginRoom(roomId, currentToken, {
-        userID,
-        userName,
+      let res;
+      if (type === "digitalHuman") {
+        res = await createDigitalHuman(roomId, userID, userStreamId);
+        logger.info('ROOM', '数字人创建成功', { roomId, userID });
+      } else {
+        res = await Start(roomId, userID, userStreamId);
+        logger.info('ROOM', 'AI Agent 启动成功', { roomId, userID });
+      }
+      return res;
+    } catch (error: any) {
+      logger.error('ROOM', 'AI Agent 服务启动失败', { type, error });
+      throw createError.business("并发已满，语音互动启动失败", { 
+        canRetry: true,
+        context: { type, roomId, userID } 
       });
-      
-      if (!login) {
-        throw createError.sdk("登录RTC房间失败", { canRetry: true });
-      }
-      
-      await startPublishingStream(userStreamId);
-      isLogin.value = true;
-      
-      logger.info('ROOM', 'RTC房间登录成功', { roomId, userID });
-      
-      try {
-        let res;
-        if (type === "digitalHuman") {
-          res = await createDigitalHuman(roomId, userID, userStreamId);
-          logger.info('ROOM', '数字人创建成功', { roomId, userID });
-        } else {
-          res = await Start(roomId, userID, userStreamId);
-          logger.info('ROOM', 'AI Agent 启动成功', { roomId, userID });
-        }
-        return res;
-      } catch (error: any) {
-        logger.error('ROOM', 'AI Agent 服务启动失败', { type, error });
-        throw createError.business("并发已满，语音互动启动失败", { 
-          canRetry: true,
-          context: { type, roomId, userID } 
-        });
-      }
-    } catch (error) {
-      logger.error('ROOM', '登录房间失败', { type, roomId, userID, error });
-      throw ErrorHandler.handle(error, 'useRoom.loginRoom');
     }
   }
 
