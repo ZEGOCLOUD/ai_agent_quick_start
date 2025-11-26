@@ -47,5 +47,5 @@ dependencies {
     api "com.squareup.picasso:picasso:2.8"
 
     // 数字人 SDK
-    implementation 'im.zego:digitalmobile:1.3.0.43'
+    implementation 'im.zego:digitalmobile:1.4.0.88'
 }
