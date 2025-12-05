@@ -4,8 +4,8 @@ import basicSsl from "@vitejs/plugin-basic-ssl";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), basicSsl(),],
+  plugins: [vue()],
   server: {
-    host: true,
+    host: false,
   }
 })
