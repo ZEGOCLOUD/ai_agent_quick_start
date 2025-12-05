@@ -20,6 +20,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.gson.JsonObject;
 import im.zego.aiagent.express.quickstart.Constant;
 import im.zego.aiagent.express.quickstart.R;
+import im.zego.aiagent.express.quickstart.voice.AudioChatMessageParser.AudioChatAgentStatusMessage;
 import im.zego.aiagent.express.quickstart.voice.AudioChatMessageParser.AudioChatMessage;
 import im.zego.aiagent.express.quickstart.voice.AudioChatMessageParser.AudioChatMessageListListener;
 import im.zego.zegoexpress.ZegoExpressEngine;
@@ -332,6 +333,11 @@ public class VoiceChatActivity extends AppCompatActivity {
             @Override
             public void onMessageListUpdated(List<AudioChatMessage> messagesList) {
                 messageList.onMessageListUpdated(messagesList);
+            }
+
+            @Override
+            public void onAudioChatStateUpdate(AudioChatAgentStatusMessage statusMessage) {
+
             }
         });
 

@@ -6,6 +6,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AudioChatMessageParser {
@@ -37,9 +37,11 @@ public class AudioChatMessageParser {
 
     private AudioChatMessageListListener listener;
 
-    private int lastCMD1Seq;
+    private long lastCMDSeq;
 
-    private static final String TAG = "AudioChatMessageParser";
+    private static String TAG = "AudioChatMessageParser";
+
+    private static final boolean SUPPORT_STREAM = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
 
     /**
      * 输入
@@ -48,40 +50,67 @@ public class AudioChatMessageParser {
      * @return
      */
     public void parseAudioChatMessage(String message) {
-        Log.d(TAG, "parseAudioChatMessage() called with: message = [" + message + "]");
-        AudioChatMessage chatMessage = gson.fromJson(message, AudioChatMessage.class);
-        if (chatMessage.cmd == 3) {
-            updateASRChatMessage(chatMessage);
-        } else if (chatMessage.cmd == 4) {
-            addOrUpdateLLMChatMessage(chatMessage);
+        int cmd = parseCmdFromJson(message);
+
+        if (cmd == 3) {
+            updateASRChatMessage(message);
+        } else if (cmd == 4) {
+            addOrUpdateLLMChatMessage(message);
+        } else if (cmd == 6) {
+            AudioChatAgentStatusMessage statusMessage = gson.fromJson(message, AudioChatAgentStatusMessage.class);
+            if (statusMessage.seqId < lastCMDSeq) { // 比上一次的seq小的话，舍弃掉
+                return;
+            }
+            if (listener != null) {
+                listener.onAudioChatStateUpdate(statusMessage);
+            }
+            lastCMDSeq = statusMessage.seqId;
         }
     }
+
+    public int parseCmdFromJson(String jsonStr) {
+        if (jsonStr == null || jsonStr.trim().isEmpty()) {
+            return -1;
+        }
+
+        try {
+            JsonObject obj = gson.fromJson(jsonStr, JsonObject.class);
+            if (obj.has("Cmd")) {
+                return obj.get("Cmd").getAsInt();
+            } else if (obj.has("cmd")) {
+                return obj.get("cmd").getAsInt();
+            }
+        } catch (Exception e) {
+            // 记录日志
+        }
+        return -1; // 默认值
+    }
+
 
     /**
      * 根据消息ID和序列ID比较，更新或插入语音聊天文本消息。 如果存在相同消息ID的消息，仅当新消息的序列ID更高时更新。 否则，将新消息插入列表。
      *
-     * @param newMessage 要处理的新语音聊天文本消息
+     * @param messageString 要处理的新语音聊天文本消息
      */
-    private void updateASRChatMessage(AudioChatMessage newMessage) {
-        AudioChatMessage findMessage = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Optional<AudioChatMessage> any = rtcMessageList.stream()
-                .filter(rtcRoomMessage -> rtcRoomMessage.data.messageId.equals(newMessage.data.messageId)).findAny();
-            if (any.isPresent()) {
-                findMessage = any.get();
-            }
-        } else {
+    private void updateASRChatMessage(String messageString) {
+        AudioChatMessage newMessage = gson.fromJson(messageString, AudioChatMessage.class);
 
-            // 遍历列表，查找匹配的 messageId
-            for (AudioChatMessage rtcRoomMessage : rtcMessageList) {
-                if (rtcRoomMessage.data.messageId.equals(newMessage.data.messageId)) {
-                    findMessage = rtcRoomMessage;
-                    break; // 找到后立即退出循环
+        AudioChatMessage existedMessage = null;
+        if (SUPPORT_STREAM) {
+            existedMessage = rtcMessageList.stream()
+                .filter(m -> m.cmd == 3 && Objects.equals(m.data.messageId, newMessage.data.messageId))
+                .findAny()
+                .orElse(null);
+        } else {
+            for (AudioChatMessage m : rtcMessageList) {
+                if (m.cmd == 3 && Objects.equals(m.data.messageId, newMessage.data.messageId)) {
+                    existedMessage = m;
+                    break;
                 }
             }
         }
-        if (findMessage != null) {
-            AudioChatMessage existedMessage = findMessage;
+
+        if (existedMessage != null) {
             if (existedMessage.seqId < newMessage.seqId) {
                 Log.d(TAG, "本地seq_id 比较小，更新消息 = [" + newMessage + "]");
                 existedMessage.seqId = newMessage.seqId;
@@ -107,9 +136,10 @@ public class AudioChatMessageParser {
      * 处理LLM聊天消息的添加或更新。 每个轮次可能包含多个messageId，每个messageId可能分批发送多个LLM消息。 客户端需按照 messageId
      * 对消息排序并合并，仅显示每个轮次中seqId最大的messageId对应的合并消息。
      *
-     * @param newMessage 新接收的语音聊天文本消息
+     * @param messageString 新接收的语音聊天文本消息
      */
-    private void addOrUpdateLLMChatMessage(AudioChatMessage newMessage) {
+    private void addOrUpdateLLMChatMessage(String messageString) {
+        AudioChatMessage newMessage = gson.fromJson(messageString, AudioChatMessage.class);
 
         String mergedLLMText = mergeLLMMessages(newMessage);
 
@@ -126,21 +156,19 @@ public class AudioChatMessageParser {
         newLLMMessage.round = newMessage.round;
         newLLMMessage.cmd = newMessage.cmd;
         newLLMMessage.data = new AudioChatMessage.Data();
-        newLLMMessage.data.speakStatus = newMessage.data.speakStatus;
         newLLMMessage.data.text = mergedLLMText;
         newLLMMessage.data.messageId = newMessage.data.messageId;
         newLLMMessage.data.endFlag = newMessage.data.endFlag;
 
-        List<AudioChatMessage> roundLLMMessages;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        List<AudioChatMessage> roundLLMMessages = new ArrayList<>();
+        if (SUPPORT_STREAM) {
             roundLLMMessages = rtcMessageList.stream()
-                .filter(roomMessage -> roomMessage.round == newMessage.round && roomMessage.cmd == 4)
+                .filter(m -> m.round == newMessage.round && m.cmd == 4)
                 .collect(Collectors.toList());
         } else {
-            roundLLMMessages = new ArrayList<>();
-            for (AudioChatMessage roomMessage : rtcMessageList) {
-                if (roomMessage.round == newMessage.round && roomMessage.cmd == 4) {
-                    roundLLMMessages.add(roomMessage);
+            for (AudioChatMessage m : rtcMessageList) {
+                if (m.round == newMessage.round && m.cmd == 4) {
+                    roundLLMMessages.add(m);
                 }
             }
         }
@@ -148,20 +176,31 @@ public class AudioChatMessageParser {
         if (roundLLMMessages.isEmpty()) {
             // 如果这一轮round 在消息列表中还没有message,那么就直接插入这条消息。
             rtcMessageList.add(newLLMMessage);
-            Log.d(TAG, "插入新消息 ： [" + mergedLLMText + "]");
         } else {
-            //如果已经有了,rtcMessageList 中的这一轮round应该只有一条
+            //如果已经有了,rtcMessageList 中的这一轮round应该只有一条消息
             AudioChatMessage inListMessage = roundLLMMessages.get(0);
             if (inListMessage != null) {
-                //  如果不是同一条消息，比较seqId，如果新消息seqId比较小，则忽略
-                if (inListMessage.seqId > newMessage.seqId && !Objects.equals(newMessage.data.messageId,
-                    inListMessage.data.messageId)) {
-                    Log.d(TAG, "同一 round 已存在更大 seq_id 的消息，忽略当前 message_id: " + newMessage.data.messageId
-                        + ", seq_id: " + newMessage.seqId);
-                } else {
-                    // 否则，更新消息
+                // 如果新消息和已经有的消息id相同
+                if (Objects.equals(newMessage.data.messageId, inListMessage.data.messageId)) {
+                    // 新消息的 seqId 比较小，忽略
+                    Log.d(TAG, "同一 round 已存在相同 message_id 的消息: " + newMessage.data.messageId + ", seq_id: "
+                        + newMessage.seqId + ",合并更新");
+
                     int index = rtcMessageList.indexOf(inListMessage);
                     rtcMessageList.set(index, newLLMMessage);
+                } else {
+                    // 这里是 同一轮里面，新消息和已经有的消息id 不同
+                    if (inListMessage.seqId > newMessage.seqId) {
+                        Log.d(TAG,
+                            "同一 round 已存在不同 message_id 的消息: " + newMessage.data.messageId + ", seq_id: "
+                                + newMessage.seqId + ",但是新消息 seqId 比较小，忽略");
+                    } else {
+                        Log.d(TAG,
+                            "同一 round 已存在不同 message_id 的消息: " + newMessage.data.messageId + ", seq_id: "
+                                + newMessage.seqId + ",新消息 seqId 比较大，更新");
+                        int index = rtcMessageList.indexOf(inListMessage);
+                        rtcMessageList.set(index, newLLMMessage);
+                    }
                 }
             }
         }
@@ -186,24 +225,23 @@ public class AudioChatMessageParser {
             rtcRoomMessages.add(newMessage);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return rtcRoomMessages.stream().sorted(Comparator.comparingLong(message -> message.seqId))
-                .map(message -> message.data.text != null ? message.data.text : "").collect(Collectors.joining());
+        if (SUPPORT_STREAM) {
+            return rtcRoomMessages.stream()
+                .sorted(Comparator.comparingLong(m -> m.seqId))
+                .map(m -> m.data.text != null ? m.data.text : "")
+                .collect(Collectors.joining());
         } else {
-            // Sort messages by seqId
-            Collections.sort(rtcRoomMessages, new Comparator<AudioChatMessage>() {
-                public int compare(AudioChatMessage m1, AudioChatMessage m2) {
-                    return Long.valueOf(m1.seqId).compareTo(Long.valueOf(m2.seqId));
+            // 手动排序（简单插入排序或复制后 Collections.sort）
+            List<AudioChatMessage> sorted = new ArrayList<>(rtcRoomMessages);
+            Collections.sort(sorted, (a, b) -> Long.compare(a.seqId, b.seqId));
+
+            StringBuilder sb = new StringBuilder();
+            for (AudioChatMessage m : sorted) {
+                if (m.data.text != null) {
+                    sb.append(m.data.text);
                 }
-            });
-
-            // Join message texts
-            StringBuilder result = new StringBuilder();
-            for (AudioChatMessage message : rtcRoomMessages) {
-                result.append(message.data.text != null ? message.data.text : "");
             }
-
-            return result.toString();
+            return sb.toString();
         }
     }
 
@@ -236,6 +274,7 @@ public class AudioChatMessageParser {
 
         void onMessageListUpdated(List<AudioChatMessage> messagesList);
 
+        void onAudioChatStateUpdate(AudioChatAgentStatusMessage statusMessage);
     }
 
     /**
@@ -256,8 +295,6 @@ public class AudioChatMessageParser {
 
         public static class Data {
 
-            @SerializedName(value = "SpeakStatus", alternate = "speak_status")
-            public int speakStatus;
             @SerializedName(value = "Text", alternate = "text")
             public String text;
             @SerializedName(value = "MessageId", alternate = "message_id")
@@ -266,6 +303,45 @@ public class AudioChatMessageParser {
             public boolean endFlag;
             @SerializedName(value = "UserId", alternate = "user_id")
             public String userId;
+
+            @Override
+            public String toString() {
+                return "Data{" + "text='" + text + '\'' + ", messageId='" + messageId + '\'' + '}';
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "AudioChatMessage{" + "seqId=" + seqId + ", round=" + round + ", data=" + data + '}';
+        }
+    }
+
+    public static class AudioChatAgentStatusMessage {
+
+        @SerializedName(value = "Timestamp", alternate = "timestamp")
+        public long timestamp;
+        @SerializedName(value = "SeqId", alternate = "seq_id")
+        public long seqId;
+        @SerializedName(value = "Round", alternate = "round")
+        public long round;
+        @SerializedName(value = "Cmd", alternate = "cmd")
+        public int cmd;
+        @SerializedName(value = "Data", alternate = "data")
+        public Data data;
+
+        public static class Data {
+
+            @SerializedName(value = "Status")
+            public int status;
+            @SerializedName(value = "OldStatus")
+            public int oldStatus;
+            @SerializedName(value = "Reason")
+            public String reason;
+
+            public static final int IDLE = 0;
+            public static final int LISTENING = 1;
+            public static final int THINKING = 2;
+            public static final int SPEAKING = 3;
         }
     }
 }
