@@ -17,53 +17,13 @@ NS_ASSUME_NONNULL_BEGIN
  * 通过此枚举，系统可以正确解析和处理来自不同来源的消息数据。
  */
 typedef NS_ENUM(NSInteger, ZegoAIAgentSubtitlesMessageCommand) {
-    /** 用户说话状态 - 表示用户开始或结束说话 */
-    ZegoAgentMessageCmdUserSpeakStatus = 1,
-    /** 智能体说话状态 - 表示AI智能体开始或结束回复 */
-    ZegoAgentMessageCmdAgentSpeakStatus = 2,
     /** 识别的ASR文本 - 语音识别结果 */
     ZegoAgentMessageCmdASRText = 3,
     /** LLM文本 - 大语言模型生成的回复文本 */
-    ZegoAgentMessageCmdLLMText = 4
+    ZegoAgentMessageCmdLLMText = 4,
+    /** 智能体状态 */
+    ZegoAgentMessageCmdAgentStatus = 6,
 };
-
-/**
- * @brief 说话状态枚举
- *
- * 定义了说话过程中的不同状态，用于标记说话的开始和结束。
- * 此状态对于管理音频流和界面提示至关重要。
- */
-typedef NS_ENUM(NSInteger, ZegoAIAgentSubtitlesSpeakStatus) {
-    /** 说话开始 - 表示用户或AI开始发言 */
-    ZegoAgentSpeakStatusStart = 1,
-    /** 说话结束 - 表示用户或AI结束发言 */
-    ZegoAgentSpeakStatusEnd = 2
-};
-
-/**
- * @class ZegoAIAgentSubtitlesSpeakStatusData
- * @brief 说话状态数据模型
- *
- * 封装了用户或智能体说话状态的相关数据，用于传递和存储说话过程中的状态信息。
- * 此类提供了与字典之间的转换方法，便于数据的序列化和反序列化。
- */
-@interface ZegoAIAgentSubtitlesSpeakStatusData : NSObject
-/** 说话状态 - 表示当前是开始说话还是结束说话 */
-@property (nonatomic, assign) ZegoAIAgentSubtitlesSpeakStatus speakStatus;
-
-/**
- * 从字典创建说话状态数据对象
- * @param dict 包含说话状态数据的字典
- * @return 新创建的说话状态数据对象
- */
-- (instancetype)initWithDictionary:(NSDictionary *)dict;
-
-/**
- * 将说话状态数据转换为字典
- * @return 包含说话状态数据的字典
- */
-- (NSDictionary *)toDictionary;
-@end
 
 /**
  * @class ZegoAIAgentSubtitlesASRTextData
@@ -124,6 +84,23 @@ typedef NS_ENUM(NSInteger, ZegoAIAgentSubtitlesSpeakStatus) {
 @end
 
 /**
+ * @class ZegoAgentStatusData
+ * @brief 智能体状态
+ *
+ * 封装了用户或智能体说话状态的相关数据，用于传递和存储说话过程中的状态信息。
+ * 此类提供了与字典之间的转换方法，便于数据的序列化和反序列化。
+ */
+@interface ZegoAgentStatusData : NSObject
+
+@property (nonatomic, assign) int status;
+
+- (instancetype)initWithDictionary:(NSDictionary *)dict;
+
+- (NSDictionary *)toDictionary;
+
+@end
+
+/**
  * @class ZegoAIAgentSubtitlesMessageProtocol
  * @brief RTC房间事件消息协议类
  *
@@ -151,18 +128,6 @@ typedef NS_ENUM(NSInteger, ZegoAIAgentSubtitlesSpeakStatus) {
 @property (nonatomic, strong) NSDictionary *data;
 
 /** 
- * 用户说话状态数据
- * 仅当cmdType = ZegoAgentMessageCmdUserSpeakStatus时有效
- */
-@property (nonatomic, strong, readonly, nullable) ZegoAIAgentSubtitlesSpeakStatusData *userSpeakData;
-
-/** 
- * 智能体说话状态数据
- * 仅当cmdType = ZegoAgentMessageCmdAgentSpeakStatus时有效
- */
-@property (nonatomic, strong, readonly, nullable) ZegoAIAgentSubtitlesSpeakStatusData *agentSpeakData;
-
-/** 
  * ASR文本数据
  * 仅当cmdType = ZegoAgentMessageCmdASRText时有效
  */
@@ -173,6 +138,12 @@ typedef NS_ENUM(NSInteger, ZegoAIAgentSubtitlesSpeakStatus) {
  * 仅当cmdType = ZegoAgentMessageCmdLLMText时有效
  */
 @property (nonatomic, strong, readonly, nullable) ZegoAIAgentSubtitlesLLMTextData *llmTextData;
+
+/**
+ * 智能体状态
+ * 仅当cmdType = ZegoAgentMessageCmdAgentStatus时有效
+ */
+@property (nonatomic, strong, readonly, nullable) ZegoAgentStatusData *agentStatusData;
 
 /**
  * 根据JSON数据初始化消息内容

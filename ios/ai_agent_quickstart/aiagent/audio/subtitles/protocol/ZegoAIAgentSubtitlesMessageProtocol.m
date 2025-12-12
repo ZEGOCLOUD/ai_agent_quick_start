@@ -8,35 +8,6 @@
 
 #import "ZegoAIAgentSubtitlesMessageProtocol.h"
 
-#pragma mark - ZegoAgentSpeakStatusData
-
-@implementation ZegoAIAgentSubtitlesSpeakStatusData
-
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        _speakStatus = 0;
-    }
-    return self;
-}
-
-- (instancetype)initWithDictionary:(NSDictionary *)dict {
-    self = [self init];
-    
-    if (self) {
-        if (dict[@"SpeakStatus"]) {
-            _speakStatus = (ZegoAIAgentSubtitlesSpeakStatus)[dict[@"SpeakStatus"] intValue];
-        }
-    }
-    return self;
-}
-
-- (NSDictionary *)toDictionary {
-    return @{@"SpeakStatus": @(self.speakStatus)};
-}
-
-@end
-
 #pragma mark - ZegoAgentASRTextData
 
 @implementation ZegoAIAgentSubtitlesASRTextData
@@ -119,13 +90,41 @@
 
 @end
 
+#pragma mark - ZegoAgentStatusData
+
+@implementation ZegoAgentStatusData
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        _status = 0;
+    }
+    return self;
+}
+
+- (instancetype)initWithDictionary:(NSDictionary *)dict {
+    self = [self init];
+    
+    if (self) {
+        if (dict[@"Status"]) {
+            _status = [dict[@"Status"] intValue];
+        }
+    }
+    return self;
+}
+
+- (NSDictionary *)toDictionary {
+    return @{@"Status": @(self.status)};
+}
+
+@end
+
 #pragma mark - ZegoAgentMessageContent
 
 @implementation ZegoAIAgentSubtitlesMessageProtocol {
-    ZegoAIAgentSubtitlesSpeakStatusData *_userSpeakData;
-    ZegoAIAgentSubtitlesSpeakStatusData *_agentSpeakData;
     ZegoAIAgentSubtitlesASRTextData *_asrTextData;
     ZegoAIAgentSubtitlesLLMTextData *_llmTextData;
+    ZegoAgentStatusData *_agentStatusData;
 }
 
 - (instancetype)init {
@@ -170,20 +169,16 @@
 
 - (void)parseDataForCmd {
     switch (_cmdType) {
-        case ZegoAgentMessageCmdUserSpeakStatus:
-            _userSpeakData = [[ZegoAIAgentSubtitlesSpeakStatusData alloc] initWithDictionary:_data];
-            break;
-            
-        case ZegoAgentMessageCmdAgentSpeakStatus:
-            _agentSpeakData = [[ZegoAIAgentSubtitlesSpeakStatusData alloc] initWithDictionary:_data];
-            break;
-            
         case ZegoAgentMessageCmdASRText:
             _asrTextData = [[ZegoAIAgentSubtitlesASRTextData alloc] initWithDictionary:_data];
             break;
             
         case ZegoAgentMessageCmdLLMText:
             _llmTextData = [[ZegoAIAgentSubtitlesLLMTextData alloc] initWithDictionary:_data];
+            break;
+            
+        case ZegoAgentMessageCmdAgentStatus:
+            _agentStatusData = [[ZegoAgentStatusData alloc] initWithDictionary:_data];
             break;
             
         default:
@@ -206,22 +201,6 @@
     
     // 根据命令类型准备特定数据
     switch (_cmdType) {
-        case ZegoAgentMessageCmdUserSpeakStatus:
-            if (_userSpeakData) {
-                dict[@"Data"] = [_userSpeakData toDictionary];
-            } else {
-                dict[@"Data"] = @{};
-            }
-            break;
-            
-        case ZegoAgentMessageCmdAgentSpeakStatus:
-            if (_agentSpeakData) {
-                dict[@"Data"] = [_agentSpeakData toDictionary];
-            } else {
-                dict[@"Data"] = @{};
-            }
-            break;
-            
         case ZegoAgentMessageCmdASRText:
             if (_asrTextData) {
                 dict[@"Data"] = [_asrTextData toDictionary];
@@ -233,6 +212,14 @@
         case ZegoAgentMessageCmdLLMText:
             if (_llmTextData) {
                 dict[@"Data"] = [_llmTextData toDictionary];
+            } else {
+                dict[@"Data"] = @{};
+            }
+            break;
+            
+        case ZegoAgentMessageCmdAgentStatus:
+            if (_agentStatusData) {
+                dict[@"Data"] = [_agentStatusData toDictionary];
             } else {
                 dict[@"Data"] = @{};
             }

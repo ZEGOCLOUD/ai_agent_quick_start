@@ -13,7 +13,7 @@
 
 // 存储注册的事件处理对象
 @property (nonatomic, strong) NSHashTable<id<ZegoAIAgentSubtitlesEventHandler>> *eventHandlers;
-@property (nonatomic, assign) int64_t lastCMD1Seq; // 防止消息乱序
+@property (nonatomic, assign) int64_t lastCmdSeq; // 防止消息乱序
 @property (nonatomic, assign) ZegoAIAgentSessionState chatSessionState;
 
 @end
@@ -34,7 +34,7 @@
 - (instancetype)init {
     if (self = [super init]) {
         self.eventHandlers = [NSHashTable weakObjectsHashTable];
-        self.lastCMD1Seq = 0;
+        self.lastCmdSeq = 0;
         self.chatSessionState =     SubtitlesSessionState_UNINIT;
     }
     return self;
@@ -166,46 +166,34 @@
             cmdMsg.data.end_flag = end_flag;
             [self dispatchLLMChatMsg:cmdMsg];
         }
-    } else if(cmd == ZegoAgentMessageCmdUserSpeakStatus){
-        if(messageProtocol.userSpeakData) {
-            int speakStatus = (int)messageProtocol.userSpeakData.speakStatus;
-            
-            if (seqId < self.lastCMD1Seq) {
-                NSLog( @"recvcmdstate 收到cmd=1, _lastCMD1Seq=%lld, curSeqId=%lld, 丢弃该消息", self.lastCMD1Seq, seqId);
-                return;
-            }
-            
-            NSLog( @"recvcmdstate userID=%@, userName=%@, cmd=%d, seqId=%llu, timeStamp=%llu, speakStatus=%d",
-                    userID, userName, (int)cmd, seqId, timeStamp, speakStatus);
-            
-            if(speakStatus == ZegoAgentSpeakStatusStart){
-                NSLog(@"cmd=1 speakStatus=1 正在听");
-                self.chatSessionState =     SubtitlesSessionState_AI_LISTEN;
-                [self dispatchChatStateChange:    SubtitlesSessionState_AI_LISTEN];
-                
-            } else if(speakStatus == ZegoAgentSpeakStatusEnd){
-                NSLog(@"cmd=1 speakStatus=2 正在想");
-                self.chatSessionState =     SubtitlesSessionState_AI_THINKING;
-                [self dispatchChatStateChange:    SubtitlesSessionState_AI_THINKING];
-            }
-            self.lastCMD1Seq = seqId;
-        }
-    } else if(cmd == ZegoAgentMessageCmdAgentSpeakStatus){
-        if(messageProtocol.agentSpeakData) {
-            int speakStatus = (int)messageProtocol.agentSpeakData.speakStatus;
-            
-            NSLog(@"recvcmdstate userID=%@, userName=%@, cmd=%d, seqId=%llu, timeStamp=%llu, speakStatus=%d",
-                    userID,
-                    userName,
-                    (int)cmd, seqId, timeStamp, speakStatus);
-            
-            if(speakStatus == ZegoAgentSpeakStatusStart){
-                NSLog(@"cmd=1 speakStatus=2 正在讲");
-                self.chatSessionState =     SubtitlesSessionState_AI_SPEAKING;
-                [self dispatchChatStateChange:    SubtitlesSessionState_AI_SPEAKING];
-            } else if(speakStatus == ZegoAgentSpeakStatusEnd){
-                self.chatSessionState =     SubtitlesSessionState_AI_LISTEN;
-                [self dispatchChatStateChange:    SubtitlesSessionState_AI_LISTEN];
+    } else if (cmd == ZegoAgentMessageCmdAgentStatus) {
+        if (messageProtocol.agentStatusData) {
+            int agentStatus = messageProtocol.agentStatusData.status;
+            if (seqId <= self.lastCmdSeq) {
+                NSLog(@"recvcmdstate userID=%@, userName=%@, cmd=%d, seqId=%llu, timeStamp=%llu, agentStatus=%d, skipped due to a smaller seq",
+                      userID,
+                      userName,
+                      (int)cmd, seqId, timeStamp, agentStatus);
+            } else {
+                NSLog(@"recvcmdstate userID=%@, userName=%@, cmd=%d, seqId=%llu, timeStamp=%llu, agentStatus=%d",
+                      userID,
+                      userName,
+                      (int)cmd, seqId, timeStamp, agentStatus);
+                self.lastCmdSeq = seqId;
+
+                if (agentStatus == 0) {
+                    self.chatSessionState = SubtitlesSessionState_UNINIT;
+                    [self dispatchChatStateChange: SubtitlesSessionState_UNINIT];
+                } else if (agentStatus == 1) {
+                    self.chatSessionState = SubtitlesSessionState_AI_LISTEN;
+                    [self dispatchChatStateChange: SubtitlesSessionState_AI_LISTEN];
+                } else if (agentStatus == 2) {
+                    self.chatSessionState = SubtitlesSessionState_AI_THINKING;
+                    [self dispatchChatStateChange: SubtitlesSessionState_AI_THINKING];
+                } else if (agentStatus == 3) {
+                    self.chatSessionState = SubtitlesSessionState_AI_SPEAKING;
+                    [self dispatchChatStateChange: SubtitlesSessionState_AI_SPEAKING];
+                }
             }
         }
     }
