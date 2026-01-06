@@ -99,24 +99,24 @@ function validateConfig(config: AppConfig): void {
 // 构建配置对象
 const config: AppConfig = {
   zego: {
-    appId: getNumberEnv('VITE_ZEGO_APP_ID'),
-    server: getRequiredEnv('VITE_ZEGO_SERVER'),
+    appId: getNumberEnv('ZEGO_APP_ID'),
+    server: getRequiredEnv('ZEGO_SERVER'),
   },
   
   api: {
-    baseUrl: getRequiredEnv('VITE_APP_BASE_URL'),
-    timeout: getNumberEnv('VITE_API_TIMEOUT', 30000),
+    baseUrl: getRequiredEnv('APP_BASE_URL'),
+    timeout: getNumberEnv('API_TIMEOUT', 30000),
   },
   
   digitalHuman: {
-    id: getOptionalEnv('VITE_DIGITAL_HUMAN_ID', '20be9bfb-ef6b-4d63-8c3b-1f20077599c5'),
-    configId: getOptionalEnv('VITE_CONFIG_ID', 'miniprogram'),
+    id: getOptionalEnv('DIGITAL_HUMAN_ID', '20be9bfb-ef6b-4d63-8c3b-1f20077599c5'),
+    configId: getOptionalEnv('CONFIG_ID', 'miniprogram'),
   },
   
   env: {
-    isDevelopment: (envConfig as any).VITE_APP_ENV === 'development',
-    isDebug: getOptionalEnv('VITE_DEBUG', 'false') === 'true',
-    logLevel: (getOptionalEnv('VITE_LOG_LEVEL', 'warn') as AppConfig['env']['logLevel']),
+    isDevelopment: (envConfig as any).APP_ENV === 'development',
+    isDebug: getOptionalEnv('DEBUG', 'false') === 'true',
+    logLevel: (getOptionalEnv('LOG_LEVEL', 'warn') as AppConfig['env']['logLevel']),
   },
 };
 

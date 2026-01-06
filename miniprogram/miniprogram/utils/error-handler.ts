@@ -393,7 +393,7 @@ export class ErrorHandler {
    */
   private static reportError(error: AppError): void {
     // 这里可以集成错误监控服务，如 Sentry
-    if (envConfig.VITE_APP_ENV === 'development') {
+    if (envConfig.APP_ENV === 'development') {
       logger.debug('ERROR_REPORTER', '错误上报', {
         type: error.type,
         message: error.message,

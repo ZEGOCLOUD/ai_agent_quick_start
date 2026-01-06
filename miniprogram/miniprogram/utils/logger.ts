@@ -16,7 +16,7 @@ class Logger {
   private isDevelopment: boolean;
 
   constructor() {
-    this.isDevelopment = envConfig.VITE_APP_ENV === 'development';
+    this.isDevelopment = envConfig.APP_ENV === 'development';
     this.level = this.isDevelopment ? LogLevel.DEBUG : LogLevel.WARN;
   }
 

@@ -24,11 +24,11 @@ This article introduces how to run the sample code on the miniprogram platform, 
 1. Clone or download [ai_agent_quick_start](https://github.com/ZEGOCLOUD/ai_agent_quick_start) to your local machine
 2. Switch to the `/miniprogram` directory in terminal and execute `npm install` to install dependencies
 3. Copy `/miniprogram/env.example.ts` to `env.ts` and modify the configuration items
-    > - `VITE_ZEGO_APP_ID`(`AppID` of Basic Information) and `VITE_ZEGO_SERVER`(`Server URL` of Basic Configurations) can be viewed in the **Project Configuration** of the [ZEGOCLOUD Console](https://console.zegocloud.com/). ⚠️Note: Must be consistent with the AppID used by the business backend deployment.
+    > - `ZEGO_APP_ID`(`AppID` of Basic Information) and `ZEGO_SERVER`(`Server URL` of Basic Configurations) can be viewed in the **Project Configuration** of the [ZEGOCLOUD Console](https://console.zegocloud.com/). ⚠️Note: Must be consistent with the AppID used by the business backend deployment.
     >
     > <img width="3840" height="1916" alt="Image" src="https://github.com/user-attachments/assets/ed06dd61-983e-433a-8984-5c87b1139bb5" />
     >
-    > - `VITE_APP_BASE_URL` is your business backend address. Please refer to the [Business Backend Sample Code](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server) to deploy the business backend, then you can obtain it
+    > - `APP_BASE_URL` is your business backend address. Please refer to the [Business Backend Sample Code](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server) to deploy the business backend, then you can obtain it
 
 4. Import the project into the WeChat MiniProgram Development Tool
 5. Configure your MiniProgram `AppID` in the **Details - Basic Information** section to start the experience
@@ -43,13 +43,13 @@ This article introduces how to run the sample code on the miniprogram platform, 
 
 ```bash
 # Digital human configuration (if not using digital human functionality, you can keep default values)
-VITE_DIGITAL_HUMAN_ID=c4b56d5c-db98-4d91-86d4-5a97b507da97
-VITE_CONFIG_ID=miniprogram
+DIGITAL_HUMAN_ID=c4b56d5c-db98-4d91-86d4-5a97b507da97
+CONFIG_ID=miniprogram
 
 # Development configuration
-VITE_DEBUG=true                           # Whether to enable debug mode
-VITE_LOG_LEVEL=debug                      # Log level
-VITE_API_TIMEOUT=30000                    # API request timeout
+DEBUG=true                           # Whether to enable debug mode
+LOG_LEVEL=debug                      # Log level
+API_TIMEOUT=30000                    # API request timeout
 ```
 
 

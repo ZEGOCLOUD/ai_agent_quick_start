@@ -24,11 +24,11 @@ ZEGO 实时互动 AI Agent（下文简称"互动AI"或"AI Agent"），通过接�
 1. 将 [ai_agent_quick_start](https://github.com/ZEGOCLOUD/ai_agent_quick_start)克隆或下载到本地
 2. 终端切换到 `/miniprogram` 目录，执行`npm install`安装依赖
 3. 将 `/miniprogram/env.example.ts` 复制为 `env.ts`，并修改其中的配置项
-    > - `VITE_ZEGO_APP_ID`(基本信息的`AppID`) 和 `VITE_ZEGO_SERVER`(配置信息的`Server 地址`) 可在 [ZEGO 控制台](https://console.zego.im) 的**项目概览**中查看。⚠️注意：必须与业务后台部署使用的AppID保持一致。
+    > - `ZEGO_APP_ID`(基本信息的`AppID`) 和 `ZEGO_SERVER`(配置信息的`Server 地址`) 可在 [ZEGO 控制台](https://console.zego.im) 的**项目概览**中查看。⚠️注意：必须与业务后台部署使用的AppID保持一致。
     >
     > <img width="3840" height="1916" alt="Image" src="https://github.com/user-attachments/assets/8c7d021f-57fb-43a0-9389-77109f444bb8" />
     >
-    > - `VITE_APP_BASE_URL` 为您的业务后台地址，请参考 [业务后台示例代码](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server)部署好业务后台后，即可获取
+    > - `APP_BASE_URL` 为您的业务后台地址，请参考 [业务后台示例代码](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server)部署好业务后台后，即可获取
 
 4. 将项目导入到微信小程序开发工具中
 5. 在详情-基本信息中配置您的小程序 `AppID` ，即可开始体验
@@ -44,13 +44,13 @@ ZEGO 实时互动 AI Agent（下文简称"互动AI"或"AI Agent"），通过接�
 
 ```bash
 # 数字人配置（如果不使用数字人功能可以保持默认值）
-VITE_DIGITAL_HUMAN_ID=c4b56d5c-db98-4d91-86d4-5a97b507da97
-VITE_CONFIG_ID=miniprogram
+DIGITAL_HUMAN_ID=c4b56d5c-db98-4d91-86d4-5a97b507da97
+CONFIG_ID=miniprogram
 
 # 开发配置
-VITE_DEBUG=true                           # 是否开启调试模式
-VITE_LOG_LEVEL=debug                      # 日志级别
-VITE_API_TIMEOUT=30000                    # API 请求超时时间
+DEBUG=true                           # 是否开启调试模式
+LOG_LEVEL=debug                      # 日志级别
+API_TIMEOUT=30000                    # API 请求超时时间
 ```
 
 
