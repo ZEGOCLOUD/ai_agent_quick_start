@@ -1,0 +1,61 @@
+<view class="page-container">
+  <view class="content">
+    <view class="id">RoomID = {{roomId}}</view>
+    <view wx:if="{{agentInstanceId}}" class="id copyable-container">
+      <text selectable="true">AgentInstanceID = {{agentInstanceId}}</text>
+      <text class="copy-btn" bindtap="copyAgentInstanceId">copy</text>
+    </view>
+    <!-- 用户头像区域 -->
+    <view class="user-list">
+      <view class="user-avatar">
+        <text class="user-name">{{userName}}</text>
+        <text class="user-id">{{userId}}</text>
+        
+      </view>
+      <view class="user-avatar">
+        <text class="status">{{agentStatusMap[agentStatus]}}</text>
+        <text class="user-name">{{agentName}}</text>
+        <text class="user-id">{{agentUserId}}</text>
+      </view>
+    </view>
+
+    <view>
+      <zego-pusher id="zegoPusher" pusher="{{pusher}}" />
+      <zego-player class="zegoPlayer" wx:for="{{zegoPlayerList}}" wx:key="id" id="{{item.componentID}}" playerId="{{item.playerId}}" playerList="{{playerList}}" />
+    </view>
+    
+    <!-- 按钮 -->
+    <button wx:if="{{!isLoginRoom}}" class="btn" bindtap="handleLoginRoom">Login Room</button>
+    <button wx:else class="btn red-btn" bindtap="handleLogoutRoom">Logout Room</button>
+
+  </view>
+  
+  <!-- 提示区域 -->
+  <view class="note-area">
+    <text class="note-title">注意:</text>
+    <text class="note-item">1.同一个AppID内，需保证"userID"全局唯一，否则会互踢。</text>
+    <text class="note-item">2.请先在服务端创建对应的智能体，并在Call时同步创建智能体实例。</text>
+  </view>
+
+  <view class="chat">
+    <!-- 字幕折叠区域 -->
+    <view class="subtitles-wrap" bindtap="toggleSubtitles">
+      <text class="subtitles-title">subtitles (Click to {{isSubtitlesExpand ? 'collapse' : 'expand'}})</text>
+    </view>
+    
+    <!-- 对话消息区域 -->
+    <scroll-view wx:if="{{isSubtitlesExpand}}" class="message-list" id="messageList" scroll-y="{{true}}" scroll-into-view="{{toBottom}}" scroll-with-animation="{{true}}">
+      <!-- 循环渲染对话消息 -->
+      <view class="message-item" wx:for="{{messages}}" wx:key="index">
+        <!-- 消息内容 -->
+        <view wx:if="{{item.sender === 'bot'}}" class="message bot-message">
+          <text class="message-content">{{item.content}}</text>
+        </view>
+        <view wx:else class="message user-message">
+          <text class="message-content">{{item.content}}</text>
+        </view>
+      </view>
+      <view id="bottom"></view>
+    </scroll-view>
+  </view>
+</view>

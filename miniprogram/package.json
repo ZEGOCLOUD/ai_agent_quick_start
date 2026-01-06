@@ -1,0 +1,12 @@
+{
+  "name": "ai-agent-miniprogram-quickstart",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "zego-express-engine-miniprogram": "^3.8.0"
+  }
+}

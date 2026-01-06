@@ -1,0 +1,166 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  padding: 20rpx 30rpx;
+  box-sizing: border-box;
+  height: 100vh;
+}
+
+.back-btn {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.id {
+  display: flex;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 40rpx;
+}
+
+.user-list {
+  display: flex;
+  justify-content: center;
+  gap: 100rpx;
+  margin-bottom: 40rpx;
+}
+
+.user-avatar {
+  display: flex;
+  flex-direction: column;
+  width: 240rpx;
+  height: 240rpx;
+  border-radius: 50%;
+  background: #f5f5f5;
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx;
+  box-sizing: border-box;
+}
+
+.user-id, .user-name, .status {
+  font-size: 22rpx;
+  word-break: break-all;
+  text-align: center;
+}
+
+.btn {
+  height: 80rpx;
+  background: #8deb91;
+  color: #fff;
+  font-size: 32rpx;
+  border-radius: 10rpx;
+  margin-bottom: 30rpx;
+}
+.red-btn {
+  background: #fd4339;
+}
+
+.note-area {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 30rpx;
+}
+
+.note-title {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.note-item {
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.subtitles-wrap {
+  border: 1px solid #e0e0e0;
+  border-radius: 10rpx;
+  padding: 20rpx;
+}
+
+.subtitles-title {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.subtitles-content {
+  margin-top: 15rpx;
+  font-size: 26rpx;
+  color: #666;
+}
+.zegoPlayer {
+  display: none;
+}
+.message-list {
+  overflow-y: auto;
+  padding: 8px 0;
+  /* height: 400px; */
+}
+.message-item {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0px 4px 8px;
+}
+.message{
+  border-radius: 12px;
+  width: fit-content;
+  max-width: 85%;
+  padding: 10px 14px;
+  color: #ffffff;
+  font-family: "PingFang SC", sans-serif;
+  font-size: 14px; 
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+.message-content{
+  text-align: left;
+  word-break: break-word;
+}
+.bot-message{
+  align-self: flex-start;
+  margin-right: auto;
+  background-color: #f3f4f7;
+  color: #333;
+}
+.user-message {
+  align-self: flex-end;
+  margin-left: auto;
+  background: #3478fc;
+}
+#bottom {
+  height: 8px;
+}
+
+.copyable-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+}
+
+.copy-btn {
+  background-color: #3478fc;
+  color: white;
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  cursor: pointer;
+  user-select: none;
+}
+
+.copy-btn:active {
+  background-color: #2a68d3;
+}
