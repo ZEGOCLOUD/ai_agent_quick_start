@@ -41,7 +41,7 @@ public class AudioChatMessageParser {
 
     private static String TAG = "AudioChatMessageParser";
 
-    private static final boolean SUPPORT_STREAM = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
+    private static final boolean SUPPORT_STREAM = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N; // API 24+
 
     /**
      * 输入
@@ -176,10 +176,12 @@ public class AudioChatMessageParser {
         if (roundLLMMessages.isEmpty()) {
             // 如果这一轮round 在消息列表中还没有message,那么就直接插入这条消息。
             rtcMessageList.add(newLLMMessage);
+            Log.d(TAG, "插入新消息 ： [" + mergedLLMText + "]");
         } else {
             //如果已经有了,rtcMessageList 中的这一轮round应该只有一条消息
             AudioChatMessage inListMessage = roundLLMMessages.get(0);
             if (inListMessage != null) {
+                //  如果不是同一条消息，比较seqId，如果新消息seqId比较小，则忽略
                 // 如果新消息和已经有的消息id相同
                 if (Objects.equals(newMessage.data.messageId, inListMessage.data.messageId)) {
                     // 新消息的 seqId 比较小，忽略
@@ -222,7 +224,23 @@ public class AudioChatMessageParser {
             rtcRoomMessages.add(newMessage);
             llmMessageTemp.put(newMessage.data.messageId, rtcRoomMessages);
         } else {
-            rtcRoomMessages.add(newMessage);
+            // 检查是否已存在相同seqId和messageId的消息
+            boolean exists = false;
+            if (SUPPORT_STREAM) {
+                exists = rtcRoomMessages.stream().anyMatch(m ->
+                    m.seqId == newMessage.seqId && Objects.equals(m.data.messageId, newMessage.data.messageId)
+                );
+            } else {
+                for (AudioChatMessage m : rtcRoomMessages) {
+                    if (m.seqId == newMessage.seqId && Objects.equals(m.data.messageId, newMessage.data.messageId)) {
+                        exists = true;
+                        break;
+                    }
+                }
+            }
+            if (!exists) {
+                rtcRoomMessages.add(newMessage);
+            }
         }
 
         if (SUPPORT_STREAM) {
