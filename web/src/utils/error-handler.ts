@@ -334,9 +334,54 @@ export class ErrorHandler {
   }
 
   /**
+   * 格式化操作名称
+   */
+  private static formatOperation(context?: string): string {
+    if (!context) return '';
+    
+    // 从 context 中提取操作名称
+    // 例如：'Chat.handleLogin' -> '聊天 - 登录房间'
+    // 例如：'useRoom.getToken' -> '获取 Token'
+    const parts = context.split('.');
+    const moduleName = parts[0] || context;
+    const actionName = parts[1] || '';
+    
+    // 简化的操作名称映射
+    const operationMap: Record<string, string> = {
+      'Chat.handleLogin': '聊天 - 登录房间',
+      'Chat.handleLogout': '聊天 - 退出房间',
+      'Chat.onMounted': '聊天 - 初始化',
+      'useRoom.getToken': '获取 Token',
+      'useRoom.loginRoom': '登录房间',
+      'useRoom.logoutRoom': '退出房间',
+      'useRoom.startPublishingStream': '开始推流',
+      'useRoom.checkPermission': '检查权限',
+      'useRoom.roomStreamUpdate': '拉取远程流',
+      'useRoom.roomStateChanged': '房间状态变化',
+    };
+    
+    const operation = operationMap[context] || `${moduleName}${actionName ? ` - ${actionName}` : ''}`;
+    return `操作：${operation}`;
+  }
+
+  /**
    * 显示用户提示
    */
   private static showUserNotification(error: AppError): void {
+    // 构建详细的错误消息
+    let detailedMessage = error.userMessage;
+    
+    // 添加具体操作（如果有 context）
+    const operation = this.formatOperation(error.context);
+    if (operation) {
+      detailedMessage = `${operation}\n${detailedMessage}`;
+    }
+    
+    // 添加错误原因（如果有 message 且不同于 userMessage）
+    if (error.message && error.message !== error.userMessage && error.message !== 'Unknown error') {
+      detailedMessage = `${detailedMessage}\n原因：${error.message}`;
+    }
+    
     const options = {
       duration: this.getNotificationDuration(error.severity),
       showClose: true,
@@ -346,26 +391,26 @@ export class ErrorHandler {
       case ErrorSeverity.CRITICAL:
         ElNotification.error({
           title: '严重错误',
-          message: error.userMessage,
+          message: detailedMessage,
           ...options,
           duration: 0, // 不自动关闭
         });
         break;
       case ErrorSeverity.HIGH:
         ElMessage.error({
-          message: error.userMessage,
+          message: detailedMessage,
           ...options,
         });
         break;
       case ErrorSeverity.MEDIUM:
         ElMessage.warning({
-          message: error.userMessage,
+          message: detailedMessage,
           ...options,
         });
         break;
       case ErrorSeverity.LOW:
         ElMessage.info({
-          message: error.userMessage,
+          message: detailedMessage,
           ...options,
         });
         break;
