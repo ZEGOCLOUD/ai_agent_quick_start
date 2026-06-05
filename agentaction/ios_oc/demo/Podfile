@@ -1,0 +1,6 @@
+platform :ios, '15.0'
+project 'HostApp.xcodeproj'
+target 'HostApp' do
+  pod 'ZegoAIAgentActionObjC', :path => '../agentaction'
+  pod 'ZegoExpressEngine', '~> 3.15.0'
+end

@@ -1,0 +1,56 @@
+# Local editor / tool state
+.DS_Store
+.idea/
+.vscode/
+.omc/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# JavaScript / Web
+web/node_modules/
+web/agentaction/node_modules/
+web/npm-debug.log*
+web/agentaction/npm-debug.log*
+web/yarn-error.log*
+web/agentaction/yarn-error.log*
+
+# Dart / Flutter
+.dart_tool/
+**/.dart_tool/
+**/.packages
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/build/
+flutter/demo/.metadata
+
+# Android / Gradle
+**/.gradle/
+**/local.properties
+**/*.class
+**/*.apk
+**/*.aab
+**/*.dex
+**/captures/
+
+# Swift Package Manager
+**/.build/
+**/.swiftpm/
+
+# Xcode / iOS
+**/DerivedData/
+**/*.xcuserstate
+**/*.xcworkspace/xcuserdata/
+**/*.xcodeproj/xcuserdata/
+**/*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# CocoaPods
+ios_oc/Pods/
+ios_oc/Podfile.lock
+ios_oc/demo/Pods/
+ios_oc/demo/Podfile.lock
+
+# Generated validation reports
+**/reports/

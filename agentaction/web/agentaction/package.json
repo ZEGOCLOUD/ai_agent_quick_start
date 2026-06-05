@@ -1,0 +1,14 @@
+{
+  "name": "zego-ai-agent-action-web",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "google-protobuf": "^4.0.1"
+  },
+  "devDependencies": {
+    "protoc-gen-js": "^3.21.4-4"
+  },
+  "scripts": {
+    "generate:proto": "../../scripts/generate_protocol.sh"
+  }
+}

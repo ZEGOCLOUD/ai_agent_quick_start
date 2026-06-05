@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package zego.aiagent.action;
+
+option java_package = "com.zego.agentaction";
+option java_outer_classname = "AIAgentActionProto";
+option swift_prefix = "Zego";
+
+message AgentActionEnvelope {
+  string action = 1;
+  string seq = 2;
+  bytes params = 3;
+}
+
+message AgentActionResponse {
+  string action = 1;
+  string seq = 2;
+  int32 code = 3;
+  string message = 4;
+  string request_id = 5;
+  bytes data = 6;
+}
+
+message SendAgentInstanceTTSParams {
+  string text = 1;
+  bool add_history = 2;
+  int32 interrupt_mode = 3;
+  string priority = 4;
+  string same_priority_option = 5;
+  bool enqueue_user_speech = 6;
+}
+
+message SendAgentInstanceLLMParams {
+  string text = 1;
+  string system_prompt = 2;
+  bool add_question_to_history = 3;
+  bool add_answer_to_history = 4;
+  string priority = 5;
+  string same_priority_option = 6;
+  bool enqueue_user_speech = 7;
+}
+
+message InterruptAgentInstanceParams {}
+
+message StartListeningParams {
+  string user_id = 1;
+}
+
+message StopListeningParams {
+  string user_id = 1;
+}
