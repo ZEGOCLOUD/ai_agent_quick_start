@@ -9,11 +9,41 @@
 
 > 英文版本请见 [README.en.md](./README.en.md)。
 
+## 套件结构图
+
+```text
+web/
+├── agentaction/
+│   ├── package.json
+│   ├── index.js
+│   ├── index.d.ts
+│   └── src/
+│       ├── zego_ai_agent_action.js
+│       ├── defines.js
+│       ├── logger.js
+│       └── generated/
+│           └── ai_agent_action_pb.js
+└── demo/
+    └── index.html
+```
+
+可以把这几层理解成：
+
+- `index.js`：套件对外的默认入口。打包工程、CommonJS、TS 项目优先从这里导入。
+- `index.d.ts`：给 TypeScript 工程用的类型声明。它不参与运行，只负责让 IDE 和编译器知道套件暴露了哪些类、方法和参数。
+- `src/zego_ai_agent_action.js`：套件真正的实现入口，`index.js` 最终就是转发到这里。
+- `src/defines.js`：ZEGO Express 实验性 API 的方法名、字段名、错误码等常量。
+- `src/logger.js`：套件内部日志工具。
+- `src/generated/ai_agent_action_pb.js`：已经生成好的 Protobuf 参数类，供 CommonJS/打包场景直接使用。
+
 ## 集成步骤
 
 ### 1. 拷贝源码
 
-将 `web/agentaction` 拷贝到你的 Web 项目中。浏览器直接 `<script>` 引入时无需额外安装；如果使用 CommonJS/打包工具引入，请在拷贝后的目录安装 Protobuf 运行时：
+将 `web/agentaction` 拷贝到你的 Web 项目中。
+
+- 浏览器直接 `<script>` 引入：无需额外安装。
+- CommonJS / 打包工具 / TypeScript 项目：在拷贝后的目录安装依赖。
 
 ```bash
 cd web/agentaction
@@ -22,7 +52,11 @@ npm install
 
 ### 2. 加载套件
 
-浏览器直接引入时按以下顺序加载：
+推荐分成两种接入方式理解。
+
+#### 方式 A：浏览器直接引入
+
+按以下顺序加载：
 
 ```html
 <script src="./agentaction/src/defines.js"></script>
@@ -30,7 +64,35 @@ npm install
 <script src="./agentaction/src/zego_ai_agent_action.js"></script>
 ```
 
-如果使用 CommonJS，也可以 `require('./agentaction/src/zego_ai_agent_action')`，此时会使用 `src/generated/ai_agent_action_pb.js` 与 `google-protobuf`。
+加载完成后，套件会挂到全局对象：
+
+```js
+window.ZegoAIAgentAction
+```
+
+这种方式最适合直接打开 `html` 的 Demo 或纯浏览器页面。
+
+#### 方式 B：工程化项目引入
+
+如果你的 Web 项目是 CommonJS、Vite、Webpack、TS 工程，优先走包入口：
+
+```js
+const ZegoAIAgentAction = require('./agentaction');
+```
+
+或：
+
+```ts
+import ZegoAIAgentAction from './agentaction';
+```
+
+这里真正起作用的是：
+
+- `package.json` 的 `"main": "index.js"`：告诉运行时默认入口是 `index.js`
+- `package.json` 的 `"types": "index.d.ts"`：告诉 TypeScript 类型入口是 `index.d.ts`
+- `index.js` 再把实现转发到 `src/zego_ai_agent_action.js`
+
+也就是说，业务项目通常不需要再关心 `src/*.js` 的内部路径，只需要面向套件入口使用即可。
 
 ### 3. 实现 Sender，桥接到 ZEGO Express
 

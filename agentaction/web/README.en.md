@@ -9,11 +9,41 @@ This folder provides the Web AI Agent Action client suite. It controls AI Agent 
 
 > Chinese version: [README.md](./README.md)
 
+## Suite Structure
+
+```text
+web/
+├── agentaction/
+│   ├── package.json
+│   ├── index.js
+│   ├── index.d.ts
+│   └── src/
+│       ├── zego_ai_agent_action.js
+│       ├── defines.js
+│       ├── logger.js
+│       └── generated/
+│           └── ai_agent_action_pb.js
+└── demo/
+    └── index.html
+```
+
+You can read the layers like this:
+
+- `index.js`: the public runtime entry for the suite. Bundlers, CommonJS projects, and TS projects should import from here first.
+- `index.d.ts`: type declarations for TypeScript. It does not run at runtime; it only describes the suite surface to the IDE and compiler.
+- `src/zego_ai_agent_action.js`: the real implementation entry. `index.js` simply re-exports this file.
+- `src/defines.js`: constants for ZEGO Express experimental API methods, keys, and error codes.
+- `src/logger.js`: internal logging helper.
+- `src/generated/ai_agent_action_pb.js`: generated protobuf parameter classes used by CommonJS and bundler scenarios.
+
 ## Integration
 
 ### 1. Copy the suite
 
-Copy `web/agentaction` into your Web project. Direct browser `<script>` usage does not need extra installation. If you use CommonJS or a bundler, install the protobuf runtime in the copied folder:
+Copy `web/agentaction` into your Web project.
+
+- Direct browser `<script>` usage does not need extra installation.
+- For CommonJS, bundlers, or TypeScript projects, install the dependency in the copied folder:
 
 ```bash
 cd web/agentaction
@@ -22,7 +52,11 @@ npm install
 
 ### 2. Load the suite
 
-For direct browser usage, load scripts in this order:
+Use one of the following loading styles.
+
+#### Option A: direct browser scripts
+
+Load scripts in this order:
 
 ```html
 <script src="./agentaction/src/defines.js"></script>
@@ -30,7 +64,35 @@ For direct browser usage, load scripts in this order:
 <script src="./agentaction/src/zego_ai_agent_action.js"></script>
 ```
 
-For CommonJS usage, you can `require('./agentaction/src/zego_ai_agent_action')`; that path uses `src/generated/ai_agent_action_pb.js` and `google-protobuf`.
+After loading, the suite is exposed on:
+
+```js
+window.ZegoAIAgentAction
+```
+
+This is the best fit for a plain browser demo or a directly opened HTML page.
+
+#### Option B: project-style import
+
+For CommonJS, bundlers, or TypeScript projects, prefer the package entry:
+
+```js
+const ZegoAIAgentAction = require('./agentaction');
+```
+
+or:
+
+```ts
+import ZegoAIAgentAction from './agentaction';
+```
+
+This works because:
+
+- `"main": "index.js"` makes `index.js` the runtime entry
+- `"types": "index.d.ts"` makes `index.d.ts` the type entry
+- `index.js` then forwards to `src/zego_ai_agent_action.js`
+
+So the business project usually does not need to import `src/*.js` paths directly.
 
 ### 3. Implement the Sender
 

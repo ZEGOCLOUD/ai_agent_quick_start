@@ -9,7 +9,9 @@ web/demo/
 └── index.html    # Initializes Express, logs in, and exercises all 5 actions
 ```
 
-The demo imports `../agentaction/src/*.js` directly, so you do not need to copy the suite source to run it.
+The demo imports `../agentaction/src/*.js` directly, so you can run it without copying another suite folder.
+
+This is intentional: the demo uses the direct browser-loading path so `index.html` can be opened and verified immediately. For a TS, Vite, or Webpack project, prefer the package-entry path described in the suite README: `agentaction/index.js + index.d.ts`.
 
 ## Run
 
@@ -29,5 +31,18 @@ The demo follows the same external wiring as Android/iOS:
 - In `sender`, pass the generated `formatedJson` directly to `zg.callExperimentalAPI(formatedJson)`.
 - In `recvExperimentalAPI`, forward the raw `content` string to `client.handleRoomChannelMessage(content)`.
 - The page buttons exercise TTS, LLM, Interrupt, StartListening, StopListening, and CancelAll.
+
+## How Demo Relates to the Suite Entry
+
+You can read the split like this:
+
+- Demo: directly loads `src/defines.js`, `src/logger.js`, and `src/zego_ai_agent_action.js`
+- Public suite runtime entry: `agentaction/index.js`
+- TypeScript type entry: `agentaction/index.d.ts`
+
+In other words:
+
+- the demo is optimized for direct browser verification
+- `index.js / index.d.ts` are optimized for integration into project-based apps
 
 For protocol fields, error codes, and defaults, see the [suite README](../README.md).
