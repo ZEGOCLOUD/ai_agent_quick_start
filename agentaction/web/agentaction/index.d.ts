@@ -87,6 +87,19 @@ export interface ZegoAIAgentActionClientInstance {
   cancelAll(message?: string): void;
 }
 
+export interface ZegoAIAgentActionLoggerInstance {
+  installSink(handler: (level: number, label: string, line: string) => void): void;
+  setLevel(level: number): void;
+  debug(message: string): void;
+  info(message: string): void;
+  warn(message: string): void;
+  error(message: string): void;
+  LEVEL_DEBUG: number;
+  LEVEL_INFO: number;
+  LEVEL_WARN: number;
+  LEVEL_ERROR: number;
+}
+
 export interface ZegoAIAgentActionModule {
   ZegoAIAgentActionClient: new (options: {
     roomId: string;
@@ -94,7 +107,7 @@ export interface ZegoAIAgentActionModule {
     userId: string;
     deviceId?: string;
     timeoutMs?: number;
-    sender: (params: ZegoAIAgentActionSendParams, formatedJson: string) => Promise<ZegoAIAgentActionSendResult>;
+    sender: (params: ZegoAIAgentActionSendParams, formatedJson: Record<string, unknown>) => Promise<ZegoAIAgentActionSendResult>;
     onResponse?: (response: ZegoAIAgentActionResponse) => void;
     onError?: (error: ZegoAIAgentActionError) => void;
   }) => ZegoAIAgentActionClientInstance;
@@ -110,6 +123,7 @@ export interface ZegoAIAgentActionModule {
     StartListeningParams: new () => StartListeningParams;
     StopListeningParams: new () => StopListeningParams;
   };
+  ZegoAIAgentActionLogger: ZegoAIAgentActionLoggerInstance;
 }
 
 declare const ZegoAIAgentAction: ZegoAIAgentActionModule;

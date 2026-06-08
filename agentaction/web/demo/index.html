@@ -76,10 +76,9 @@ async function initSDK() {
   zg.on('roomStateUpdate', (roomID, state, errorCode, extendedData) => {
     log('[roomStateUpdate] roomID=' + roomID + ' state=' + state + ' errorCode=' + errorCode);
   });
-  zg.on('recvExperimentalAPI', (content) => {
-    log('[recvExperimentalAPI] length=' + (content && content.length));
-    log('[recvExperimentalAPI] ' + content);
-    client.handleRoomChannelMessage(content);
+  zg.on('recvExperimentalAPI', (payload) => {
+    log('[recvExperimentalAPI] ' + JSON.stringify(payload));
+    client.handleRoomChannelMessage(payload);
   });
 
   log('loginRoom roomId=' + roomId);
@@ -87,10 +86,10 @@ async function initSDK() {
   log('logged in to ' + roomId);
 
   // 开启实验性 API 房间消息通道接收
-  zg.callExperimentalAPI(JSON.stringify({
-    method: ZegoAIAgentActionDefines.ExpressMethods.onReciveRoomChannelMessage,
+  zg.callExperimentalAPI({
+    method: ZegoAIAgentActionDefines.ExpressMethods.onRecvRoomChannelMessage,
     params: {}
-  }));
+  });
 }
 
 function createClient() {
@@ -100,7 +99,7 @@ function createClient() {
     agentUserId: document.getElementById('agentUserId').value,
     sender: async (params, formatedJson) => {
       log('[sender] action=callExperimentalAPI seq=' + params.seq);
-      log('[sender] formatedJson=' + formatedJson);
+      log('[sender] formatedJson=' + JSON.stringify(formatedJson));
       try {
         const result = await zg.callExperimentalAPI(formatedJson);
         log('[sender] callExperimentalAPI result=' + result);

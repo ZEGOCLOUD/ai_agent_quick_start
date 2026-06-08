@@ -25,12 +25,18 @@ open agentaction/web/demo/index.html
 
 ## Integration Shape
 
-The demo follows the same external wiring as Android/iOS:
+The demo follows the same business flow as Android/iOS, but the Web experimental API method names and callback payload shape differ from the native platforms:
 
 - Initialize `ZegoExpressEngine` and log in to the room.
-- In `sender`, pass the generated `formatedJson` directly to `zg.callExperimentalAPI(formatedJson)`.
-- In `recvExperimentalAPI`, forward the raw `content` string to `client.handleRoomChannelMessage(content)`.
+- In `sender`, pass the suite-provided `formatedJson` object directly to `zg.callExperimentalAPI(...)`.
+- In `recvExperimentalAPI`, forward the raw `payload` object to `client.handleRoomChannelMessage(payload)`.
 - The page buttons exercise TTS, LLM, Interrupt, StartListening, StopListening, and CancelAll.
+
+Additional Web notes:
+
+- the Web experimental API method names are `sendRoomChannelMessage / onRecvRoomChannelMessage`
+- unlike native platforms, Web has no send callback
+- so "send succeeded" is mainly determined by whether `callExperimentalAPI` throws, while the business result still depends on the agent reply or timeout
 
 ## How Demo Relates to the Suite Entry
 

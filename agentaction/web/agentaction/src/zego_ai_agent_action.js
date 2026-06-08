@@ -182,6 +182,19 @@
         };
     }
 
+    function extractRoomChannelEvent(data) {
+        if (!data || typeof data !== 'object') return null;
+        const method = data[defines.ExpressKeys.method];
+        if (method !== defines.ExpressMethods.onRecvRoomChannelMessage) return null;
+        const body = data[defines.ExpressKeys.content] || data[defines.ExpressKeys.params];
+        if (!body || typeof body !== 'object') return null;
+        return {
+            body: body,
+            msgType: body[defines.ExpressKeys.msgType],
+            msgContent: body[defines.ExpressKeys.msgContent],
+        };
+    }
+
     class ZegoAIAgentActionClient {
         constructor(options) {
             options = options || {};
@@ -201,9 +214,7 @@
             this.onError = typeof options.onError === 'function' ? options.onError : null;
             this.onDebugEvent = typeof options.onDebugEvent === 'function' ? options.onDebugEvent : null;
             this.pending = new Map();
-            this.expressPending = new Map();
             this.localSeq = 0;
-            this.expressSeq = 0;
         }
 
         sendAgentInstanceTTS(params, options) {
@@ -238,103 +249,71 @@
                 data = typeof contentString === 'string' ? JSON.parse(contentString) : contentString;
             } catch (cause) {
                 this._debug('parse_failed', { cause: cause, rawMessage: contentString });
+                Log.debug('handleRoomChannelMessage skip: reason=parse_failed');
                 return false;
             }
 
-            if (!data) return false;
-            const method = data[defines.ExpressKeys.method];
-
-            if (method === defines.ExpressMethods.onReciveRoomChannelMessage) {
-                const params = data[defines.ExpressKeys.params];
-                if (!params || params[defines.ExpressKeys.msgType] !== MsgTypes.AGENT_ACTION_RESPONSE) {
-                    return false;
-                }
-                Log.debug('handleRoomChannelMessage recv: ' + (typeof contentString === 'string' ? contentString : JSON.stringify(contentString)));
-
-                const msgContentStr = params[defines.ExpressKeys.msgContent];
-                let content;
-                try {
-                    content = typeof msgContentStr === 'string' ? JSON.parse(msgContentStr) : msgContentStr;
-                } catch (cause) {
-                    Log.error('handleRoomChannelMessage msgContent parse error: ' + cause);
-                    this._debug('parse_failed', { cause: cause, rawMessage: msgContentStr });
-                    return false;
-                }
-
-                if (!content || typeof content[defines.ProtocolKeys.seq] !== 'string' || !content[defines.ProtocolKeys.action] || typeof content[defines.ProtocolKeys.code] !== 'number') {
-                    Log.warn('on_recive_room_channel_message missing required fields: ' + JSON.stringify(content));
-                    this._debug('invalid_response', { content: content, rawMessage: msgContentStr });
-                    return false;
-                }
-
-                const seq = content[defines.ProtocolKeys.seq];
-                const item = this.pending.get(seq);
-                if (!item) {
-                    Log.warn('on_recive_room_channel_message orphan seq=' + seq);
-                    this._debug('orphan_response', { seq: seq, content: content });
-                    return false;
-                }
-
-                clearTimeout(item.timer);
-                this.pending.delete(seq);
-
-                // 清理 expressPending
-                for (let [expSeq, bSeq] of this.expressPending.entries()) {
-                    if (bSeq === seq) {
-                        this.expressPending.delete(expSeq);
-                        break;
-                    }
-                }
-
-                const responseProto = decodeResponse(content);
-                const response = {
-                    action: responseProto.getAction(),
-                    seq: responseProto.getSeq(),
-                    code: responseProto.getCode(),
-                    message: responseProto.getMessage() || '',
-                    requestId: responseProto.getRequestId() || '',
-                    data: content[defines.ProtocolKeys.data],
-                    rawMessage: msgContentStr,
-                };
-
-                Log.info('recv action=' + response.action + ' seq=' + response.seq + ' code=' + response.code + ' message=' + response.message);
-                if (this.onResponse) this.onResponse(response);
-                if (response.code === ErrorCodes.SUCCESS) {
-                    item.resolve(response);
-                } else {
-                    const error = createError(response.seq, response.action, response.code, response.message || 'agent action failed');
-                    if (this.onError) this.onError(error);
-                    item.reject(error);
-                }
-                return true;
-            } else if (method === defines.ExpressMethods.onSendRoomChannelMessage) {
-                const params = data[defines.ExpressKeys.params];
-                if (!params) return false;
-                Log.debug('handleRoomChannelMessage recv: ' + (typeof contentString === 'string' ? contentString : JSON.stringify(contentString)));
-
-                const errorCode = params[defines.ExpressKeys.errorCode];
-                const expressSeq = params[defines.ExpressKeys.seq];
-
-                if (errorCode !== ErrorCodes.SUCCESS && expressSeq !== undefined) {
-                    const seq = this.expressPending.get(expressSeq);
-                    if (seq) {
-                        this.expressPending.delete(expressSeq);
-                        const item = this.pending.get(seq);
-                        if (item) {
-                            clearTimeout(item.timer);
-                            this.pending.delete(seq);
-                            const errorMessage = params[defines.ExpressKeys.errorMessage] || '';
-                            Log.warn('on_send_room_channel_message error seq=' + seq + ' errorCode=' + errorCode + ' message=' + errorMessage);
-                            const error = createError(seq, item.action, errorCode, errorMessage);
-                            if (this.onError) this.onError(error);
-                            item.reject(error);
-                        }
-                    }
-                }
-                return true;
+            const event = extractRoomChannelEvent(data);
+            if (!event) {
+                Log.debug('handleRoomChannelMessage skip: reason=not_room_channel_event method=' + (data && data[defines.ExpressKeys.method]));
+                return false;
             }
 
-            return false;
+            if (Number(event.msgType) !== MsgTypes.AGENT_ACTION_RESPONSE || !event.msgContent) {
+                return false;
+            }
+
+            Log.debug('handleRoomChannelMessage recv: ' + (typeof contentString === 'string' ? contentString : JSON.stringify(contentString)));
+
+            const msgContentStr = event.msgContent;
+            let content;
+            try {
+                content = typeof msgContentStr === 'string' ? JSON.parse(msgContentStr) : msgContentStr;
+            } catch (cause) {
+                Log.error('handleRoomChannelMessage msgContent parse error: ' + cause);
+                this._debug('parse_failed', { cause: cause, rawMessage: msgContentStr });
+                return false;
+            }
+
+            if (!content || typeof content[defines.ProtocolKeys.seq] !== 'string' || !content[defines.ProtocolKeys.action] || typeof content[defines.ProtocolKeys.code] !== 'number') {
+                Log.warn('on_recive_room_channel_message missing required fields: ' + JSON.stringify(content));
+                this._debug('invalid_response', { content: content, rawMessage: msgContentStr });
+                return false;
+            }
+
+            const seq = content[defines.ProtocolKeys.seq];
+            const item = this.pending.get(seq);
+            if (!item) {
+                Log.warn('on_recive_room_channel_message orphan seq=' + seq);
+                this._debug('orphan_response', { seq: seq, content: content });
+                return false;
+            }
+
+            clearTimeout(item.timer);
+            this.pending.delete(seq);
+
+            const responseProto = decodeResponse(content);
+            const response = {
+                action: responseProto.getAction(),
+                seq: responseProto.getSeq(),
+                code: responseProto.getCode(),
+                message: responseProto.getMessage() || '',
+                requestId: responseProto.getRequestId() || '',
+                data: content[defines.ProtocolKeys.data],
+                rawMessage: msgContentStr,
+            };
+
+            Log.info('recv action=' + response.action + ' seq=' + response.seq + ' code=' + response.code + ' message=' + response.message);
+            if (this.onResponse) this.onResponse(response);
+            if (response.code === ErrorCodes.SUCCESS) {
+                item.resolve(response);
+            } else {
+                const error = createError(response.seq, response.action, response.code, response.message || 'agent action failed');
+                if (this.onError) this.onError(error);
+                item.reject(error);
+            }
+            return true;
+
         }
 
         cancelAll(message) {
@@ -359,22 +338,16 @@
             envelope.setParams(params.serializeBinary());
             const msgContent = JSON.stringify(encodeEnvelope(envelope, params));
 
-            this.expressSeq += 1;
-            const currentExpressSeq = this.expressSeq;
-            this.expressPending.set(currentExpressSeq, seq);
-
             const expressParams = {};
             expressParams[defines.ExpressKeys.roomId] = this.roomId;
             expressParams[defines.ExpressKeys.msgType] = MsgTypes.AGENT_ACTION_REQUEST;
             expressParams[defines.ExpressKeys.msgContent] = msgContent;
             expressParams[defines.ExpressKeys.userList] = [agentUserId];
-            expressParams[defines.ExpressKeys.seq] = currentExpressSeq;
 
             const expressPayload = {};
             expressPayload[defines.ExpressKeys.method] = defines.ExpressMethods.sendRoomChannelMessage;
             expressPayload[defines.ExpressKeys.params] = expressParams;
-            const expressJson = JSON.stringify(expressPayload);
-            Log.info('send action=' + action + ' seq=' + seq + ' expressSeq=' + currentExpressSeq + ' msgContent=' + msgContent);
+            Log.info('send action=' + action + ' seq=' + seq + ' msgContent=' + msgContent);
 
             const sendParams = {
                 roomId: this.roomId,
@@ -385,6 +358,10 @@
                 msg_content: msgContent,
                 userList: [agentUserId],
                 user_list: [agentUserId],
+                roomID: this.roomId,
+                msgTypeValue: MsgTypes.AGENT_ACTION_REQUEST,
+                msgContentValue: msgContent,
+                toUserIDList: [agentUserId],
             };
 
             return new Promise((resolve, reject) => {
@@ -397,7 +374,7 @@
                 this.pending.set(seq, { action: action, resolve: resolve, reject: reject, timer: timer, startTime: Date.now() });
 
                 Promise.resolve()
-                    .then(() => this.sender(sendParams, expressJson))
+                    .then(() => this.sender(sendParams, expressPayload))
                     .then((result) => {
                         Log.debug('sender result action=' + action + ' seq=' + seq + ' errorCode=' + (result && result.errorCode));
                         if (result && result.errorCode && result.errorCode !== ErrorCodes.SUCCESS) {

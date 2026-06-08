@@ -32,7 +32,7 @@ You can read the layers like this:
 - `index.js`: the public runtime entry for the suite. Bundlers, CommonJS projects, and TS projects should import from here first.
 - `index.d.ts`: type declarations for TypeScript. It does not run at runtime; it only describes the suite surface to the IDE and compiler.
 - `src/zego_ai_agent_action.js`: the real implementation entry. `index.js` simply re-exports this file.
-- `src/defines.js`: constants for ZEGO Express experimental API methods, keys, and error codes.
+- `src/defines.js`: constants for the Web Express experimental API methods, keys, and error codes.
 - `src/logger.js`: internal logging helper.
 - `src/generated/ai_agent_action_pb.js`: generated protobuf parameter classes used by CommonJS and bundler scenarios.
 
@@ -96,7 +96,14 @@ So the business project usually does not need to import `src/*.js` paths directl
 
 ### 3. Implement the Sender
 
-The `sender` receives the JSON envelope assembled by the suite plus metadata such as `roomId / msgType / userList / seq`. For real traffic, pass `formatedJson` directly to the Web Express SDK `callExperimentalAPI`.
+The `sender` receives the suite metadata plus one request object named `formatedJson`. The name is kept for continuity, but on Web it is actually the object payload that can be passed directly into Express.
+
+Web Express experimental APIs are not fully identical to the native platforms:
+
+- the send method is `sendRoomChannelMessage`
+- the receive callback method is `onRecvRoomChannelMessage`
+- Web `recvExperimentalAPI` usually delivers an object payload, not the native-style JSON string
+- Web does not provide a send callback, so send success is mainly determined by the `callExperimentalAPI` call itself, and business completion still depends on the room-message response or timeout
 
 ```js
 const client = new ZegoAIAgentAction.ZegoAIAgentActionClient({
@@ -131,11 +138,12 @@ const client = new ZegoAIAgentAction.ZegoAIAgentActionClient({
 
 ```json
 {
-  "method": "liveroom.room.send_room_channel_message",
+  "method": "sendRoomChannelMessage",
   "params": {
-    "room_id": "room_1",
-    "msg_content": "{\"Action\":\"...\",\"Seq\":\"...\",\"Params\":{...}}",
-    "user_list": ["agent_1"],
+    "roomID": "room_1",
+    "msgType": 20,
+    "msgContent": "{\"Action\":\"...\",\"Seq\":\"...\",\"Params\":{...}}",
+    "toUserIDList": ["agent_1"],
     "seq": 1
   }
 }
@@ -175,15 +183,15 @@ await client.stopListening(new ZegoAIAgentAction.Protobuf.StopListeningParams())
 
 ### 5. Forward Room Channel Callbacks
 
-Forward Express `recvExperimentalAPI` content to `client.handleRoomChannelMessage(content)`. The suite decides whether the payload is an AI Agent Action message:
+Forward the raw `recvExperimentalAPI` payload object to `client.handleRoomChannelMessage(payload)`. The suite decides whether the payload is an AI Agent Action message:
 
 - AI Agent Action response: parse `Action/Seq/Code/Message/RequestId/Data` and trigger `onResponse` or `onError`; returns `true`.
-- AI Agent Action send receipt: when `errorCode != 0`, mark the matching `seq` as failed; returns `true`.
+- Web has no send callback; request completion is determined by the business response or timeout.
 - Other messages return `false`.
 
 ```js
-zg.on('recvExperimentalAPI', (content) => {
-  const consumed = client.handleRoomChannelMessage(content);
+zg.on('recvExperimentalAPI', (payload) => {
+  const consumed = client.handleRoomChannelMessage(payload);
   if (consumed) {
     console.log('agentaction message consumed');
   }
@@ -193,10 +201,10 @@ zg.on('recvExperimentalAPI', (content) => {
 Some Web Express versions require explicitly enabling experimental API room channel receive:
 
 ```js
-zg.callExperimentalAPI(JSON.stringify({
-  method: ZegoAIAgentActionDefines.ExpressMethods.onReciveRoomChannelMessage,
+zg.callExperimentalAPI({
+  method: ZegoAIAgentActionDefines.ExpressMethods.onRecvRoomChannelMessage,
   params: {}
-}));
+});
 ```
 
 ### 6. Cancel and Clean Up
@@ -207,10 +215,30 @@ client.cancelAll('logout');
 
 ### 7. Logging
 
+Suite-internal logs include a timestamp and a `[DEBUG]/[INFO]/[WARN]/[ERROR]` prefix. `ZegoAIAgentActionLogger` is available either as a browser global or as a named property on the main module entry.
+
+#### Option A: Direct `<script>` include
+
 ```js
 ZegoAIAgentActionLogger.setLevel(ZegoAIAgentActionLogger.LEVEL_DEBUG);
 ZegoAIAgentActionLogger.installSink((level, label, message) => {
   console.log('[AgentAction]', message);
+});
+```
+
+#### Option B: Bundler / TypeScript project
+
+Replace `<pkg>` with the actual npm package name.
+
+```ts
+import ZegoAIAgentAction from '<pkg>';
+
+ZegoAIAgentAction.ZegoAIAgentActionLogger.installSink((level, _label, message) => {
+  // level: 0=DEBUG 1=INFO 2=WARN 3=ERROR
+  const tagged = `[agentaction] ${message}`;
+  if (level >= 3) console.error(tagged);
+  else if (level >= 2) console.warn(tagged);
+  else console.log(tagged);
 });
 ```
 
@@ -228,3 +256,40 @@ ZegoAIAgentActionLogger.installSink((level, label, message) => {
 ## Run Demo
 
 Open `web/demo/index.html` in a browser. Before running it, fill in your `appID / server / token`, and adjust `roomId / userId / agentUserId` as needed.
+
+## Troubleshooting
+
+> The following only applies if you are vendoring the suite into your own project as a pnpm `file:` dependency and modifying its source. Plain `npm i <pkg>` users are not affected.
+
+### Source changes not reflected at runtime
+
+**Symptom**: You edit files under the vendored copy (typical path `<vendor-dir>/src/*.js`, e.g. the copy of `quickstart/.../agentaction/web/agentaction/` placed inside your own project) but the browser keeps running the old version — newly added `console.log` calls or modified logic do not take effect.
+
+**Root cause**: pnpm `file:` dependencies copy a snapshot into `node_modules/.pnpm/<pkg>@file+<vendor-dir>/` at install time, and the snapshot is not auto-refreshed when you edit the source. Vite additionally pre-bundles dependencies into `node_modules/.vite/`, so even after a `pnpm install` the dev server may still serve the cached old build.
+
+**Fix**:
+
+```bash
+# 1. Stop dev server (if running)
+# 2. Remove pnpm snapshot
+rm -rf node_modules/.pnpm/<pkg>@file+<vendor-dir>
+# 3. Remove Vite pre-bundle cache
+rm -rf node_modules/.vite node_modules/.vite-temp
+# 4. Re-install (rebuilds the file: snapshot)
+pnpm install
+# 5. Start dev server
+pnpm run serve
+# 6. Hard-reload the browser (Cmd+Shift+R / Ctrl+Shift+R)
+```
+
+**Verify the snapshot is in sync**:
+
+```bash
+# Both MD5s must be identical. If they differ, the snapshot was not refreshed.
+md5 -q <vendor-dir>/src/zego_ai_agent_action.js \
+  node_modules/.pnpm/<pkg>@file+<vendor-dir>/node_modules/<pkg>/src/zego_ai_agent_action.js
+```
+
+### Stack traces point at suite source but the line numbers are off
+
+Same root cause as above — the Vite pre-bundle cache is serving stale SDK source maps. Delete `node_modules/.vite` and restart the dev server.

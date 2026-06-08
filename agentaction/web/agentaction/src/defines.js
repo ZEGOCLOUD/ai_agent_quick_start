@@ -8,26 +8,19 @@
     'use strict';
 
     const ExpressMethods = {
-        /// 发送房间通道消息的方法名
-        sendRoomChannelMessage: 'liveroom.room.send_room_channel_message',
-
-        /// 收到房间通道消息的回调方法名
-        onReciveRoomChannelMessage: 'liveroom.room.on_recive_room_channel_message',
-
-        /// 发送房间通道消息结果的回调方法名
-        onSendRoomChannelMessage: 'liveroom.room.on_send_room_channel_message',
+        sendRoomChannelMessage: 'sendRoomChannelMessage',
+        onRecvRoomChannelMessage: 'onRecvRoomChannelMessage',
     };
 
     const ExpressKeys = {
         method: 'method',
         params: 'params',
-        roomId: 'room_id',
-        msgType: 'msg_type',
-        msgContent: 'msg_content',
-        userList: 'user_list',
+        content: 'content',
+        roomId: 'roomID',
+        msgType: 'msgType',
+        msgContent: 'msgContent',
+        userList: 'toUserIDList',
         seq: 'seq',
-        errorCode: 'error_code',
-        errorMessage: 'error_message',
     };
 
     const ProtocolKeys = {

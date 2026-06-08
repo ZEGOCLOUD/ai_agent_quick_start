@@ -6,11 +6,5 @@
   "types": "index.d.ts",
   "dependencies": {
     "google-protobuf": "^4.0.1"
-  },
-  "devDependencies": {
-    "protoc-gen-js": "^3.21.4-4"
-  },
-  "scripts": {
-    "generate:proto": "../../scripts/generate_protocol.sh"
   }
 }

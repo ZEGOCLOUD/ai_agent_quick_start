@@ -25,12 +25,18 @@ open agentaction/web/demo/index.html
 
 ## 接入方式
 
-Demo 的关键链路与 Android/iOS 保持一致：
+Demo 的业务链路与 Android/iOS 保持一致，但 Web 实验性 API 的方法名和回调载荷形态与原生端不同：
 
 - 初始化 `ZegoExpressEngine` 并登录房间；
-- 在 `sender` 中把套件生成的 `formatedJson` 原样传给 `zg.callExperimentalAPI(formatedJson)`；
-- 在 `recvExperimentalAPI` 中把收到的 `content` 原文交给 `client.handleRoomChannelMessage(content)`；
+- 在 `sender` 中把套件提供的 `formatedJson` 对象直接传给 `zg.callExperimentalAPI(...)`；
+- 在 `recvExperimentalAPI` 中把收到的原始 `payload` 对象交给 `client.handleRoomChannelMessage(payload)`；
 - 页面按钮分别演示 TTS、LLM、Interrupt、StartListening、StopListening 与 CancelAll。
+
+补充说明：
+
+- Web Express 的实验性 API 方法名是 `sendRoomChannelMessage / onRecvRoomChannelMessage`
+- 不同于原生端，Web 侧发送没有回调
+- 因此 Web 侧的“发送成功”主要看 `callExperimentalAPI` 有没有抛错，业务结果则继续等智能体回包或超时
 
 ## Demo 和套件入口的关系
 
