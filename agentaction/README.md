@@ -22,7 +22,7 @@ ios_oc/
   demo/
 ```
 
-客户接入时只需将目标平台下的 `agentaction/` 目录拷贝到自己的项目即可，对应的 `demo/` 目录提供了带 Mock 房间通道发送器的最小可运行示例。
+客户接入时只需将目标平台下的 `agentaction/` 目录拷贝到自己的项目即可，对应的 `demo/` 目录提供了最小可运行示例，演示如何把套件生成的 `formatedJson` 透传给 ZEGO Express `callExperimentalAPI`，并把 `onRecvExperimentalAPI` 回调转交给套件。
 
 > 英文版本请见 [README.en.md](./README.en.md)。
 
@@ -55,7 +55,7 @@ ios_oc/
 
 ## 消息格式
 
-套件向 `user_list=[agentUserId]` 发送 `msg_type=20` 消息。
+套件向 `user_list=[agentUserId]` 发送房间通道消息。
 
 `msg_content` 采用 JSON 传输信封，便于在当前 Demo 中运行而无需引入 Protobuf 运行时：
 
@@ -76,13 +76,13 @@ ios_oc/
 
 ## Demo
 
-- Web：[web/demo/index.html](./web/demo/index.html)，直接用浏览器打开即可。
+- Web：[web/demo/README.md](./web/demo/README.md)
 - Android：[android/demo/README.md](./android/demo/README.md)
 - iOS Swift：[ios_swift/README.md](./ios_swift/README.md)
 - iOS Objective-C：[ios_oc/README.md](./ios_oc/README.md)
 - Flutter：[flutter/demo/README.md](./flutter/demo/README.md)
 
-原生 Demo 目录是带 Mock 房间通道发送器的可运行项目骨架。实际接入时将 Mock 发送器替换为对应 ZEGO Express SDK 桥接即可，具体拷贝与使用步骤见各平台 README。
+Demo 目录展示的外部接入方式保持一致：创建 Client、在 Sender 中调用 Express `callExperimentalAPI(formatedJson)`、在 `onRecvExperimentalAPI` 中调用 `client.handleRoomChannelMessage(content)`。具体拷贝与使用步骤见各平台 README。
 
 ## 参考文档
 

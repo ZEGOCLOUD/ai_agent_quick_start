@@ -121,7 +121,6 @@ function createClient() {
   });
 }
 let client = createClient();
-function refreshClient() { client = createClient(); return client; }
 document.getElementById('tts').onclick = () => {
   log('[action] TTS click');
   const params = new ZegoAIAgentAction.Protobuf.SendAgentInstanceTTSParams();
@@ -129,7 +128,7 @@ document.getElementById('tts').onclick = () => {
   params.setAddHistory(true);
   params.setPriority(priority.value);
   params.setSamePriorityOption('ClearAndInterrupt');
-  refreshClient().sendAgentInstanceTTS(params).then(r => log('[action] TTS resolved seq=' + r.seq)).catch(e => log('[action] TTS error: ' + e.message));
+  client.sendAgentInstanceTTS(params).then(r => log('[action] TTS resolved seq=' + r.seq)).catch(e => log('[action] TTS error: ' + e.message));
 };
 document.getElementById('llm').onclick = () => {
   log('[action] LLM click');
@@ -140,11 +139,11 @@ document.getElementById('llm').onclick = () => {
   params.setAddAnswerToHistory(true);
   params.setPriority(priority.value);
   params.setSamePriorityOption('ClearAndInterrupt');
-  refreshClient().sendAgentInstanceLLM(params).then(r => log('[action] LLM resolved seq=' + r.seq)).catch(e => log('[action] LLM error: ' + e.message));
+  client.sendAgentInstanceLLM(params).then(r => log('[action] LLM resolved seq=' + r.seq)).catch(e => log('[action] LLM error: ' + e.message));
 };
 document.getElementById('interrupt').onclick = () => {
   log('[action] Interrupt click');
-  refreshClient().interruptAgentInstance().then(r => log('[action] Interrupt resolved seq=' + r.seq)).catch(e => log('[action] Interrupt error: ' + e.message));
+  client.interruptAgentInstance().then(r => log('[action] Interrupt resolved seq=' + r.seq)).catch(e => log('[action] Interrupt error: ' + e.message));
 };
 const startBtn = document.getElementById('start');
 const stopBtn = document.getElementById('stop');
@@ -158,11 +157,11 @@ initSDK().then(() => {
 
 startBtn.onclick = () => {
   log('[action] Start click');
-  refreshClient().startListening(new ZegoAIAgentAction.Protobuf.StartListeningParams()).then(r => log('[action] Start resolved seq=' + r.seq)).catch(e => log('[action] Start error: ' + e.message));
+  client.startListening(new ZegoAIAgentAction.Protobuf.StartListeningParams()).then(r => log('[action] Start resolved seq=' + r.seq)).catch(e => log('[action] Start error: ' + e.message));
 };
 stopBtn.onclick = () => {
   log('[action] Stop click');
-  refreshClient().stopListening(new ZegoAIAgentAction.Protobuf.StopListeningParams()).then(r => log('[action] Stop resolved seq=' + r.seq)).catch(e => log('[action] Stop error: ' + e.message));
+  client.stopListening(new ZegoAIAgentAction.Protobuf.StopListeningParams()).then(r => log('[action] Stop resolved seq=' + r.seq)).catch(e => log('[action] Stop error: ' + e.message));
 };
 cancelBtn.onclick = () => {
   log('[action] cancelAll click');

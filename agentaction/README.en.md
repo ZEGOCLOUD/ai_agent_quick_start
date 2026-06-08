@@ -22,7 +22,7 @@ ios_oc/
   demo/
 ```
 
-Customer integrations should copy only the target platform's `agentaction/` folder into their project. The matching `demo/` folder shows a minimal runnable integration with a mock room channel sender.
+Customer integrations should copy only the target platform's `agentaction/` folder into their project. The matching `demo/` folder shows a minimal runnable integration that forwards the generated `formatedJson` to ZEGO Express `callExperimentalAPI` and hands `onRecvExperimentalAPI` callbacks back to the suite.
 
 > Chinese version: [README.md](./README.md)
 
@@ -55,7 +55,7 @@ Defaults:
 
 ## Message Format
 
-The suite sends `msg_type=20` to `user_list=[agentUserId]`.
+The suite sends room channel messages to `user_list=[agentUserId]`.
 
 `msg_content` is a JSON transport envelope so it can run in current demos without adding protobuf runtimes:
 
@@ -76,13 +76,13 @@ The protobuf file remains the source of truth for platform generated protocol cl
 
 ## Demos
 
-- Web: [web/demo/index.html](./web/demo/index.html), directly open in a browser.
+- Web: [web/demo/README.md](./web/demo/README.md)
 - Android: [android/demo/README.md](./android/demo/README.md)
 - iOS Swift: [ios_swift/README.md](./ios_swift/README.md)
 - iOS Objective-C: [ios_oc/README.md](./ios_oc/README.md)
 - Flutter: [flutter/demo/README.md](./flutter/demo/README.md)
 
-The native demo folders are runnable project skeletons with a mock room channel sender. Replace the mock sender with the matching ZEGO Express SDK bridge in product integration. See each platform README for the copy-and-use steps.
+All demos follow the same external wiring: create a Client, call Express `callExperimentalAPI(formatedJson)` in the Sender, and call `client.handleRoomChannelMessage(content)` from `onRecvExperimentalAPI`. See each platform README for the copy-and-use steps.
 
 ## References
 

@@ -11,8 +11,11 @@
 })(typeof self !== 'undefined' ? self : this, function(protoRoot, defines, Logger) {
     'use strict';
 
-    const pb = (protoRoot && protoRoot.AgentActionEnvelope && protoRoot) ||
+    let pb = (protoRoot && protoRoot.AgentActionEnvelope && protoRoot) ||
         (protoRoot && protoRoot.zego && protoRoot.zego.aiagent && protoRoot.zego.aiagent.action);
+    if (!pb) {
+        pb = createFallbackProtobuf();
+    }
 
     const Log = Logger || {
         debug: function () {},
@@ -43,6 +46,118 @@
 
     function createDeviceId() {
         return 'web_' + Math.random().toString(36).slice(2, 10);
+    }
+
+    function createFallbackProtobuf() {
+        class AgentActionEnvelope {
+            constructor() {
+                this.action = '';
+                this.seq = '';
+                this.params = null;
+            }
+            setAction(value) { this.action = value || ''; return this; }
+            getAction() { return this.action; }
+            setSeq(value) { this.seq = value || ''; return this; }
+            getSeq() { return this.seq; }
+            setParams(value) { this.params = value; return this; }
+            getParams() { return this.params; }
+        }
+
+        class AgentActionResponse {
+            constructor() {
+                this.action = '';
+                this.seq = '';
+                this.code = 0;
+                this.message = '';
+                this.requestId = '';
+            }
+            setAction(value) { this.action = value || ''; return this; }
+            getAction() { return this.action; }
+            setSeq(value) { this.seq = value || ''; return this; }
+            getSeq() { return this.seq; }
+            setCode(value) { this.code = Number(value || 0); return this; }
+            getCode() { return this.code; }
+            setMessage(value) { this.message = value || ''; return this; }
+            getMessage() { return this.message; }
+            setRequestId(value) { this.requestId = value || ''; return this; }
+            getRequestId() { return this.requestId; }
+        }
+
+        class SendAgentInstanceTTSParams {
+            constructor() {
+                this.text = '';
+                this.addHistory = false;
+                this.priority = '';
+                this.samePriorityOption = '';
+                this.interruptMode = 0;
+                this.enqueueUserSpeech = false;
+            }
+            serializeBinary() { return []; }
+            setText(value) { this.text = value || ''; return this; }
+            getText() { return this.text; }
+            setAddHistory(value) { this.addHistory = !!value; return this; }
+            getAddHistory() { return this.addHistory; }
+            setPriority(value) { this.priority = value || ''; return this; }
+            getPriority() { return this.priority; }
+            setSamePriorityOption(value) { this.samePriorityOption = value || ''; return this; }
+            getSamePriorityOption() { return this.samePriorityOption; }
+            setInterruptMode(value) { this.interruptMode = Number(value || 0); return this; }
+            getInterruptMode() { return this.interruptMode; }
+            setEnqueueUserSpeech(value) { this.enqueueUserSpeech = !!value; return this; }
+            getEnqueueUserSpeech() { return this.enqueueUserSpeech; }
+        }
+
+        class SendAgentInstanceLLMParams {
+            constructor() {
+                this.text = '';
+                this.systemPrompt = '';
+                this.addQuestionToHistory = false;
+                this.addAnswerToHistory = false;
+                this.priority = '';
+                this.samePriorityOption = '';
+                this.enqueueUserSpeech = false;
+            }
+            serializeBinary() { return []; }
+            setText(value) { this.text = value || ''; return this; }
+            getText() { return this.text; }
+            setSystemPrompt(value) { this.systemPrompt = value || ''; return this; }
+            getSystemPrompt() { return this.systemPrompt; }
+            setAddQuestionToHistory(value) { this.addQuestionToHistory = !!value; return this; }
+            getAddQuestionToHistory() { return this.addQuestionToHistory; }
+            setAddAnswerToHistory(value) { this.addAnswerToHistory = !!value; return this; }
+            getAddAnswerToHistory() { return this.addAnswerToHistory; }
+            setPriority(value) { this.priority = value || ''; return this; }
+            getPriority() { return this.priority; }
+            setSamePriorityOption(value) { this.samePriorityOption = value || ''; return this; }
+            getSamePriorityOption() { return this.samePriorityOption; }
+            setEnqueueUserSpeech(value) { this.enqueueUserSpeech = !!value; return this; }
+            getEnqueueUserSpeech() { return this.enqueueUserSpeech; }
+        }
+
+        class InterruptAgentInstanceParams {
+            serializeBinary() { return []; }
+        }
+
+        class StartListeningParams {
+            constructor() {
+                this.userId = '';
+            }
+            serializeBinary() { return []; }
+            setUserId(value) { this.userId = value || ''; return this; }
+            getUserId() { return this.userId; }
+        }
+
+        class StopListeningParams extends StartListeningParams {}
+
+        return {
+            AgentActionEnvelope: AgentActionEnvelope,
+            AgentActionResponse: AgentActionResponse,
+            SendAgentInstanceTTSParams: SendAgentInstanceTTSParams,
+            SendAgentInstanceLLMParams: SendAgentInstanceLLMParams,
+            InterruptAgentInstanceParams: InterruptAgentInstanceParams,
+            StartListeningParams: StartListeningParams,
+            StopListeningParams: StopListeningParams,
+        };
     }
 
     function requireString(value, name) {
@@ -76,10 +191,6 @@
             if (typeof options.sender !== 'function') {
                 throw createError('', '', 'invalid_param', 'sender(params) is required');
             }
-            if (!pb) {
-                throw createError('', '', 'invalid_param', 'protobuf classes are not loaded');
-            }
-
             this.roomId = options.roomId;
             this.agentUserId = options.agentUserId;
             this.userId = options.userId || options.currentUserId || 'anonymous';
