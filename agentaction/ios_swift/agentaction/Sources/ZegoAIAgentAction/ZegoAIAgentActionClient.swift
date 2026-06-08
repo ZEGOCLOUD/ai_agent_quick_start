@@ -100,7 +100,6 @@ public final class ZegoAIAgentActionClient {
 
     @discardableResult
     public func handleRoomChannelMessage(content: String) -> Bool {
-        ZegoAIAgentActionLogger.debug("handleRoomChannelMessage recv: \(content)")
         guard let data = content.data(using: .utf8),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let method = json[ZegoAIAgentActionExpressKeys.method] as? String else {
@@ -110,8 +109,11 @@ public final class ZegoAIAgentActionClient {
         if method == ZegoAIAgentActionExpressMethods.onReciveRoomChannelMessage {
             guard let params = json[ZegoAIAgentActionExpressKeys.params] as? [String: Any],
                   let msgType = params[ZegoAIAgentActionExpressKeys.msgType] as? Int,
-                  msgType == ZegoAIAgentActionMsgType.response,
-                  let msgContent = params[ZegoAIAgentActionExpressKeys.msgContent] as? String,
+                  msgType == ZegoAIAgentActionMsgType.response else {
+                return false
+            }
+            ZegoAIAgentActionLogger.debug("handleRoomChannelMessage recv: \(content)")
+            guard let msgContent = params[ZegoAIAgentActionExpressKeys.msgContent] as? String,
                   let contentData = msgContent.data(using: .utf8),
                   let contentJson = try? JSONSerialization.jsonObject(with: contentData) as? [String: Any],
                   let seq = contentJson[ZegoAIAgentActionProtocolKeys.seq] as? String,
@@ -153,6 +155,7 @@ public final class ZegoAIAgentActionClient {
             }
             return true
         } else if method == ZegoAIAgentActionExpressMethods.onSendRoomChannelMessage {
+            ZegoAIAgentActionLogger.debug("handleRoomChannelMessage recv: \(content)")
             guard let params = json[ZegoAIAgentActionExpressKeys.params] as? [String: Any],
                   let errorCode = params[ZegoAIAgentActionExpressKeys.errorCode] as? Int,
                   errorCode != ZegoAIAgentActionErrorCodes.success,

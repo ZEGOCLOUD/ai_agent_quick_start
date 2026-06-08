@@ -302,7 +302,6 @@ class ZegoAIAgentActionClient {
   /// 返回 `true` 表示该消息被本客户端消费，`false` 表示与本客户端无关（可能是其他
   /// 业务消息或解析失败）。
   bool handleRoomChannelMessage(String content) {
-    ZegoAIAgentActionLogger.debug('handleRoomChannelMessage recv: $content');
     try {
       final data = jsonDecode(content) as Map<String, dynamic>;
       final method = data[ZegoAIAgentActionExpressKeys.method] as String?;
@@ -316,6 +315,7 @@ class ZegoAIAgentActionClient {
         if (msgType == null || msgContent == null) return false;
 
         if (msgType != ZegoAIAgentActionMsgTypes.response) return false;
+        ZegoAIAgentActionLogger.debug('handleRoomChannelMessage recv: $content');
         final contentMap = jsonDecode(msgContent) as Map<String, dynamic>;
         final responsePb = _decodeResponse(contentMap);
         final seq = responsePb.seq;
@@ -356,6 +356,7 @@ class ZegoAIAgentActionClient {
       } else if (method == ZegoAIAgentActionExpressMethods.onSendRoomChannelMessage) {
         final params = data[ZegoAIAgentActionExpressKeys.params] as Map<String, dynamic>?;
         if (params == null) return false;
+        ZegoAIAgentActionLogger.debug('handleRoomChannelMessage recv: $content');
 
         final errorCode = params[ZegoAIAgentActionExpressKeys.errorCode] as int?;
         final expressSeq = params[ZegoAIAgentActionExpressKeys.seq] as int?;

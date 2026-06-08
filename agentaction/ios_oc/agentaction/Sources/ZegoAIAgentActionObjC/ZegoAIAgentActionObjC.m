@@ -136,7 +136,6 @@
 }
 
 - (BOOL)handleRoomChannelMessageWithContent:(NSString *)contentString {
-    [ZegoAIAgentActionLogger debug:[NSString stringWithFormat:@"handleRoomChannelMessage recv: %@", contentString]];
     NSData *data = [contentString dataUsingEncoding:NSUTF8StringEncoding];
     NSDictionary *dataDict = data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:nil] : nil;
     if (![dataDict isKindOfClass:NSDictionary.class]) return NO;
@@ -149,6 +148,7 @@
         NSInteger msgType = [expressParams[ZegoAIAgentActionExpressKeys.msgType] integerValue];
         NSString *msgContent = expressParams[ZegoAIAgentActionExpressKeys.msgContent];
         if (msgType != ZegoAIAgentActionMsgTypes.response || ![msgContent isKindOfClass:NSString.class]) return NO;
+        [ZegoAIAgentActionLogger debug:[NSString stringWithFormat:@"handleRoomChannelMessage recv: %@", contentString]];
 
         NSData *msgContentData = [msgContent dataUsingEncoding:NSUTF8StringEncoding];
         NSDictionary *content = msgContentData ? [NSJSONSerialization JSONObjectWithData:msgContentData options:0 error:nil] : nil;
@@ -189,6 +189,7 @@
     } else if ([ZegoAIAgentActionExpressMethods.onSendRoomChannelMessage isEqualToString:method]) {
         NSDictionary *expressParams = dataDict[ZegoAIAgentActionExpressKeys.params];
         if (![expressParams isKindOfClass:NSDictionary.class]) return NO;
+        [ZegoAIAgentActionLogger debug:[NSString stringWithFormat:@"handleRoomChannelMessage recv: %@", contentString]];
 
         NSInteger errorCode = [expressParams[ZegoAIAgentActionExpressKeys.errorCode] integerValue];
         NSNumber *expressSeq = expressParams[ZegoAIAgentActionExpressKeys.seq];

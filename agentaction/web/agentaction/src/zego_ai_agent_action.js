@@ -233,12 +233,10 @@
         }
 
         handleRoomChannelMessage(contentString) {
-            Log.debug('handleRoomChannelMessage recv: ' + contentString);
             let data;
             try {
                 data = typeof contentString === 'string' ? JSON.parse(contentString) : contentString;
             } catch (cause) {
-                Log.error('handleRoomChannelMessage parse error: ' + cause);
                 this._debug('parse_failed', { cause: cause, rawMessage: contentString });
                 return false;
             }
@@ -251,6 +249,7 @@
                 if (!params || params[defines.ExpressKeys.msgType] !== MsgTypes.AGENT_ACTION_RESPONSE) {
                     return false;
                 }
+                Log.debug('handleRoomChannelMessage recv: ' + (typeof contentString === 'string' ? contentString : JSON.stringify(contentString)));
 
                 const msgContentStr = params[defines.ExpressKeys.msgContent];
                 let content;
@@ -311,6 +310,7 @@
             } else if (method === defines.ExpressMethods.onSendRoomChannelMessage) {
                 const params = data[defines.ExpressKeys.params];
                 if (!params) return false;
+                Log.debug('handleRoomChannelMessage recv: ' + (typeof contentString === 'string' ? contentString : JSON.stringify(contentString)));
 
                 const errorCode = params[defines.ExpressKeys.errorCode];
                 const expressSeq = params[defines.ExpressKeys.seq];

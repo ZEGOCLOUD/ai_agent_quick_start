@@ -126,7 +126,6 @@ public class ZegoAIAgentActionClient {
     }
 
     public boolean handleRoomChannelMessage(String contentString) {
-        ZegoAIAgentActionLogger.debug("handleRoomChannelMessage recv: " + contentString);
         try {
             JSONObject data = new JSONObject(contentString);
             String method = data.optString(ZegoAIAgentActionDefines.ExpressKeys.method);
@@ -138,6 +137,7 @@ public class ZegoAIAgentActionClient {
                 int msgType = params.optInt(ZegoAIAgentActionDefines.ExpressKeys.msgType, -1);
                 String msgContent = params.optString(ZegoAIAgentActionDefines.ExpressKeys.msgContent);
                 if (msgType != MSG_TYPE_RESPONSE || msgContent.isEmpty()) return false;
+                ZegoAIAgentActionLogger.debug("handleRoomChannelMessage recv: " + contentString);
 
                 JSONObject content = new JSONObject(msgContent);
                 String seq = content.optString(ZegoAIAgentActionDefines.ProtocolKeys.seq, "");
@@ -183,6 +183,7 @@ public class ZegoAIAgentActionClient {
             } else if (ZegoAIAgentActionDefines.ExpressMethods.onSendRoomChannelMessage.equals(method)) {
                 JSONObject params = data.optJSONObject(ZegoAIAgentActionDefines.ExpressKeys.params);
                 if (params == null) return false;
+                ZegoAIAgentActionLogger.debug("handleRoomChannelMessage recv: " + contentString);
 
                 int errorCode = params.optInt(ZegoAIAgentActionDefines.ExpressKeys.errorCode, 0);
                 int expressSeq = params.optInt(ZegoAIAgentActionDefines.ExpressKeys.seq, -1);
