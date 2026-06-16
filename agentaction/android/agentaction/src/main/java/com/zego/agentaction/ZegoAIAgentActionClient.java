@@ -24,6 +24,15 @@ public class ZegoAIAgentActionClient {
     public static final String ACTION_START_LISTENING = "StartListening";
     public static final String ACTION_STOP_LISTENING = "StopListening";
 
+    /**
+     * `SendAgentInstanceTTS` / `SendAgentInstanceLLM` 的任务优先级默认值（与 aigc-agent 接口文档保持一致）
+     */
+    private static final String DEFAULT_PRIORITY = "Medium";
+    /**
+     * `SendAgentInstanceTTS` / `SendAgentInstanceLLM` 的相同优先级打断策略默认值（与 aigc-agent 接口文档保持一致）
+     */
+    private static final String DEFAULT_SAME_PRIORITY_OPTION = "ClearAndInterrupt";
+
     public interface Sender {
         void send(ZegoAIAgentActionSendParams params, String formatedJson, SendCallback callback);
     }
@@ -305,8 +314,9 @@ public class ZegoAIAgentActionClient {
             AIAgentActionProto.SendAgentInstanceTTSParams value = (AIAgentActionProto.SendAgentInstanceTTSParams) params;
             put(object, ZegoAIAgentActionDefines.ProtocolKeys.text, value.getText());
             put(object, ZegoAIAgentActionDefines.ProtocolKeys.addHistory, value.getAddHistory());
-            put(object, ZegoAIAgentActionDefines.ProtocolKeys.priority, value.getPriority());
-            put(object, ZegoAIAgentActionDefines.ProtocolKeys.samePriorityOption, value.getSamePriorityOption());
+            // priority / samePriorityOption 为枚举字符串，客户端不显式赋值时 protobuf 默认空串会触发服务端 410000003 "Priority is invalid"，此处兜底为文档默认值
+            put(object, ZegoAIAgentActionDefines.ProtocolKeys.priority, value.getPriority().isEmpty() ? DEFAULT_PRIORITY : value.getPriority());
+            put(object, ZegoAIAgentActionDefines.ProtocolKeys.samePriorityOption, value.getSamePriorityOption().isEmpty() ? DEFAULT_SAME_PRIORITY_OPTION : value.getSamePriorityOption());
             if (value.getInterruptMode() != 0) put(object, ZegoAIAgentActionDefines.ProtocolKeys.interruptMode, value.getInterruptMode());
             if (value.getEnqueueUserSpeech()) put(object, ZegoAIAgentActionDefines.ProtocolKeys.enqueueUserSpeech, true);
             return object;
@@ -317,8 +327,9 @@ public class ZegoAIAgentActionClient {
             put(object, ZegoAIAgentActionDefines.ProtocolKeys.systemPrompt, value.getSystemPrompt());
             put(object, ZegoAIAgentActionDefines.ProtocolKeys.addQuestionToHistory, value.getAddQuestionToHistory());
             put(object, ZegoAIAgentActionDefines.ProtocolKeys.addAnswerToHistory, value.getAddAnswerToHistory());
-            put(object, ZegoAIAgentActionDefines.ProtocolKeys.priority, value.getPriority());
-            put(object, ZegoAIAgentActionDefines.ProtocolKeys.samePriorityOption, value.getSamePriorityOption());
+            // 同 TTS：枚举字段空串兜底为文档默认值，避免服务端校验失败
+            put(object, ZegoAIAgentActionDefines.ProtocolKeys.priority, value.getPriority().isEmpty() ? DEFAULT_PRIORITY : value.getPriority());
+            put(object, ZegoAIAgentActionDefines.ProtocolKeys.samePriorityOption, value.getSamePriorityOption().isEmpty() ? DEFAULT_SAME_PRIORITY_OPTION : value.getSamePriorityOption());
             if (value.getEnqueueUserSpeech()) put(object, ZegoAIAgentActionDefines.ProtocolKeys.enqueueUserSpeech, true);
             return object;
         }

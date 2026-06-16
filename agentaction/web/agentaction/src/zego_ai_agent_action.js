@@ -44,6 +44,11 @@
         CANCELED: -3,
     };
 
+    // `SendAgentInstanceTTS` / `SendAgentInstanceLLM` 的任务优先级默认值（与 aigc-agent 接口文档保持一致）
+    const DEFAULT_PRIORITY = 'Medium';
+    // `SendAgentInstanceTTS` / `SendAgentInstanceLLM` 的相同优先级打断策略默认值（与 aigc-agent 接口文档保持一致）
+    const DEFAULT_SAME_PRIORITY_OPTION = 'ClearAndInterrupt';
+
     function createDeviceId() {
         return 'web_' + Math.random().toString(36).slice(2, 10);
     }
@@ -433,8 +438,9 @@
             const json = {};
             json[defines.ProtocolKeys.text] = params.getText();
             json[defines.ProtocolKeys.addHistory] = params.getAddHistory();
-            json[defines.ProtocolKeys.priority] = params.getPriority();
-            json[defines.ProtocolKeys.samePriorityOption] = params.getSamePriorityOption();
+            // priority / samePriorityOption 为枚举字符串，客户端不显式赋值时 protobuf 默认空串会触发服务端 410000003 "Priority is invalid"，此处兜底为文档默认值
+            json[defines.ProtocolKeys.priority] = params.getPriority() || DEFAULT_PRIORITY;
+            json[defines.ProtocolKeys.samePriorityOption] = params.getSamePriorityOption() || DEFAULT_SAME_PRIORITY_OPTION;
             if (params.getInterruptMode() !== 0) json[defines.ProtocolKeys.interruptMode] = params.getInterruptMode();
             if (params.getEnqueueUserSpeech()) json[defines.ProtocolKeys.enqueueUserSpeech] = true;
             return json;
@@ -445,8 +451,9 @@
             json[defines.ProtocolKeys.systemPrompt] = params.getSystemPrompt();
             json[defines.ProtocolKeys.addQuestionToHistory] = params.getAddQuestionToHistory();
             json[defines.ProtocolKeys.addAnswerToHistory] = params.getAddAnswerToHistory();
-            json[defines.ProtocolKeys.priority] = params.getPriority();
-            json[defines.ProtocolKeys.samePriorityOption] = params.getSamePriorityOption();
+            // 同 TTS：枚举字段空串兜底为文档默认值，避免服务端校验失败
+            json[defines.ProtocolKeys.priority] = params.getPriority() || DEFAULT_PRIORITY;
+            json[defines.ProtocolKeys.samePriorityOption] = params.getSamePriorityOption() || DEFAULT_SAME_PRIORITY_OPTION;
             if (params.getEnqueueUserSpeech()) json[defines.ProtocolKeys.enqueueUserSpeech] = true;
             return json;
         }

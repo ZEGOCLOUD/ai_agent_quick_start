@@ -2,6 +2,11 @@
 #import "include/ZegoAIAgentActionDefines.h"
 #import "Generated/AiAgentAction.pbobjc.h"
 
+// `SendAgentInstanceTTS` / `SendAgentInstanceLLM` 的任务优先级默认值（与 aigc-agent 接口文档保持一致）
+static NSString * const ZegoAIAgentActionDefaultPriority = @"Medium";
+// `SendAgentInstanceTTS` / `SendAgentInstanceLLM` 的相同优先级打断策略默认值（与 aigc-agent 接口文档保持一致）
+static NSString * const ZegoAIAgentActionDefaultSamePriorityOption = @"ClearAndInterrupt";
+
 @implementation ZegoAIAgentActionOCSendParams
 - (instancetype)initWithRoomId:(NSString *)roomId msgType:(NSInteger)msgType seq:(NSString *)seq msgContent:(NSString *)msgContent userList:(NSArray<NSString *> *)userList {
     self = [super init];
@@ -325,8 +330,9 @@
         SendAgentInstanceTTSParams *p = (SendAgentInstanceTTSParams *)params;
         dict[ZegoAIAgentActionProtocolKeys.text] = p.text ?: @"";
         dict[ZegoAIAgentActionProtocolKeys.addHistory] = @(p.addHistory);
-        dict[ZegoAIAgentActionProtocolKeys.priority] = p.priority ?: @"";
-        dict[ZegoAIAgentActionProtocolKeys.samePriorityOption] = p.samePriorityOption ?: @"";
+        // priority / samePriorityOption 为枚举字符串，客户端不显式赋值时 protobuf 默认空串会触发服务端 410000003 "Priority is invalid"，此处兜底为文档默认值
+        dict[ZegoAIAgentActionProtocolKeys.priority] = p.priority.length > 0 ? p.priority : ZegoAIAgentActionDefaultPriority;
+        dict[ZegoAIAgentActionProtocolKeys.samePriorityOption] = p.samePriorityOption.length > 0 ? p.samePriorityOption : ZegoAIAgentActionDefaultSamePriorityOption;
         if (p.interruptMode != 0) dict[ZegoAIAgentActionProtocolKeys.interruptMode] = @(p.interruptMode);
         if (p.enqueueUserSpeech) dict[ZegoAIAgentActionProtocolKeys.enqueueUserSpeech] = @YES;
         return dict;
@@ -337,8 +343,9 @@
         dict[ZegoAIAgentActionProtocolKeys.systemPrompt] = p.systemPrompt ?: @"";
         dict[ZegoAIAgentActionProtocolKeys.addQuestionToHistory] = @(p.addQuestionToHistory);
         dict[ZegoAIAgentActionProtocolKeys.addAnswerToHistory] = @(p.addAnswerToHistory);
-        dict[ZegoAIAgentActionProtocolKeys.priority] = p.priority ?: @"";
-        dict[ZegoAIAgentActionProtocolKeys.samePriorityOption] = p.samePriorityOption ?: @"";
+        // 同 TTS：枚举字段空串兜底为文档默认值，避免服务端校验失败
+        dict[ZegoAIAgentActionProtocolKeys.priority] = p.priority.length > 0 ? p.priority : ZegoAIAgentActionDefaultPriority;
+        dict[ZegoAIAgentActionProtocolKeys.samePriorityOption] = p.samePriorityOption.length > 0 ? p.samePriorityOption : ZegoAIAgentActionDefaultSamePriorityOption;
         if (p.enqueueUserSpeech) dict[ZegoAIAgentActionProtocolKeys.enqueueUserSpeech] = @YES;
         return dict;
     }
