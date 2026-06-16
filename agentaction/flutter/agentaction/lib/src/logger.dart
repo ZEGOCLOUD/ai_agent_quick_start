@@ -24,9 +24,16 @@ class ZegoAIAgentActionLogger {
     _level = level;
   }
 
+  /// 输出 DEBUG 级别日志（最低级别）。
   static void debug(String message) => _log(levelDebug, 'DEBUG', message);
+
+  /// 输出 INFO 级别日志。
   static void info(String message) => _log(levelInfo, 'INFO', message);
+
+  /// 输出 WARN 级别日志。
   static void warn(String message) => _log(levelWarn, 'WARN', message);
+
+  /// 输出 ERROR 级别日志（最高级别）。
   static void error(String message) => _log(levelError, 'ERROR', message);
 
   static void _log(int level, String label, String message) {

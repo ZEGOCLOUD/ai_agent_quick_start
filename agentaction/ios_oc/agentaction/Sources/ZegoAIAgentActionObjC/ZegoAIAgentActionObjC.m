@@ -87,11 +87,16 @@ static NSString * const ZegoAIAgentActionDefaultSamePriorityOption = @"ClearAndI
 @end
 
 @implementation ZegoAIAgentActionOCClient
-- (instancetype)initWithRoomId:(NSString *)roomId agentUserId:(NSString *)agentUserId userId:(NSString *)userId sender:(id<ZegoAIAgentActionOCSender>)sender onResponse:(ZegoAIAgentActionOCResponseHandler)onResponse onError:(ZegoAIAgentActionOCErrorHandler)onError {
-    return [self initWithRoomId:roomId agentUserId:agentUserId userId:userId deviceId:nil timeoutMs:5000 sender:sender onResponse:onResponse onError:onError];
-}
-
-- (instancetype)initWithRoomId:(NSString *)roomId agentUserId:(NSString *)agentUserId userId:(NSString *)userId deviceId:(NSString *)deviceId timeoutMs:(NSInteger)timeoutMs sender:(id<ZegoAIAgentActionOCSender>)sender onResponse:(ZegoAIAgentActionOCResponseHandler)onResponse onError:(ZegoAIAgentActionOCErrorHandler)onError {
+- (instancetype)initWithRoomId:(NSString *)roomId
+                   agentUserId:(NSString *)agentUserId
+                        userId:(NSString *)userId
+               agentInstanceId:(nullable NSString *)agentInstanceId
+                isDigitalHuman:(BOOL)isDigitalHuman
+                      deviceId:(nullable NSString *)deviceId
+                     timeoutMs:(NSInteger)timeoutMs
+                        sender:(id<ZegoAIAgentActionOCSender>)sender
+                    onResponse:(nullable ZegoAIAgentActionOCResponseHandler)onResponse
+                       onError:(nullable ZegoAIAgentActionOCErrorHandler)onError {
     NSParameterAssert(roomId.length > 0);
     NSParameterAssert(agentUserId.length > 0);
     NSParameterAssert(userId.length > 0);
@@ -99,7 +104,19 @@ static NSString * const ZegoAIAgentActionDefaultSamePriorityOption = @"ClearAndI
     self = [super init];
     if (self) {
         _roomId = [roomId copy];
-        _agentUserId = [agentUserId copy];
+        // 数字人场景下后端 aiagent 进程加入 RTC 用的 userID 是 `ai_agent_<agentInstanceId>`，与 `agentUserId`
+        // 入参（即 `rtcInfo.agentUserId`，形如 `@RBT#<agentId>`）不一致；信令走 sendRoomChannelMessage 的
+        // userList 点对点发送，userList 必须写后端真实 userID 才能被后端收到。
+        // 规则对齐后端：数字人场景下后端会用 `ai_agent_` 前缀 + instanceId 拼接出一个内部 userID 用于接收信令。
+        if (isDigitalHuman && agentInstanceId.length > 0) {
+            // 与后端 RTC 内部用户的拼接规则对齐（`ai_agent_` 前缀 + instanceId）
+            _agentUserId = [@"ai_agent_" stringByAppendingString:agentInstanceId];
+        } else {
+            _agentUserId = [agentUserId copy];
+        }
+        // 透传构造参数，供调用方做客户端复用判断（避免跨 instance 误用旧 client）
+        _agentInstanceId = [agentInstanceId copy];
+        _isDigitalHuman = isDigitalHuman;
         _userId = [userId copy];
         _deviceId = deviceId.length > 0 ? [deviceId copy] : [[NSString stringWithFormat: @"oc_%@", [NSUUID UUID].UUIDString] substringToIndex:11];
         _timeoutMs = timeoutMs > 0 ? timeoutMs : 5000;
@@ -113,28 +130,33 @@ static NSString * const ZegoAIAgentActionDefaultSamePriorityOption = @"ClearAndI
     return self;
 }
 
+/// 主动调用智能体 TTS。详见 `ZegoAIAgentActionOCClient` 头文件。
 - (void)sendAgentInstanceTTSWithParams:(SendAgentInstanceTTSParams *)params timeoutMs:(NSNumber *)timeoutMs completion:(ZegoAIAgentActionOCCompletion)completion {
     NSParameterAssert(params);
     NSParameterAssert(params.text.length > 0);
     [self sendProtoAction:ZegoAIAgentActionNames.sendAgentInstanceTTS params:params timeoutMs:timeoutMs completion:completion];
 }
 
+/// 主动调用智能体 LLM。详见 `ZegoAIAgentActionOCClient` 头文件。
 - (void)sendAgentInstanceLLMWithParams:(SendAgentInstanceLLMParams *)params timeoutMs:(NSNumber *)timeoutMs completion:(ZegoAIAgentActionOCCompletion)completion {
     NSParameterAssert(params);
     NSParameterAssert(params.text.length > 0);
     [self sendProtoAction:ZegoAIAgentActionNames.sendAgentInstanceLLM params:params timeoutMs:timeoutMs completion:completion];
 }
 
+/// 打断智能体实例。详见 `ZegoAIAgentActionOCClient` 头文件。
 - (void)interruptAgentInstanceWithTimeoutMs:(NSNumber *)timeoutMs completion:(ZegoAIAgentActionOCCompletion)completion {
     InterruptAgentInstanceParams *interruptParams = [InterruptAgentInstanceParams message];
     [self sendProtoAction:ZegoAIAgentActionNames.interruptAgentInstance params:interruptParams timeoutMs:timeoutMs completion:completion];
 }
 
+/// 智能体开始聆听。详见 `ZegoAIAgentActionOCClient` 头文件。
 - (void)startListeningWithParams:(StartListeningParams *)params timeoutMs:(NSNumber *)timeoutMs completion:(ZegoAIAgentActionOCCompletion)completion {
     NSParameterAssert(params);
     [self sendProtoAction:ZegoAIAgentActionNames.startListening params:params timeoutMs:timeoutMs completion:completion];
 }
 
+/// 智能体结束聆听。详见 `ZegoAIAgentActionOCClient` 头文件。
 - (void)stopListeningWithParams:(StopListeningParams *)params timeoutMs:(NSNumber *)timeoutMs completion:(ZegoAIAgentActionOCCompletion)completion {
     NSParameterAssert(params);
     [self sendProtoAction:ZegoAIAgentActionNames.stopListening params:params timeoutMs:timeoutMs completion:completion];

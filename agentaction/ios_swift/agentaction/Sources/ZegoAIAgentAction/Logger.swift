@@ -27,18 +27,22 @@ public enum ZegoAIAgentActionLogger {
         self.level = level
     }
 
+    /// 输出 DEBUG 级别日志（最低级别）。
     public static func debug(_ message: @autoclosure () -> String) {
         log(levelDebug, label: "DEBUG", message: message())
     }
 
+    /// 输出 INFO 级别日志。
     public static func info(_ message: @autoclosure () -> String) {
         log(levelInfo, label: "INFO", message: message())
     }
 
+    /// 输出 WARN 级别日志。
     public static func warn(_ message: @autoclosure () -> String) {
         log(levelWarn, label: "WARN", message: message())
     }
 
+    /// 输出 ERROR 级别日志（最高级别）。
     public static func error(_ message: @autoclosure () -> String) {
         log(levelError, label: "ERROR", message: message())
     }

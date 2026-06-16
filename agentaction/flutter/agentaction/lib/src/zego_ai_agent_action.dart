@@ -178,10 +178,24 @@ class ZegoAIAgentActionClient {
   final String roomId;
 
   /// 目标智能体实例的 userId，上行消息将定向发送给该用户。
+  ///
+  /// 1V1 等场景下与后端 aiagent 进程加入 RTC 的 userID 一致（即 `rtcInfo.agentUserId`）；
+  /// 数字人通话场景下，构造器会按 `isDigitalHuman && agentInstanceId` 标志重算为
+  /// `ai_agent_<agentInstanceId>`，规则对齐后端：数字人场景下后端会用 `ai_agent_` 前缀 + instanceId
+  /// 拼接出一个内部 userID 用于接收信令。
+  ///
+  /// 该字段是构造时由 `agentUserId` 形参 + `isDigitalHuman` + `agentInstanceId` 推导出来的最终值。
   final String agentUserId;
 
   /// 当前客户端的 userId，用于生成本地业务链路追踪标识。
   final String userId;
+
+  /// 智能体实例 ID；数字人通话场景下由调用方传入并参与 `agentUserId` 重算，其它场景可为 null。
+  final String? agentInstanceId;
+
+  /// 是否为数字人通话；为 true 且 `agentInstanceId` 非空时，构造器内部会把
+  /// `agentUserId` 重算为 `ai_agent_<agentInstanceId>`。
+  final bool isDigitalHuman;
 
   /// 设备 ID，本地自增 seq 时会拼接，确保多端命名空间隔离。
   final String deviceId;
@@ -205,18 +219,40 @@ class ZegoAIAgentActionClient {
 
   /// 构造一个客户端实例。
   ///
-  /// [roomId]、[agentUserId]、[userId] 必填且不能为空；[sender] 为 Express SDK
-  /// 透传回调。
+  /// - [roomId] 业务房间 ID（与 ZEGO 音视频房间 ID 一致），必填非空
+  /// - [agentUserId] 1V1 等场景下后端 aiagent 进程加入 RTC 的 userID
+  ///   （即 `rtcInfo.agentUserId`，形如 `@RBT#<agentId>`）；
+  ///   数字人场景下本参数被忽略，套件按 `isDigitalHuman && agentInstanceId` 非空
+  ///   自动用 `ai_agent_<agentInstanceId>`（对齐后端：数字人场景下后端会用
+  ///   `ai_agent_` 前缀 + instanceId 拼接出一个内部 userID 用于接收信令）
+  /// - [userId] 当前终端用户 ID，必填非空
+  /// - [agentInstanceId] 智能体实例 ID（数字人场景必传且非空，其它场景传 null）
+  /// - [isDigitalHuman] 是否为数字人通话（决定是否走 `ai_agent_<instanceId>` 拼接规则）
+  /// - [sender] 底层信令发送回调（通常实现为 `ZegoExpressEngine.callExperimentalAPI`）
+  /// - [deviceId] 设备 ID（用于构造请求 seq）；传 null 时由套件自动生成
+  /// - [timeoutMs] 默认超时（ms），默认 5000
+  /// - [onResponse] 全局响应回调（可选）
+  /// - [onError] 全局错误回调（可选）
   ZegoAIAgentActionClient({
     required this.roomId,
-    required this.agentUserId,
+    // 入参形式的 agentUserId：1V1 等场景下与后端 aiagent 进程加入 RTC 的 userID 一致；
+    // 数字人场景下 init list 会按 isDigitalHuman && agentInstanceId 非空 自动重算为
+    // `ai_agent_<agentInstanceId>`，对齐后端：数字人场景下后端会用 `ai_agent_` 前缀 + instanceId
+    // 拼接出一个内部 userID 用于接收信令。
+    required String agentUserId,
     required this.userId,
     required this.sender,
+    this.agentInstanceId,
+    this.isDigitalHuman = false,
     String? deviceId,
     this.timeoutMs = 5000,
     this.onResponse,
     this.onError,
-  }) : deviceId = deviceId ?? _createDeviceId() {
+  // 与后端 RTC 内部用户的拼接规则对齐（`ai_agent_` 前缀 + instanceId）
+  })  : agentUserId = (isDigitalHuman && (agentInstanceId?.isNotEmpty ?? false))
+            ? 'ai_agent_$agentInstanceId'
+            : agentUserId,
+       deviceId = deviceId ?? _createDeviceId() {
     _requireString(roomId, 'roomId');
     _requireString(agentUserId, 'agentUserId');
     _requireString(userId, 'userId');

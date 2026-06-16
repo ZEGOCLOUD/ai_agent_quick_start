@@ -23,9 +23,16 @@ NS_ASSUME_NONNULL_BEGIN
 /// 设置日志级别，低于该级别的日志将被丢弃。
 + (void)setLevel:(NSInteger)level;
 
+/// 输出 DEBUG 级别日志（最低级别）。
 + (void)debug:(NSString *)message;
+
+/// 输出 INFO 级别日志。
 + (void)info:(NSString *)message;
+
+/// 输出 WARN 级别日志。
 + (void)warn:(NSString *)message;
+
+/// 输出 ERROR 级别日志（最高级别）。
 + (void)error:(NSString *)message;
 
 @end

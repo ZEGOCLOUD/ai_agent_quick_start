@@ -56,23 +56,35 @@
         LEVEL_WARN: LEVEL_WARN,
         LEVEL_ERROR: LEVEL_ERROR,
 
+        /**
+         * 设置日志输出回调；传 `null` 恢复为默认 `console.log` 输出。
+         * @param {((level: number, label: string, line: string) => void)|null} handler
+         */
         installSink: function (handler) {
             sink = typeof handler === 'function' ? handler : null;
         },
 
+        /**
+         * 设置日志级别，低于该级别的日志将被丢弃。
+         * @param {number} newLevel 0=DEBUG / 1=INFO / 2=WARN / 3=ERROR
+         */
         setLevel: function (newLevel) {
             level = newLevel;
         },
 
+        /** 输出 DEBUG 级别日志（最低级别）。 */
         debug: function (message) {
             log(LEVEL_DEBUG, 'DEBUG', message);
         },
+        /** 输出 INFO 级别日志。 */
         info: function (message) {
             log(LEVEL_INFO, 'INFO', message);
         },
+        /** 输出 WARN 级别日志。 */
         warn: function (message) {
             log(LEVEL_WARN, 'WARN', message);
         },
+        /** 输出 ERROR 级别日志（最高级别）。 */
         error: function (message) {
             log(LEVEL_ERROR, 'ERROR', message);
         },

@@ -55,18 +55,22 @@ public class ZegoAIAgentActionLogger {
         ZegoAIAgentActionLogger.level = level;
     }
 
+    /// 输出 DEBUG 级别日志（最低级别）。
     public static void debug(String message) {
         log(LEVEL_DEBUG, "DEBUG", message);
     }
 
+    /// 输出 INFO 级别日志。
     public static void info(String message) {
         log(LEVEL_INFO, "INFO", message);
     }
 
+    /// 输出 WARN 级别日志。
     public static void warn(String message) {
         log(LEVEL_WARN, "WARN", message);
     }
 
+    /// 输出 ERROR 级别日志（最高级别）。
     public static void error(String message) {
         log(LEVEL_ERROR, "ERROR", message);
     }

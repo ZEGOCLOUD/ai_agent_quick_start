@@ -15,6 +15,25 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 智能体实例控制客户端。
+ *
+ * <p>负责将业务侧发起的 TTS / LLM / 打断 / 聆听等请求透明地上送到 PaaS，
+ * 并在收到 PaaS 响应后回传给业务侧。
+ *
+ * <p>使用流程：
+ * <ol>
+ *   <li>业务侧实现 {@link Sender}（通常实现为直接调用
+ *       {@code ZegoExpressEngine.callExperimentalAPI}），传入构造器；</li>
+ *   <li>在 {@code ZegoExpressEngine.onRecvExperimentalAPI} 回调中，将实验性 API
+ *       回调内容（{@code content} 字符串）原样传给 {@link #handleRoomChannelMessage(String)}；</li>
+ *   <li>调用 {@link #sendAgentInstanceTTS} / {@link #sendAgentInstanceLLM} /
+ *       {@link #interruptAgentInstance} / {@link #startListening} /
+ *       {@link #stopListening} 等方法发起请求；</li>
+ *   <li>通过 {@link Completion} 回调等待结果，或在 {@link ResponseCallback} /
+ *       {@link ErrorCallback} 中接收异步通知。</li>
+ * </ol>
+ */
 public class ZegoAIAgentActionClient {
     public static final int MSG_TYPE_REQUEST = 20;
     public static final int MSG_TYPE_RESPONSE = 22;
@@ -57,6 +76,8 @@ public class ZegoAIAgentActionClient {
     private final String roomId;
     private final String agentUserId;
     private final String userId;
+    private final String agentInstanceId;
+    private final boolean isDigitalHuman;
     private final String deviceId;
     private final int timeoutMs;
     private final Sender sender;
@@ -68,18 +89,44 @@ public class ZegoAIAgentActionClient {
     private long localSeq = 0;
     private int expressSeq = 0;
 
-    public ZegoAIAgentActionClient(String roomId, String agentUserId, String userId, Sender sender, ResponseCallback responseCallback, ErrorCallback errorCallback) {
-        this(roomId, agentUserId, userId, null, 5000, sender, responseCallback, errorCallback);
-    }
-
-    public ZegoAIAgentActionClient(String roomId, String agentUserId, String userId, String deviceId, int timeoutMs, Sender sender, ResponseCallback responseCallback, ErrorCallback errorCallback) {
+    /**
+     * 构造一个智能体实例控制客户端。
+     *
+     * @param roomId          业务房间 ID（与 ZEGO 音视频房间 ID 一致），必填非空
+     * @param agentUserId     1V1 等场景下后端 aiagent 进程加入 RTC 的 userID
+     *                        （即 {@code rtcInfo.agentUserId}，形如 {@code @RBT#<agentId>}）；
+     *                        数字人场景下本参数被忽略，套件按 {@code isDigitalHuman && agentInstanceId} 非空
+     *                        自动用 {@code ai_agent_<agentInstanceId>}（对齐后端：数字人场景下后端会用
+     *                        {@code ai_agent_} 前缀 + instanceId 拼接出一个内部 userID 用于接收信令）
+     * @param userId          当前终端用户 ID，必填非空
+     * @param agentInstanceId 智能体实例 ID（数字人场景必传且非空，其它场景传 null）
+     * @param isDigitalHuman  是否为数字人通话（决定是否走 {@code ai_agent_<instanceId>} 拼接规则）
+     * @param deviceId        设备 ID（用于构造请求 seq）；传 null 时由套件自动生成
+     * @param timeoutMs       默认超时（ms），传 0 时使用 5000
+     * @param sender          底层信令发送回调（通常实现为 {@code ZegoExpressEngine.callExperimentalAPI}）
+     * @param responseCallback 全局响应回调（可选）
+     * @param errorCallback   全局错误回调（可选）
+     */
+    public ZegoAIAgentActionClient(String roomId, String agentUserId, String userId, String agentInstanceId, boolean isDigitalHuman, String deviceId, int timeoutMs, Sender sender, ResponseCallback responseCallback, ErrorCallback errorCallback) {
         requireString(roomId, "roomId");
         requireString(agentUserId, "agentUserId");
         requireString(userId, "userId");
         if (sender == null) throw new IllegalArgumentException("sender is required");
         this.roomId = roomId;
-        this.agentUserId = agentUserId;
+        // 数字人场景下后端 aiagent 进程加入 RTC 用的 userID 是 `ai_agent_<agentInstanceId>`，与 `agentUserId`
+        // 入参（即 `rtcInfo.agentUserId`，形如 `@RBT#<agentId>`）不一致；信令走 sendRoomChannelMessage 的
+        // userList 点对点发送，userList 必须写后端真实 userID 才能被后端收到。
+        // 规则对齐后端：数字人场景下后端会用 `ai_agent_` 前缀 + instanceId 拼接出一个内部 userID 用于接收信令。
+        if (isDigitalHuman && agentInstanceId != null && !agentInstanceId.isEmpty()) {
+            // 与后端 RTC 内部用户的拼接规则对齐（`ai_agent_` 前缀 + instanceId）
+            this.agentUserId = "ai_agent_" + agentInstanceId;
+        } else {
+            this.agentUserId = agentUserId;
+        }
         this.userId = userId;
+        // 透传构造参数，供调用方做客户端复用判断（避免跨 instance 误用旧 client）
+        this.agentInstanceId = agentInstanceId;
+        this.isDigitalHuman = isDigitalHuman;
         this.deviceId = deviceId == null || deviceId.isEmpty() ? "android_" + UUID.randomUUID().toString().substring(0, 8) : deviceId;
         this.timeoutMs = timeoutMs;
         this.sender = sender;
@@ -87,10 +134,27 @@ public class ZegoAIAgentActionClient {
         this.errorCallback = errorCallback;
     }
 
+    /**
+     * 主动调用智能体 TTS（便捷重载，使用构造器默认超时）。
+     *
+     * <p>对应 5 类控制能力中的"主动调用 TTS"。
+     *
+     * @param params    TTS 请求参数
+     * @param completion 请求完成回调
+     */
     public void sendAgentInstanceTTS(AIAgentActionProto.SendAgentInstanceTTSParams params, Completion completion) {
         sendAgentInstanceTTS(params, null, completion);
     }
 
+    /**
+     * 主动调用智能体 TTS。
+     *
+     * <p>对应 5 类控制能力中的"主动调用 TTS"，业务侧传入 TTS 参数即可发起。
+     *
+     * @param params     TTS 请求参数
+     * @param timeoutMs  本次请求的超时（ms）；传 null 时使用构造器 {@code timeoutMs} 默认值
+     * @param completion 请求完成回调
+     */
     public void sendAgentInstanceTTS(AIAgentActionProto.SendAgentInstanceTTSParams params, Integer timeoutMs, Completion completion) {
         if (params == null) throw new IllegalArgumentException("SendAgentInstanceTTSParams is required");
         requireString(params.getText(), "text");
@@ -98,42 +162,119 @@ public class ZegoAIAgentActionClient {
         send(ACTION_SEND_TTS, params, timeoutMs, completion);
     }
 
+    /**
+     * 主动调用智能体 LLM（便捷重载，使用构造器默认超时）。
+     *
+     * <p>对应 5 类控制能力中的"主动调用 LLM"。
+     *
+     * @param params    LLM 请求参数
+     * @param completion 请求完成回调
+     */
     public void sendAgentInstanceLLM(AIAgentActionProto.SendAgentInstanceLLMParams params, Completion completion) {
         sendAgentInstanceLLM(params, null, completion);
     }
 
+    /**
+     * 主动调用智能体 LLM。
+     *
+     * <p>对应 5 类控制能力中的"主动调用 LLM"，业务侧传入 LLM 参数即可发起。
+     *
+     * @param params     LLM 请求参数
+     * @param timeoutMs  本次请求的超时（ms）；传 null 时使用构造器 {@code timeoutMs} 默认值
+     * @param completion 请求完成回调
+     */
     public void sendAgentInstanceLLM(AIAgentActionProto.SendAgentInstanceLLMParams params, Integer timeoutMs, Completion completion) {
         if (params == null) throw new IllegalArgumentException("SendAgentInstanceLLMParams is required");
         requireString(params.getText(), "text");
         send(ACTION_SEND_LLM, params, timeoutMs, completion);
     }
 
+    /**
+     * 打断智能体实例（便捷重载，使用构造器默认超时）。
+     *
+     * <p>对应 5 类控制能力中的"打断智能体实例"。
+     *
+     * @param completion 请求完成回调
+     */
     public void interruptAgentInstance(Completion completion) {
         interruptAgentInstance(null, completion);
     }
 
+    /**
+     * 打断智能体实例。
+     *
+     * <p>对应 5 类控制能力中的"打断智能体实例"，停止当前 TTS / LLM 推理流程。
+     *
+     * @param timeoutMs  本次请求的超时（ms）；传 null 时使用构造器 {@code timeoutMs} 默认值
+     * @param completion 请求完成回调
+     */
     public void interruptAgentInstance(Integer timeoutMs, Completion completion) {
         send(ACTION_INTERRUPT, AIAgentActionProto.InterruptAgentInstanceParams.newBuilder().build(), timeoutMs, completion);
     }
 
+    /**
+     * 智能体开始聆听指定用户（便捷重载，使用构造器默认超时）。
+     *
+     * <p>对应 5 类控制能力中的"开始聆听"。
+     *
+     * @param params    开始聆听参数
+     * @param completion 请求完成回调
+     */
     public void startListening(AIAgentActionProto.StartListeningParams params, Completion completion) {
         startListening(params, null, completion);
     }
 
+    /**
+     * 智能体开始聆听指定用户。
+     *
+     * <p>对应 5 类控制能力中的"开始聆听"，业务侧可传入 Start 参数指定聆听用户。
+     *
+     * @param params     开始聆听参数
+     * @param timeoutMs  本次请求的超时（ms）；传 null 时使用构造器 {@code timeoutMs} 默认值
+     * @param completion 请求完成回调
+     */
     public void startListening(AIAgentActionProto.StartListeningParams params, Integer timeoutMs, Completion completion) {
         if (params == null) throw new IllegalArgumentException("StartListeningParams is required");
         send(ACTION_START_LISTENING, params, timeoutMs, completion);
     }
 
+    /**
+     * 智能体结束聆听指定用户（便捷重载，使用构造器默认超时）。
+     *
+     * <p>对应 5 类控制能力中的"结束聆听"。
+     *
+     * @param params    结束聆听参数
+     * @param completion 请求完成回调
+     */
     public void stopListening(AIAgentActionProto.StopListeningParams params, Completion completion) {
         stopListening(params, null, completion);
     }
 
+    /**
+     * 智能体结束聆听指定用户。
+     *
+     * <p>对应 5 类控制能力中的"结束聆听"，业务侧可传入 Stop 参数指定聆听用户。
+     *
+     * @param params     结束聆听参数
+     * @param timeoutMs  本次请求的超时（ms）；传 null 时使用构造器 {@code timeoutMs} 默认值
+     * @param completion 请求完成回调
+     */
     public void stopListening(AIAgentActionProto.StopListeningParams params, Integer timeoutMs, Completion completion) {
         if (params == null) throw new IllegalArgumentException("StopListeningParams is required");
         send(ACTION_STOP_LISTENING, params, timeoutMs, completion);
     }
 
+    /**
+     * 接收 Express 实验性 API 回调内容。
+     *
+     * <p>业务侧应在 {@code ZegoExpressEngine.onRecvExperimentalAPI} 回调中调用此方法，
+     * 把回调中的 {@code content} 字符串原样传入；Kit 会自动识别
+     * {@code liveroom.room.on_recive_room_channel_message} 与
+     * {@code liveroom.room.on_send_room_channel_message} 两种回调，匹配到对应的请求。
+     *
+     * @param contentString Express 回调内容（JSON 字符串）
+     * @return 表示是否匹配到一个 pending 请求（true = 已处理）
+     */
     public boolean handleRoomChannelMessage(String contentString) {
         try {
             JSONObject data = new JSONObject(contentString);
@@ -220,6 +361,14 @@ public class ZegoAIAgentActionClient {
         }
     }
 
+    /**
+     * 取消所有未完成的请求。
+     *
+     * <p>通常在用户主动退出对话 / 切换实例时调用；被取消的请求会以
+     * {@link ZegoAIAgentActionErrorCodes#CANCELED} 触发 {@link ErrorCallback} 与 {@link Completion}。
+     *
+     * @param message 取消原因描述（写入错误 message 字段）
+     */
     public void cancelAll(String message) {
         ZegoAIAgentActionLogger.warn("cancelAll size=" + pending.size() + " message=" + message);
         for (Map.Entry<String, Pending> entry : pending.entrySet()) {

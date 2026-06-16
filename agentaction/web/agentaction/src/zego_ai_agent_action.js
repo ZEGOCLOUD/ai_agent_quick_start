@@ -210,8 +210,20 @@
                 throw createError('', '', 'invalid_param', 'sender(params) is required');
             }
             this.roomId = options.roomId;
-            this.agentUserId = options.agentUserId;
+            // 数字人场景下后端 aiagent 进程加入 RTC 用的 userID 是 `ai_agent_<agentInstanceId>`，与 `agentUserId`
+            // 入参（即 `rtcInfo.agentUserId`，形如 `@RBT#<agentId>`）不一致；信令走 sendRoomChannelMessage 的
+            // userList 点对点发送，userList 必须写后端真实 userID 才能被后端收到。
+            // 规则对齐后端：数字人场景下后端会用 `ai_agent_` 前缀 + instanceId 拼接出一个内部 userID 用于接收信令。
+            if (options.isDigitalHuman && options.agentInstanceId) {
+                // 与后端 RTC 内部用户的拼接规则对齐（`ai_agent_` 前缀 + instanceId）
+                this.agentUserId = 'ai_agent_' + options.agentInstanceId;
+            } else {
+                this.agentUserId = options.agentUserId;
+            }
             this.userId = options.userId || options.currentUserId || 'anonymous';
+            // 透传构造参数，供调用方做客户端复用判断（避免跨 instance 误用旧 client）
+            this.agentInstanceId = options.agentInstanceId || null;
+            this.isDigitalHuman = !!options.isDigitalHuman;
             this.deviceId = options.deviceId || createDeviceId();
             this.defaultTimeoutMs = options.timeoutMs || 5000;
             this.sender = options.sender;
@@ -222,32 +234,82 @@
             this.localSeq = 0;
         }
 
+        /**
+         * 主动调用智能体 TTS。
+         *
+         * 对应 5 类控制能力中的"主动调用 TTS"，业务侧传入 TTS 参数即可发起。
+         * @param {SendAgentInstanceTTSParams} params
+         * @param {{seq?: string, timeoutMs?: number, agentUserId?: string}} [options]
+         * @returns {Promise<ZegoAIAgentActionResponse>}
+         */
         sendAgentInstanceTTS(params, options) {
             assertPbParams(params, pb.SendAgentInstanceTTSParams, 'SendAgentInstanceTTSParams');
             requireString(params.getText(), 'text');
             return this._send(Actions.SEND_AGENT_INSTANCE_TTS, params, options);
         }
 
+        /**
+         * 主动调用智能体 LLM。
+         *
+         * 对应 5 类控制能力中的"主动调用 LLM"，业务侧传入 LLM 参数即可发起。
+         * @param {SendAgentInstanceLLMParams} params
+         * @param {{seq?: string, timeoutMs?: number, agentUserId?: string}} [options]
+         * @returns {Promise<ZegoAIAgentActionResponse>}
+         */
         sendAgentInstanceLLM(params, options) {
             assertPbParams(params, pb.SendAgentInstanceLLMParams, 'SendAgentInstanceLLMParams');
             requireString(params.getText(), 'text');
             return this._send(Actions.SEND_AGENT_INSTANCE_LLM, params, options);
         }
 
+        /**
+         * 打断智能体实例。
+         *
+         * 对应 5 类控制能力中的"打断智能体实例"，停止当前 TTS / LLM 推理流程。
+         * @param {{seq?: string, timeoutMs?: number, agentUserId?: string}} [options]
+         * @returns {Promise<ZegoAIAgentActionResponse>}
+         */
         interruptAgentInstance(options) {
             return this._send(Actions.INTERRUPT_AGENT_INSTANCE, new pb.InterruptAgentInstanceParams(), options);
         }
 
+        /**
+         * 智能体开始聆听指定用户。
+         *
+         * 对应 5 类控制能力中的"开始聆听"，业务侧可传入 Start 参数指定聆听用户。
+         * @param {StartListeningParams} params
+         * @param {{seq?: string, timeoutMs?: number, agentUserId?: string}} [options]
+         * @returns {Promise<ZegoAIAgentActionResponse>}
+         */
         startListening(params, options) {
             assertPbParams(params, pb.StartListeningParams, 'StartListeningParams');
             return this._send(Actions.START_LISTENING, params, options);
         }
 
+        /**
+         * 智能体结束聆听指定用户。
+         *
+         * 对应 5 类控制能力中的"结束聆听"，业务侧可传入 Stop 参数指定聆听用户。
+         * @param {StopListeningParams} params
+         * @param {{seq?: string, timeoutMs?: number, agentUserId?: string}} [options]
+         * @returns {Promise<ZegoAIAgentActionResponse>}
+         */
         stopListening(params, options) {
             assertPbParams(params, pb.StopListeningParams, 'StopListeningParams');
             return this._send(Actions.STOP_LISTENING, params, options);
         }
 
+        /**
+         * 接收 Express 实验性 API 回调内容。
+         *
+         * 业务侧应在 `onRecvExperimentalAPI` 回调中调用此方法，
+         * 把回调中的 `content` 字符串原样传入；Kit 会自动识别
+         * `liveroom.room.on_recive_room_channel_message` 与
+         * `liveroom.room.on_send_room_channel_message` 两种回调，匹配到对应的请求。
+         *
+         * @param {string|object} contentString
+         * @returns {boolean} 表示是否匹配到一个 pending 请求（true = 已处理）
+         */
         handleRoomChannelMessage(contentString) {
             let data;
             try {
@@ -321,6 +383,14 @@
 
         }
 
+        /**
+         * 取消所有未完成的请求。
+         *
+         * 通常在用户主动退出对话 / 切换实例时调用；被取消的请求会以
+         * `ZegoAIAgentActionErrorCodes.CANCELED` 触发 `onError` 与 `Promise` reject。
+         *
+         * @param {string} [message='agent action canceled'] 取消原因描述
+         */
         cancelAll(message) {
             const reason = message || 'agent action canceled';
             Log.warn('cancelAll size=' + this.pending.size + ' message=' + reason);
