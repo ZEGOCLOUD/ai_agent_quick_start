@@ -100,7 +100,6 @@ NS_ASSUME_NONNULL_BEGIN
 /// 响应 Params.RequestId（PaaS 调用的接口 RequestId）。
 @property (class, nonatomic, readonly) NSString *requestId;
 /// 响应 Params.Data（PaaS 返回的业务数据，可空）。
-
 @property (class, nonatomic, readonly) NSString *data;
 
 // Params 内部字段

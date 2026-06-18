@@ -6,13 +6,12 @@ Pod::Spec.new do |s|
   s.homepage     = 'https://zego.im'
   s.license      = { :type => 'MIT' }
   s.author       = { 'ZEGO' => 'opensource@zego.im' }
-  s.platform     = :ios, '15.0'
+  s.platform     = :ios, '12.0'
   s.source       = { :path => '.' }
   s.source_files = 'Sources/ZegoAIAgentActionObjC/**/*.{h,m}'
   s.public_header_files = [
     'Sources/ZegoAIAgentActionObjC/include/**/*.h',
     'Sources/ZegoAIAgentActionObjC/Generated/**/*.h'
   ]
-  s.dependency 'Protobuf', '~> 4.31'
   s.requires_arc = true
 end
