@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ZEGO AI Agent Action Web Demo</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; color: #1f2937; }
+    main { max-width: 860px; margin: 0 auto; }
+    label { display: block; font-weight: 600; margin-top: 12px; }
+    input, textarea, select { width: 100%; box-sizing: border-box; padding: 10px; margin-top: 6px; border: 1px solid #cbd5e1; border-radius: 6px; }
+    button { margin: 12px 8px 0 0; padding: 10px 14px; border: 0; border-radius: 6px; background: #0f766e; color: white; cursor: pointer; }
+    button.secondary { background: #475569; }
+    button.danger { background: #b91c1c; }
+    pre { min-height: 240px; padding: 12px; background: #0f172a; color: #d1fae5; overflow: auto; border-radius: 6px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>ZEGO AI Agent Action Web Demo</h1>
+  <label>Room ID <input id="roomId" value="room_test"></label>
+  <label>Agent User ID <input id="agentUserId" value="agent_001"></label>
+  <label>Text <textarea id="text">你好，请介绍一下今天的功能。</textarea></label>
+  <label>Priority
+    <select id="priority">
+      <option>Low</option>
+      <option selected>Medium</option>
+      <option>High</option>
+    </select>
+  </label>
+  <button id="tts">SendAgentInstanceTTS</button>
+  <button id="llm">SendAgentInstanceLLM</button>
+  <button id="interrupt" class="danger">InterruptAgentInstance</button>
+  <button id="start" class="secondary">StartListening</button>
+  <button id="stop" class="secondary">StopListening</button>
+  <button id="cancel" class="danger">CancelAll</button>
+  <pre id="log"></pre>
+</main>
+<script src="https://cdn.bootcdn.net/ajax/libs/zego-express-engine-webrtc/3.15.0/ZegoExpressWebRTC.js"></script>
+<script src="../agentaction/src/defines.js"></script>
+<script src="../agentaction/src/logger.js"></script>
+<script src="../agentaction/src/zego_ai_agent_action.js"></script>
+<script>
+const TAG = 'ZegoAIAgentActionDemo';
+const logBox = document.getElementById('log');
+function log(value) {
+  const line = '[' + new Date().toISOString() + '] ' + (typeof value === 'string' ? value : JSON.stringify(value, null, 2));
+  if (typeof console !== 'undefined') {
+    if (typeof value === 'string' && value.indexOf('[error]') === 0) console.error(TAG, line);
+    else if (typeof value === 'string' && value.indexOf('[warn]') === 0) console.warn(TAG, line);
+    else console.log(TAG, line);
+  }
+  logBox.textContent += line + '\n';
+  logBox.scrollTop = logBox.scrollHeight;
+}
+
+// Kit 内部日志同步到控制台与 UI 日志面板
+if (window.ZegoAIAgentActionLogger) {
+  ZegoAIAgentActionLogger.installSink((level, label, message) => log('[kit] ' + message));
+  ZegoAIAgentActionLogger.setLevel(ZegoAIAgentActionLogger.LEVEL_DEBUG);
+}
+
+let zg;
+const appID = 0; // 请替换为你的 AppID
+const server = ""; // 请替换为你的 Server 地址
+const roomId = "room_test";
+const userId = "client_A";
+const token = ""; // 请替换为你的 Token
+
+async function initSDK() {
+  if (appID === 0) {
+    log("Warning: appID is 0, please fill in your AppID, Server and Token");
+  }
+  log('createEngine appID=' + appID);
+  zg = new ZegoExpressEngine(appID, server);
+  zg.on('roomStateUpdate', (roomID, state, errorCode, extendedData) => {
+    log('[roomStateUpdate] roomID=' + roomID + ' state=' + state + ' errorCode=' + errorCode);
+  });
+  zg.on('recvExperimentalAPI', (payload) => {
+    log('[recvExperimentalAPI] ' + JSON.stringify(payload));
+    client.handleRoomChannelMessage(payload);
+  });
+
+  log('loginRoom roomId=' + roomId);
+  await zg.loginRoom(roomId, token, { userID: userId, userName: userId });
+  log('logged in to ' + roomId);
+
+  // 开启实验性 API 房间消息通道接收
+  zg.callExperimentalAPI({
+    method: ZegoAIAgentActionDefines.ExpressMethods.onRecvRoomChannelMessage,
+    params: {}
+  });
+}
+
+function createClient() {
+  return new ZegoAIAgentAction.ZegoAIAgentActionClient({
+    roomId: roomId,
+    userId: userId,
+    agentUserId: document.getElementById('agentUserId').value,
+    sender: async (params, formatedJson) => {
+      log('[sender] action=callExperimentalAPI seq=' + params.seq);
+      log('[sender] formatedJson=' + JSON.stringify(formatedJson));
+      try {
+        const result = await zg.callExperimentalAPI(formatedJson);
+        log('[sender] callExperimentalAPI result=' + result);
+      } catch (e) {
+        log('[sender] callExperimentalAPI error: ' + e);
+        client.onError({
+          seq: params.seq,
+          action: 'unknown',
+          code: ZegoAIAgentActionDefines.ErrorCodes.SEND_FAILED,
+          message: e.toString()
+        });
+        return { errorCode: ZegoAIAgentActionDefines.ErrorCodes.SEND_FAILED, seq: params.seq };
+      }
+      return { errorCode: ZegoAIAgentActionDefines.ErrorCodes.SUCCESS, seq: params.seq };
+    },
+    onResponse: (response) => log('[response] action=' + response.action + ' seq=' + response.seq + ' code=' + response.code + ' message=' + response.message),
+    onError: (error) => log('[error] action=' + error.action + ' seq=' + error.seq + ' code=' + error.code + ' message=' + error.message)
+  });
+}
+let client = createClient();
+document.getElementById('tts').onclick = () => {
+  log('[action] TTS click');
+  const params = new ZegoAIAgentAction.Protobuf.SendAgentInstanceTTSParams();
+  params.setText(text.value);
+  params.setAddHistory(true);
+  params.setPriority(priority.value);
+  params.setSamePriorityOption('ClearAndInterrupt');
+  client.sendAgentInstanceTTS(params).then(r => log('[action] TTS resolved seq=' + r.seq)).catch(e => log('[action] TTS error: ' + e.message));
+};
+document.getElementById('llm').onclick = () => {
+  log('[action] LLM click');
+  const params = new ZegoAIAgentAction.Protobuf.SendAgentInstanceLLMParams();
+  params.setText(text.value);
+  params.setSystemPrompt('');
+  params.setAddQuestionToHistory(false);
+  params.setAddAnswerToHistory(true);
+  params.setPriority(priority.value);
+  params.setSamePriorityOption('ClearAndInterrupt');
+  client.sendAgentInstanceLLM(params).then(r => log('[action] LLM resolved seq=' + r.seq)).catch(e => log('[action] LLM error: ' + e.message));
+};
+document.getElementById('interrupt').onclick = () => {
+  log('[action] Interrupt click');
+  client.interruptAgentInstance().then(r => log('[action] Interrupt resolved seq=' + r.seq)).catch(e => log('[action] Interrupt error: ' + e.message));
+};
+const startBtn = document.getElementById('start');
+const stopBtn = document.getElementById('stop');
+const cancelBtn = document.getElementById('cancel');
+
+initSDK().then(() => {
+  startBtn.disabled = false;
+  stopBtn.disabled = false;
+  cancelBtn.disabled = false;
+});
+
+startBtn.onclick = () => {
+  log('[action] Start click');
+  client.startListening(new ZegoAIAgentAction.Protobuf.StartListeningParams()).then(r => log('[action] Start resolved seq=' + r.seq)).catch(e => log('[action] Start error: ' + e.message));
+};
+stopBtn.onclick = () => {
+  log('[action] Stop click');
+  client.stopListening(new ZegoAIAgentAction.Protobuf.StopListeningParams()).then(r => log('[action] Stop resolved seq=' + r.seq)).catch(e => log('[action] Stop error: ' + e.message));
+};
+cancelBtn.onclick = () => {
+  log('[action] cancelAll click');
+  client.cancelAll('demo cancel');
+};
+</script>
+</body>
+</html>

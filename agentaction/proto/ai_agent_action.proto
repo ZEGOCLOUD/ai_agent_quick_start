@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package zego.aiagent.action;
+
+option java_package = "com.zego.agentaction";
+option java_outer_classname = "AIAgentActionProto";
+option swift_prefix = "Zego";
+
+message AgentActionEnvelope {
+  string action = 1;
+  string seq = 2;
+  bytes params = 3;
+}
+
+message AgentActionResponse {
+  string action = 1;
+  string seq = 2;
+  int32 code = 3;
+  string message = 4;
+  string request_id = 5;
+  bytes data = 6;
+}
+
+message SendAgentInstanceTTSParams {
+  string text = 1;
+  // optional 标记：让生成器产出 hasAddHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+  // 业务方显式传 true/false 时按业务方值输出。
+  optional bool add_history = 2;
+  int32 interrupt_mode = 3;
+  // optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+  optional string priority = 4;
+  // optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+  optional string same_priority_option = 5;
+  bool enqueue_user_speech = 6;
+}
+
+message SendAgentInstanceLLMParams {
+  string text = 1;
+  string system_prompt = 2;
+  bool add_question_to_history = 3;
+  // optional 标记：让生成器产出 hasAddAnswerToHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+  // 业务方显式传 true/false 时按业务方值输出。
+  optional bool add_answer_to_history = 4;
+  // optional 标记：业务方未显式赋值时兜底为 "Medium"。
+  optional string priority = 5;
+  // optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+  optional string same_priority_option = 6;
+  bool enqueue_user_speech = 7;
+}
+
+message InterruptAgentInstanceParams {}
+
+// StartListening / StopListening 新增 sequence（int64）字段，对应 API 文档 Body 中的 Sequence 参数。
+// 业务方通过自增 Sequence 实现"AI Agent 后台只处理 Sequence 最新的请求"的效果。
+message StartListeningParams {
+  string user_id = 1;
+  // 客户端自增序列号；proto3 int64 默认 0 表示不传（与 API 文档"不传则按后台接收顺序处理"语义一致）。
+  int64 sequence = 2;
+}
+
+// StopListening 的 sequence 必须与对应 StartListening 的 sequence 相同，实现开始/结束配对。
+message StopListeningParams {
+  string user_id = 1;
+  int64 sequence = 2;
+}

@@ -1,0 +1,11 @@
+name: zego_ai_agent_action
+description: ZEGO AI Agent Action client suite.
+version: 0.1.0
+publish_to: "none"
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  fixnum: ^1.1.1
+  protobuf: ^6.0.0

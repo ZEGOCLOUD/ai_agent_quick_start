@@ -1,0 +1,10 @@
+{
+  "name": "zego-ai-agent-action-web",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "types": "index.d.ts",
+  "dependencies": {
+    "google-protobuf": "^4.0.1"
+  }
+}
