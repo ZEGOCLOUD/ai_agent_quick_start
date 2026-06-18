@@ -126,6 +126,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (class, nonatomic, readonly) NSString *addAnswerToHistory;
 /// StartListening / StopListening 请求 Params.UserId（要聆听 / 结束聆听的用户 ID）。
 @property (class, nonatomic, readonly) NSString *userId;
+/// StartListening / StopListening 请求 Params.Sequence（客户端自增序列号；不传则按后台接收顺序处理）。
+@property (class, nonatomic, readonly) NSString *sequence;
 @end
 
 NS_ASSUME_NONNULL_END

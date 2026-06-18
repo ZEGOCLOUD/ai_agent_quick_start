@@ -351,10 +351,11 @@ static NSString * const ZegoAIAgentActionDefaultSamePriorityOption = @"ClearAndI
     if ([params isKindOfClass:SendAgentInstanceTTSParams.class]) {
         SendAgentInstanceTTSParams *p = (SendAgentInstanceTTSParams *)params;
         dict[ZegoAIAgentActionProtocolKeys.text] = p.text ?: @"";
-        dict[ZegoAIAgentActionProtocolKeys.addHistory] = @(p.addHistory);
-        // priority / samePriorityOption 为枚举字符串，客户端不显式赋值时 protobuf 默认空串会触发服务端 410000003 "Priority is invalid"，此处兜底为文档默认值
-        dict[ZegoAIAgentActionProtocolKeys.priority] = p.priority.length > 0 ? p.priority : ZegoAIAgentActionDefaultPriority;
-        dict[ZegoAIAgentActionProtocolKeys.samePriorityOption] = p.samePriorityOption.length > 0 ? p.samePriorityOption : ZegoAIAgentActionDefaultSamePriorityOption;
+        // addHistory：业务方未显式赋值时兜底为 API 文档默认值 true；显式赋值（true/false）按业务方值输出。
+        dict[ZegoAIAgentActionProtocolKeys.addHistory] = p.hasAddHistory ? @(p.addHistory) : @YES;
+        // priority / samePriorityOption 为枚举字符串，客户端不显式赋值时 protobuf 默认空串会触发服务端 410000003 "Priority is invalid"，此处兜底为文档默认值。
+        dict[ZegoAIAgentActionProtocolKeys.priority] = p.hasPriority ? p.priority : ZegoAIAgentActionDefaultPriority;
+        dict[ZegoAIAgentActionProtocolKeys.samePriorityOption] = p.hasSamePriorityOption ? p.samePriorityOption : ZegoAIAgentActionDefaultSamePriorityOption;
         if (p.interruptMode != 0) dict[ZegoAIAgentActionProtocolKeys.interruptMode] = @(p.interruptMode);
         if (p.enqueueUserSpeech) dict[ZegoAIAgentActionProtocolKeys.enqueueUserSpeech] = @YES;
         return dict;
@@ -364,21 +365,26 @@ static NSString * const ZegoAIAgentActionDefaultSamePriorityOption = @"ClearAndI
         dict[ZegoAIAgentActionProtocolKeys.text] = p.text ?: @"";
         dict[ZegoAIAgentActionProtocolKeys.systemPrompt] = p.systemPrompt ?: @"";
         dict[ZegoAIAgentActionProtocolKeys.addQuestionToHistory] = @(p.addQuestionToHistory);
-        dict[ZegoAIAgentActionProtocolKeys.addAnswerToHistory] = @(p.addAnswerToHistory);
-        // 同 TTS：枚举字段空串兜底为文档默认值，避免服务端校验失败
-        dict[ZegoAIAgentActionProtocolKeys.priority] = p.priority.length > 0 ? p.priority : ZegoAIAgentActionDefaultPriority;
-        dict[ZegoAIAgentActionProtocolKeys.samePriorityOption] = p.samePriorityOption.length > 0 ? p.samePriorityOption : ZegoAIAgentActionDefaultSamePriorityOption;
+        // addAnswerToHistory：业务方未显式赋值时兜底为 API 文档默认值 true；显式赋值（true/false）按业务方值输出。
+        dict[ZegoAIAgentActionProtocolKeys.addAnswerToHistory] = p.hasAddAnswerToHistory ? @(p.addAnswerToHistory) : @YES;
+        // 同 TTS：枚举字段空串兜底为文档默认值，避免服务端校验失败。
+        dict[ZegoAIAgentActionProtocolKeys.priority] = p.hasPriority ? p.priority : ZegoAIAgentActionDefaultPriority;
+        dict[ZegoAIAgentActionProtocolKeys.samePriorityOption] = p.hasSamePriorityOption ? p.samePriorityOption : ZegoAIAgentActionDefaultSamePriorityOption;
         if (p.enqueueUserSpeech) dict[ZegoAIAgentActionProtocolKeys.enqueueUserSpeech] = @YES;
         return dict;
     }
     if ([params isKindOfClass:StartListeningParams.class]) {
         StartListeningParams *p = (StartListeningParams *)params;
         if (p.userId.length > 0) dict[ZegoAIAgentActionProtocolKeys.userId] = p.userId;
+        // sequence：业务方自增序列号；用 0 判断"未设置"，与其他端保持一致（业务方显式 setSequence(0) 也不发）。
+        if (p.sequence != 0) dict[ZegoAIAgentActionProtocolKeys.sequence] = @(p.sequence);
         return dict;
     }
     if ([params isKindOfClass:StopListeningParams.class]) {
         StopListeningParams *p = (StopListeningParams *)params;
         if (p.userId.length > 0) dict[ZegoAIAgentActionProtocolKeys.userId] = p.userId;
+        // sequence：必须与对应 StartListening 的 sequence 相同。
+        if (p.sequence != 0) dict[ZegoAIAgentActionProtocolKeys.sequence] = @(p.sequence);
         return dict;
     }
     if ([params isKindOfClass:InterruptAgentInstanceParams.class]) {

@@ -12,6 +12,7 @@
 
 import 'dart:core' as $core;
 
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
@@ -284,6 +285,8 @@ class SendAgentInstanceTTSParams extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearText() => $_clearField(1);
 
+  /// optional 标记：让生成器产出 hasAddHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+  /// 业务方显式传 true/false 时按业务方值输出。
   @$pb.TagNumber(2)
   $core.bool get addHistory => $_getBF(1);
   @$pb.TagNumber(2)
@@ -302,6 +305,7 @@ class SendAgentInstanceTTSParams extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   void clearInterruptMode() => $_clearField(3);
 
+  /// optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
   @$pb.TagNumber(4)
   $core.String get priority => $_getSZ(3);
   @$pb.TagNumber(4)
@@ -311,6 +315,7 @@ class SendAgentInstanceTTSParams extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   void clearPriority() => $_clearField(4);
 
+  /// optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
   @$pb.TagNumber(5)
   $core.String get samePriorityOption => $_getSZ(4);
   @$pb.TagNumber(5)
@@ -425,6 +430,8 @@ class SendAgentInstanceLLMParams extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   void clearAddQuestionToHistory() => $_clearField(3);
 
+  /// optional 标记：让生成器产出 hasAddAnswerToHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+  /// 业务方显式传 true/false 时按业务方值输出。
   @$pb.TagNumber(4)
   $core.bool get addAnswerToHistory => $_getBF(3);
   @$pb.TagNumber(4)
@@ -434,6 +441,7 @@ class SendAgentInstanceLLMParams extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   void clearAddAnswerToHistory() => $_clearField(4);
 
+  /// optional 标记：业务方未显式赋值时兜底为 "Medium"。
   @$pb.TagNumber(5)
   $core.String get priority => $_getSZ(4);
   @$pb.TagNumber(5)
@@ -443,6 +451,7 @@ class SendAgentInstanceLLMParams extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   void clearPriority() => $_clearField(5);
 
+  /// optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
   @$pb.TagNumber(6)
   $core.String get samePriorityOption => $_getSZ(5);
   @$pb.TagNumber(6)
@@ -504,12 +513,16 @@ class InterruptAgentInstanceParams extends $pb.GeneratedMessage {
   static InterruptAgentInstanceParams? _defaultInstance;
 }
 
+/// StartListening / StopListening 新增 sequence（int64）字段，对应 API 文档 Body 中的 Sequence 参数。
+/// 业务方通过自增 Sequence 实现"AI Agent 后台只处理 Sequence 最新的请求"的效果。
 class StartListeningParams extends $pb.GeneratedMessage {
   factory StartListeningParams({
     $core.String? userId,
+    $fixnum.Int64? sequence,
   }) {
     final result = create();
     if (userId != null) result.userId = userId;
+    if (sequence != null) result.sequence = sequence;
     return result;
   }
 
@@ -528,6 +541,7 @@ class StartListeningParams extends $pb.GeneratedMessage {
           const $pb.PackageName(_omitMessageNames ? '' : 'zego.aiagent.action'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'userId')
+    ..aInt64(2, _omitFieldNames ? '' : 'sequence')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -557,14 +571,27 @@ class StartListeningParams extends $pb.GeneratedMessage {
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
   void clearUserId() => $_clearField(1);
+
+  /// 客户端自增序列号；proto3 int64 默认 0 表示不传（与 API 文档"不传则按后台接收顺序处理"语义一致）。
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get sequence => $_getI64(1);
+  @$pb.TagNumber(2)
+  set sequence($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSequence() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSequence() => $_clearField(2);
 }
 
+/// StopListening 的 sequence 必须与对应 StartListening 的 sequence 相同，实现开始/结束配对。
 class StopListeningParams extends $pb.GeneratedMessage {
   factory StopListeningParams({
     $core.String? userId,
+    $fixnum.Int64? sequence,
   }) {
     final result = create();
     if (userId != null) result.userId = userId;
+    if (sequence != null) result.sequence = sequence;
     return result;
   }
 
@@ -583,6 +610,7 @@ class StopListeningParams extends $pb.GeneratedMessage {
           const $pb.PackageName(_omitMessageNames ? '' : 'zego.aiagent.action'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'userId')
+    ..aInt64(2, _omitFieldNames ? '' : 'sequence')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -612,6 +640,15 @@ class StopListeningParams extends $pb.GeneratedMessage {
   $core.bool hasUserId() => $_has(0);
   @$pb.TagNumber(1)
   void clearUserId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get sequence => $_getI64(1);
+  @$pb.TagNumber(2)
+  set sequence($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSequence() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSequence() => $_clearField(2);
 }
 
 const $core.bool _omitFieldNames =

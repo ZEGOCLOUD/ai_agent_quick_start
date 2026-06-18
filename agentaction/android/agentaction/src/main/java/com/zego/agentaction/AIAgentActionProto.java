@@ -1891,7 +1891,22 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         getTextBytes();
 
     /**
-     * <code>bool add_history = 2;</code>
+     * <pre>
+     * optional 标记：让生成器产出 hasAddHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+     * 业务方显式传 true/false 时按业务方值输出。
+     * </pre>
+     *
+     * <code>optional bool add_history = 2;</code>
+     * @return Whether the addHistory field is set.
+     */
+    boolean hasAddHistory();
+    /**
+     * <pre>
+     * optional 标记：让生成器产出 hasAddHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+     * 业务方显式传 true/false 时按业务方值输出。
+     * </pre>
+     *
+     * <code>optional bool add_history = 2;</code>
      * @return The addHistory.
      */
     boolean getAddHistory();
@@ -1903,24 +1918,58 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
     int getInterruptMode();
 
     /**
-     * <code>string priority = 4;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+     * </pre>
+     *
+     * <code>optional string priority = 4;</code>
+     * @return Whether the priority field is set.
+     */
+    boolean hasPriority();
+    /**
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+     * </pre>
+     *
+     * <code>optional string priority = 4;</code>
      * @return The priority.
      */
     java.lang.String getPriority();
     /**
-     * <code>string priority = 4;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+     * </pre>
+     *
+     * <code>optional string priority = 4;</code>
      * @return The bytes for priority.
      */
     com.google.protobuf.ByteString
         getPriorityBytes();
 
     /**
-     * <code>string same_priority_option = 5;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+     * </pre>
+     *
+     * <code>optional string same_priority_option = 5;</code>
+     * @return Whether the samePriorityOption field is set.
+     */
+    boolean hasSamePriorityOption();
+    /**
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+     * </pre>
+     *
+     * <code>optional string same_priority_option = 5;</code>
      * @return The samePriorityOption.
      */
     java.lang.String getSamePriorityOption();
     /**
-     * <code>string same_priority_option = 5;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+     * </pre>
+     *
+     * <code>optional string same_priority_option = 5;</code>
      * @return The bytes for samePriorityOption.
      */
     com.google.protobuf.ByteString
@@ -1977,6 +2026,7 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
               com.zego.agentaction.AIAgentActionProto.SendAgentInstanceTTSParams.class, com.zego.agentaction.AIAgentActionProto.SendAgentInstanceTTSParams.Builder.class);
     }
 
+    private int bitField0_;
     public static final int TEXT_FIELD_NUMBER = 1;
     @SuppressWarnings("serial")
     private volatile java.lang.Object text_ = "";
@@ -2019,7 +2069,25 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
     public static final int ADD_HISTORY_FIELD_NUMBER = 2;
     private boolean addHistory_ = false;
     /**
-     * <code>bool add_history = 2;</code>
+     * <pre>
+     * optional 标记：让生成器产出 hasAddHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+     * 业务方显式传 true/false 时按业务方值输出。
+     * </pre>
+     *
+     * <code>optional bool add_history = 2;</code>
+     * @return Whether the addHistory field is set.
+     */
+    @java.lang.Override
+    public boolean hasAddHistory() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <pre>
+     * optional 标记：让生成器产出 hasAddHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+     * 业务方显式传 true/false 时按业务方值输出。
+     * </pre>
+     *
+     * <code>optional bool add_history = 2;</code>
      * @return The addHistory.
      */
     @java.lang.Override
@@ -2042,7 +2110,23 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
     @SuppressWarnings("serial")
     private volatile java.lang.Object priority_ = "";
     /**
-     * <code>string priority = 4;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+     * </pre>
+     *
+     * <code>optional string priority = 4;</code>
+     * @return Whether the priority field is set.
+     */
+    @java.lang.Override
+    public boolean hasPriority() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+     * </pre>
+     *
+     * <code>optional string priority = 4;</code>
      * @return The priority.
      */
     @java.lang.Override
@@ -2059,7 +2143,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       }
     }
     /**
-     * <code>string priority = 4;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+     * </pre>
+     *
+     * <code>optional string priority = 4;</code>
      * @return The bytes for priority.
      */
     @java.lang.Override
@@ -2081,7 +2169,23 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
     @SuppressWarnings("serial")
     private volatile java.lang.Object samePriorityOption_ = "";
     /**
-     * <code>string same_priority_option = 5;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+     * </pre>
+     *
+     * <code>optional string same_priority_option = 5;</code>
+     * @return Whether the samePriorityOption field is set.
+     */
+    @java.lang.Override
+    public boolean hasSamePriorityOption() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+     * </pre>
+     *
+     * <code>optional string same_priority_option = 5;</code>
      * @return The samePriorityOption.
      */
     @java.lang.Override
@@ -2098,7 +2202,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       }
     }
     /**
-     * <code>string same_priority_option = 5;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+     * </pre>
+     *
+     * <code>optional string same_priority_option = 5;</code>
      * @return The bytes for samePriorityOption.
      */
     @java.lang.Override
@@ -2144,16 +2252,16 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       if (!com.google.protobuf.GeneratedMessage.isStringEmpty(text_)) {
         com.google.protobuf.GeneratedMessage.writeString(output, 1, text_);
       }
-      if (addHistory_ != false) {
+      if (((bitField0_ & 0x00000001) != 0)) {
         output.writeBool(2, addHistory_);
       }
       if (interruptMode_ != 0) {
         output.writeInt32(3, interruptMode_);
       }
-      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(priority_)) {
+      if (((bitField0_ & 0x00000002) != 0)) {
         com.google.protobuf.GeneratedMessage.writeString(output, 4, priority_);
       }
-      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(samePriorityOption_)) {
+      if (((bitField0_ & 0x00000004) != 0)) {
         com.google.protobuf.GeneratedMessage.writeString(output, 5, samePriorityOption_);
       }
       if (enqueueUserSpeech_ != false) {
@@ -2166,7 +2274,7 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       if (!com.google.protobuf.GeneratedMessage.isStringEmpty(text_)) {
         size += com.google.protobuf.GeneratedMessage.computeStringSize(1, text_);
       }
-      if (addHistory_ != false) {
+      if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, addHistory_);
       }
@@ -2174,10 +2282,10 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, interruptMode_);
       }
-      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(priority_)) {
+      if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.GeneratedMessage.computeStringSize(4, priority_);
       }
-      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(samePriorityOption_)) {
+      if (((bitField0_ & 0x00000004) != 0)) {
         size += com.google.protobuf.GeneratedMessage.computeStringSize(5, samePriorityOption_);
       }
       if (enqueueUserSpeech_ != false) {
@@ -2210,14 +2318,23 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
 
       if (!getText()
           .equals(other.getText())) return false;
-      if (getAddHistory()
-          != other.getAddHistory()) return false;
+      if (hasAddHistory() != other.hasAddHistory()) return false;
+      if (hasAddHistory()) {
+        if (getAddHistory()
+            != other.getAddHistory()) return false;
+      }
       if (getInterruptMode()
           != other.getInterruptMode()) return false;
-      if (!getPriority()
-          .equals(other.getPriority())) return false;
-      if (!getSamePriorityOption()
-          .equals(other.getSamePriorityOption())) return false;
+      if (hasPriority() != other.hasPriority()) return false;
+      if (hasPriority()) {
+        if (!getPriority()
+            .equals(other.getPriority())) return false;
+      }
+      if (hasSamePriorityOption() != other.hasSamePriorityOption()) return false;
+      if (hasSamePriorityOption()) {
+        if (!getSamePriorityOption()
+            .equals(other.getSamePriorityOption())) return false;
+      }
       if (getEnqueueUserSpeech()
           != other.getEnqueueUserSpeech()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
@@ -2233,15 +2350,21 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + TEXT_FIELD_NUMBER;
       hash = (53 * hash) + getText().hashCode();
-      hash = (37 * hash) + ADD_HISTORY_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getAddHistory());
+      if (hasAddHistory()) {
+        hash = (37 * hash) + ADD_HISTORY_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getAddHistory());
+      }
       hash = (37 * hash) + INTERRUPT_MODE_FIELD_NUMBER;
       hash = (53 * hash) + getInterruptMode();
-      hash = (37 * hash) + PRIORITY_FIELD_NUMBER;
-      hash = (53 * hash) + getPriority().hashCode();
-      hash = (37 * hash) + SAME_PRIORITY_OPTION_FIELD_NUMBER;
-      hash = (53 * hash) + getSamePriorityOption().hashCode();
+      if (hasPriority()) {
+        hash = (37 * hash) + PRIORITY_FIELD_NUMBER;
+        hash = (53 * hash) + getPriority().hashCode();
+      }
+      if (hasSamePriorityOption()) {
+        hash = (37 * hash) + SAME_PRIORITY_OPTION_FIELD_NUMBER;
+        hash = (53 * hash) + getSamePriorityOption().hashCode();
+      }
       hash = (37 * hash) + ENQUEUE_USER_SPEECH_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getEnqueueUserSpeech());
@@ -2418,21 +2541,26 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.text_ = text_;
         }
+        int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000002) != 0)) {
           result.addHistory_ = addHistory_;
+          to_bitField0_ |= 0x00000001;
         }
         if (((from_bitField0_ & 0x00000004) != 0)) {
           result.interruptMode_ = interruptMode_;
         }
         if (((from_bitField0_ & 0x00000008) != 0)) {
           result.priority_ = priority_;
+          to_bitField0_ |= 0x00000002;
         }
         if (((from_bitField0_ & 0x00000010) != 0)) {
           result.samePriorityOption_ = samePriorityOption_;
+          to_bitField0_ |= 0x00000004;
         }
         if (((from_bitField0_ & 0x00000020) != 0)) {
           result.enqueueUserSpeech_ = enqueueUserSpeech_;
         }
+        result.bitField0_ |= to_bitField0_;
       }
 
       @java.lang.Override
@@ -2452,18 +2580,18 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
           bitField0_ |= 0x00000001;
           onChanged();
         }
-        if (other.getAddHistory() != false) {
+        if (other.hasAddHistory()) {
           setAddHistory(other.getAddHistory());
         }
         if (other.getInterruptMode() != 0) {
           setInterruptMode(other.getInterruptMode());
         }
-        if (!other.getPriority().isEmpty()) {
+        if (other.hasPriority()) {
           priority_ = other.priority_;
           bitField0_ |= 0x00000008;
           onChanged();
         }
-        if (!other.getSamePriorityOption().isEmpty()) {
+        if (other.hasSamePriorityOption()) {
           samePriorityOption_ = other.samePriorityOption_;
           bitField0_ |= 0x00000010;
           onChanged();
@@ -2618,7 +2746,25 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
 
       private boolean addHistory_ ;
       /**
-       * <code>bool add_history = 2;</code>
+       * <pre>
+       * optional 标记：让生成器产出 hasAddHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+       * 业务方显式传 true/false 时按业务方值输出。
+       * </pre>
+       *
+       * <code>optional bool add_history = 2;</code>
+       * @return Whether the addHistory field is set.
+       */
+      @java.lang.Override
+      public boolean hasAddHistory() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <pre>
+       * optional 标记：让生成器产出 hasAddHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+       * 业务方显式传 true/false 时按业务方值输出。
+       * </pre>
+       *
+       * <code>optional bool add_history = 2;</code>
        * @return The addHistory.
        */
       @java.lang.Override
@@ -2626,7 +2772,12 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         return addHistory_;
       }
       /**
-       * <code>bool add_history = 2;</code>
+       * <pre>
+       * optional 标记：让生成器产出 hasAddHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+       * 业务方显式传 true/false 时按业务方值输出。
+       * </pre>
+       *
+       * <code>optional bool add_history = 2;</code>
        * @param value The addHistory to set.
        * @return This builder for chaining.
        */
@@ -2638,7 +2789,12 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         return this;
       }
       /**
-       * <code>bool add_history = 2;</code>
+       * <pre>
+       * optional 标记：让生成器产出 hasAddHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+       * 业务方显式传 true/false 时按业务方值输出。
+       * </pre>
+       *
+       * <code>optional bool add_history = 2;</code>
        * @return This builder for chaining.
        */
       public Builder clearAddHistory() {
@@ -2682,7 +2838,22 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
 
       private java.lang.Object priority_ = "";
       /**
-       * <code>string priority = 4;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+       * </pre>
+       *
+       * <code>optional string priority = 4;</code>
+       * @return Whether the priority field is set.
+       */
+      public boolean hasPriority() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+       * </pre>
+       *
+       * <code>optional string priority = 4;</code>
        * @return The priority.
        */
       public java.lang.String getPriority() {
@@ -2698,7 +2869,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         }
       }
       /**
-       * <code>string priority = 4;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+       * </pre>
+       *
+       * <code>optional string priority = 4;</code>
        * @return The bytes for priority.
        */
       public com.google.protobuf.ByteString
@@ -2715,7 +2890,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         }
       }
       /**
-       * <code>string priority = 4;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+       * </pre>
+       *
+       * <code>optional string priority = 4;</code>
        * @param value The priority to set.
        * @return This builder for chaining.
        */
@@ -2728,7 +2907,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         return this;
       }
       /**
-       * <code>string priority = 4;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+       * </pre>
+       *
+       * <code>optional string priority = 4;</code>
        * @return This builder for chaining.
        */
       public Builder clearPriority() {
@@ -2738,7 +2921,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         return this;
       }
       /**
-       * <code>string priority = 4;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+       * </pre>
+       *
+       * <code>optional string priority = 4;</code>
        * @param value The bytes for priority to set.
        * @return This builder for chaining.
        */
@@ -2754,7 +2941,22 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
 
       private java.lang.Object samePriorityOption_ = "";
       /**
-       * <code>string same_priority_option = 5;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+       * </pre>
+       *
+       * <code>optional string same_priority_option = 5;</code>
+       * @return Whether the samePriorityOption field is set.
+       */
+      public boolean hasSamePriorityOption() {
+        return ((bitField0_ & 0x00000010) != 0);
+      }
+      /**
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+       * </pre>
+       *
+       * <code>optional string same_priority_option = 5;</code>
        * @return The samePriorityOption.
        */
       public java.lang.String getSamePriorityOption() {
@@ -2770,7 +2972,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         }
       }
       /**
-       * <code>string same_priority_option = 5;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+       * </pre>
+       *
+       * <code>optional string same_priority_option = 5;</code>
        * @return The bytes for samePriorityOption.
        */
       public com.google.protobuf.ByteString
@@ -2787,7 +2993,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         }
       }
       /**
-       * <code>string same_priority_option = 5;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+       * </pre>
+       *
+       * <code>optional string same_priority_option = 5;</code>
        * @param value The samePriorityOption to set.
        * @return This builder for chaining.
        */
@@ -2800,7 +3010,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         return this;
       }
       /**
-       * <code>string same_priority_option = 5;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+       * </pre>
+       *
+       * <code>optional string same_priority_option = 5;</code>
        * @return This builder for chaining.
        */
       public Builder clearSamePriorityOption() {
@@ -2810,7 +3024,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         return this;
       }
       /**
-       * <code>string same_priority_option = 5;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+       * </pre>
+       *
+       * <code>optional string same_priority_option = 5;</code>
        * @param value The bytes for samePriorityOption to set.
        * @return This builder for chaining.
        */
@@ -2942,30 +3160,79 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
     boolean getAddQuestionToHistory();
 
     /**
-     * <code>bool add_answer_to_history = 4;</code>
+     * <pre>
+     * optional 标记：让生成器产出 hasAddAnswerToHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+     * 业务方显式传 true/false 时按业务方值输出。
+     * </pre>
+     *
+     * <code>optional bool add_answer_to_history = 4;</code>
+     * @return Whether the addAnswerToHistory field is set.
+     */
+    boolean hasAddAnswerToHistory();
+    /**
+     * <pre>
+     * optional 标记：让生成器产出 hasAddAnswerToHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+     * 业务方显式传 true/false 时按业务方值输出。
+     * </pre>
+     *
+     * <code>optional bool add_answer_to_history = 4;</code>
      * @return The addAnswerToHistory.
      */
     boolean getAddAnswerToHistory();
 
     /**
-     * <code>string priority = 5;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "Medium"。
+     * </pre>
+     *
+     * <code>optional string priority = 5;</code>
+     * @return Whether the priority field is set.
+     */
+    boolean hasPriority();
+    /**
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "Medium"。
+     * </pre>
+     *
+     * <code>optional string priority = 5;</code>
      * @return The priority.
      */
     java.lang.String getPriority();
     /**
-     * <code>string priority = 5;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "Medium"。
+     * </pre>
+     *
+     * <code>optional string priority = 5;</code>
      * @return The bytes for priority.
      */
     com.google.protobuf.ByteString
         getPriorityBytes();
 
     /**
-     * <code>string same_priority_option = 6;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+     * </pre>
+     *
+     * <code>optional string same_priority_option = 6;</code>
+     * @return Whether the samePriorityOption field is set.
+     */
+    boolean hasSamePriorityOption();
+    /**
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+     * </pre>
+     *
+     * <code>optional string same_priority_option = 6;</code>
      * @return The samePriorityOption.
      */
     java.lang.String getSamePriorityOption();
     /**
-     * <code>string same_priority_option = 6;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+     * </pre>
+     *
+     * <code>optional string same_priority_option = 6;</code>
      * @return The bytes for samePriorityOption.
      */
     com.google.protobuf.ByteString
@@ -3023,6 +3290,7 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
               com.zego.agentaction.AIAgentActionProto.SendAgentInstanceLLMParams.class, com.zego.agentaction.AIAgentActionProto.SendAgentInstanceLLMParams.Builder.class);
     }
 
+    private int bitField0_;
     public static final int TEXT_FIELD_NUMBER = 1;
     @SuppressWarnings("serial")
     private volatile java.lang.Object text_ = "";
@@ -3115,7 +3383,25 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
     public static final int ADD_ANSWER_TO_HISTORY_FIELD_NUMBER = 4;
     private boolean addAnswerToHistory_ = false;
     /**
-     * <code>bool add_answer_to_history = 4;</code>
+     * <pre>
+     * optional 标记：让生成器产出 hasAddAnswerToHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+     * 业务方显式传 true/false 时按业务方值输出。
+     * </pre>
+     *
+     * <code>optional bool add_answer_to_history = 4;</code>
+     * @return Whether the addAnswerToHistory field is set.
+     */
+    @java.lang.Override
+    public boolean hasAddAnswerToHistory() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <pre>
+     * optional 标记：让生成器产出 hasAddAnswerToHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+     * 业务方显式传 true/false 时按业务方值输出。
+     * </pre>
+     *
+     * <code>optional bool add_answer_to_history = 4;</code>
      * @return The addAnswerToHistory.
      */
     @java.lang.Override
@@ -3127,7 +3413,23 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
     @SuppressWarnings("serial")
     private volatile java.lang.Object priority_ = "";
     /**
-     * <code>string priority = 5;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "Medium"。
+     * </pre>
+     *
+     * <code>optional string priority = 5;</code>
+     * @return Whether the priority field is set.
+     */
+    @java.lang.Override
+    public boolean hasPriority() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "Medium"。
+     * </pre>
+     *
+     * <code>optional string priority = 5;</code>
      * @return The priority.
      */
     @java.lang.Override
@@ -3144,7 +3446,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       }
     }
     /**
-     * <code>string priority = 5;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "Medium"。
+     * </pre>
+     *
+     * <code>optional string priority = 5;</code>
      * @return The bytes for priority.
      */
     @java.lang.Override
@@ -3166,7 +3472,23 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
     @SuppressWarnings("serial")
     private volatile java.lang.Object samePriorityOption_ = "";
     /**
-     * <code>string same_priority_option = 6;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+     * </pre>
+     *
+     * <code>optional string same_priority_option = 6;</code>
+     * @return Whether the samePriorityOption field is set.
+     */
+    @java.lang.Override
+    public boolean hasSamePriorityOption() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+     * </pre>
+     *
+     * <code>optional string same_priority_option = 6;</code>
      * @return The samePriorityOption.
      */
     @java.lang.Override
@@ -3183,7 +3505,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       }
     }
     /**
-     * <code>string same_priority_option = 6;</code>
+     * <pre>
+     * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+     * </pre>
+     *
+     * <code>optional string same_priority_option = 6;</code>
      * @return The bytes for samePriorityOption.
      */
     @java.lang.Override
@@ -3235,13 +3561,13 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       if (addQuestionToHistory_ != false) {
         output.writeBool(3, addQuestionToHistory_);
       }
-      if (addAnswerToHistory_ != false) {
+      if (((bitField0_ & 0x00000001) != 0)) {
         output.writeBool(4, addAnswerToHistory_);
       }
-      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(priority_)) {
+      if (((bitField0_ & 0x00000002) != 0)) {
         com.google.protobuf.GeneratedMessage.writeString(output, 5, priority_);
       }
-      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(samePriorityOption_)) {
+      if (((bitField0_ & 0x00000004) != 0)) {
         com.google.protobuf.GeneratedMessage.writeString(output, 6, samePriorityOption_);
       }
       if (enqueueUserSpeech_ != false) {
@@ -3261,14 +3587,14 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, addQuestionToHistory_);
       }
-      if (addAnswerToHistory_ != false) {
+      if (((bitField0_ & 0x00000001) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(4, addAnswerToHistory_);
       }
-      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(priority_)) {
+      if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.GeneratedMessage.computeStringSize(5, priority_);
       }
-      if (!com.google.protobuf.GeneratedMessage.isStringEmpty(samePriorityOption_)) {
+      if (((bitField0_ & 0x00000004) != 0)) {
         size += com.google.protobuf.GeneratedMessage.computeStringSize(6, samePriorityOption_);
       }
       if (enqueueUserSpeech_ != false) {
@@ -3305,12 +3631,21 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
           .equals(other.getSystemPrompt())) return false;
       if (getAddQuestionToHistory()
           != other.getAddQuestionToHistory()) return false;
-      if (getAddAnswerToHistory()
-          != other.getAddAnswerToHistory()) return false;
-      if (!getPriority()
-          .equals(other.getPriority())) return false;
-      if (!getSamePriorityOption()
-          .equals(other.getSamePriorityOption())) return false;
+      if (hasAddAnswerToHistory() != other.hasAddAnswerToHistory()) return false;
+      if (hasAddAnswerToHistory()) {
+        if (getAddAnswerToHistory()
+            != other.getAddAnswerToHistory()) return false;
+      }
+      if (hasPriority() != other.hasPriority()) return false;
+      if (hasPriority()) {
+        if (!getPriority()
+            .equals(other.getPriority())) return false;
+      }
+      if (hasSamePriorityOption() != other.hasSamePriorityOption()) return false;
+      if (hasSamePriorityOption()) {
+        if (!getSamePriorityOption()
+            .equals(other.getSamePriorityOption())) return false;
+      }
       if (getEnqueueUserSpeech()
           != other.getEnqueueUserSpeech()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
@@ -3331,13 +3666,19 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       hash = (37 * hash) + ADD_QUESTION_TO_HISTORY_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getAddQuestionToHistory());
-      hash = (37 * hash) + ADD_ANSWER_TO_HISTORY_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getAddAnswerToHistory());
-      hash = (37 * hash) + PRIORITY_FIELD_NUMBER;
-      hash = (53 * hash) + getPriority().hashCode();
-      hash = (37 * hash) + SAME_PRIORITY_OPTION_FIELD_NUMBER;
-      hash = (53 * hash) + getSamePriorityOption().hashCode();
+      if (hasAddAnswerToHistory()) {
+        hash = (37 * hash) + ADD_ANSWER_TO_HISTORY_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getAddAnswerToHistory());
+      }
+      if (hasPriority()) {
+        hash = (37 * hash) + PRIORITY_FIELD_NUMBER;
+        hash = (53 * hash) + getPriority().hashCode();
+      }
+      if (hasSamePriorityOption()) {
+        hash = (37 * hash) + SAME_PRIORITY_OPTION_FIELD_NUMBER;
+        hash = (53 * hash) + getSamePriorityOption().hashCode();
+      }
       hash = (37 * hash) + ENQUEUE_USER_SPEECH_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getEnqueueUserSpeech());
@@ -3521,18 +3862,23 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         if (((from_bitField0_ & 0x00000004) != 0)) {
           result.addQuestionToHistory_ = addQuestionToHistory_;
         }
+        int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000008) != 0)) {
           result.addAnswerToHistory_ = addAnswerToHistory_;
+          to_bitField0_ |= 0x00000001;
         }
         if (((from_bitField0_ & 0x00000010) != 0)) {
           result.priority_ = priority_;
+          to_bitField0_ |= 0x00000002;
         }
         if (((from_bitField0_ & 0x00000020) != 0)) {
           result.samePriorityOption_ = samePriorityOption_;
+          to_bitField0_ |= 0x00000004;
         }
         if (((from_bitField0_ & 0x00000040) != 0)) {
           result.enqueueUserSpeech_ = enqueueUserSpeech_;
         }
+        result.bitField0_ |= to_bitField0_;
       }
 
       @java.lang.Override
@@ -3560,15 +3906,15 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         if (other.getAddQuestionToHistory() != false) {
           setAddQuestionToHistory(other.getAddQuestionToHistory());
         }
-        if (other.getAddAnswerToHistory() != false) {
+        if (other.hasAddAnswerToHistory()) {
           setAddAnswerToHistory(other.getAddAnswerToHistory());
         }
-        if (!other.getPriority().isEmpty()) {
+        if (other.hasPriority()) {
           priority_ = other.priority_;
           bitField0_ |= 0x00000010;
           onChanged();
         }
-        if (!other.getSamePriorityOption().isEmpty()) {
+        if (other.hasSamePriorityOption()) {
           samePriorityOption_ = other.samePriorityOption_;
           bitField0_ |= 0x00000020;
           onChanged();
@@ -3832,7 +4178,25 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
 
       private boolean addAnswerToHistory_ ;
       /**
-       * <code>bool add_answer_to_history = 4;</code>
+       * <pre>
+       * optional 标记：让生成器产出 hasAddAnswerToHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+       * 业务方显式传 true/false 时按业务方值输出。
+       * </pre>
+       *
+       * <code>optional bool add_answer_to_history = 4;</code>
+       * @return Whether the addAnswerToHistory field is set.
+       */
+      @java.lang.Override
+      public boolean hasAddAnswerToHistory() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <pre>
+       * optional 标记：让生成器产出 hasAddAnswerToHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+       * 业务方显式传 true/false 时按业务方值输出。
+       * </pre>
+       *
+       * <code>optional bool add_answer_to_history = 4;</code>
        * @return The addAnswerToHistory.
        */
       @java.lang.Override
@@ -3840,7 +4204,12 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         return addAnswerToHistory_;
       }
       /**
-       * <code>bool add_answer_to_history = 4;</code>
+       * <pre>
+       * optional 标记：让生成器产出 hasAddAnswerToHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+       * 业务方显式传 true/false 时按业务方值输出。
+       * </pre>
+       *
+       * <code>optional bool add_answer_to_history = 4;</code>
        * @param value The addAnswerToHistory to set.
        * @return This builder for chaining.
        */
@@ -3852,7 +4221,12 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         return this;
       }
       /**
-       * <code>bool add_answer_to_history = 4;</code>
+       * <pre>
+       * optional 标记：让生成器产出 hasAddAnswerToHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+       * 业务方显式传 true/false 时按业务方值输出。
+       * </pre>
+       *
+       * <code>optional bool add_answer_to_history = 4;</code>
        * @return This builder for chaining.
        */
       public Builder clearAddAnswerToHistory() {
@@ -3864,7 +4238,22 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
 
       private java.lang.Object priority_ = "";
       /**
-       * <code>string priority = 5;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "Medium"。
+       * </pre>
+       *
+       * <code>optional string priority = 5;</code>
+       * @return Whether the priority field is set.
+       */
+      public boolean hasPriority() {
+        return ((bitField0_ & 0x00000010) != 0);
+      }
+      /**
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "Medium"。
+       * </pre>
+       *
+       * <code>optional string priority = 5;</code>
        * @return The priority.
        */
       public java.lang.String getPriority() {
@@ -3880,7 +4269,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         }
       }
       /**
-       * <code>string priority = 5;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "Medium"。
+       * </pre>
+       *
+       * <code>optional string priority = 5;</code>
        * @return The bytes for priority.
        */
       public com.google.protobuf.ByteString
@@ -3897,7 +4290,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         }
       }
       /**
-       * <code>string priority = 5;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "Medium"。
+       * </pre>
+       *
+       * <code>optional string priority = 5;</code>
        * @param value The priority to set.
        * @return This builder for chaining.
        */
@@ -3910,7 +4307,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         return this;
       }
       /**
-       * <code>string priority = 5;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "Medium"。
+       * </pre>
+       *
+       * <code>optional string priority = 5;</code>
        * @return This builder for chaining.
        */
       public Builder clearPriority() {
@@ -3920,7 +4321,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         return this;
       }
       /**
-       * <code>string priority = 5;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "Medium"。
+       * </pre>
+       *
+       * <code>optional string priority = 5;</code>
        * @param value The bytes for priority to set.
        * @return This builder for chaining.
        */
@@ -3936,7 +4341,22 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
 
       private java.lang.Object samePriorityOption_ = "";
       /**
-       * <code>string same_priority_option = 6;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+       * </pre>
+       *
+       * <code>optional string same_priority_option = 6;</code>
+       * @return Whether the samePriorityOption field is set.
+       */
+      public boolean hasSamePriorityOption() {
+        return ((bitField0_ & 0x00000020) != 0);
+      }
+      /**
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+       * </pre>
+       *
+       * <code>optional string same_priority_option = 6;</code>
        * @return The samePriorityOption.
        */
       public java.lang.String getSamePriorityOption() {
@@ -3952,7 +4372,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         }
       }
       /**
-       * <code>string same_priority_option = 6;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+       * </pre>
+       *
+       * <code>optional string same_priority_option = 6;</code>
        * @return The bytes for samePriorityOption.
        */
       public com.google.protobuf.ByteString
@@ -3969,7 +4393,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         }
       }
       /**
-       * <code>string same_priority_option = 6;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+       * </pre>
+       *
+       * <code>optional string same_priority_option = 6;</code>
        * @param value The samePriorityOption to set.
        * @return This builder for chaining.
        */
@@ -3982,7 +4410,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         return this;
       }
       /**
-       * <code>string same_priority_option = 6;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+       * </pre>
+       *
+       * <code>optional string same_priority_option = 6;</code>
        * @return This builder for chaining.
        */
       public Builder clearSamePriorityOption() {
@@ -3992,7 +4424,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         return this;
       }
       /**
-       * <code>string same_priority_option = 6;</code>
+       * <pre>
+       * optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+       * </pre>
+       *
+       * <code>optional string same_priority_option = 6;</code>
        * @param value The bytes for samePriorityOption to set.
        * @return This builder for chaining.
        */
@@ -4463,8 +4899,23 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
      */
     com.google.protobuf.ByteString
         getUserIdBytes();
+
+    /**
+     * <pre>
+     * 客户端自增序列号；proto3 int64 默认 0 表示不传（与 API 文档"不传则按后台接收顺序处理"语义一致）。
+     * </pre>
+     *
+     * <code>int64 sequence = 2;</code>
+     * @return The sequence.
+     */
+    long getSequence();
   }
   /**
+   * <pre>
+   * StartListening / StopListening 新增 sequence（int64）字段，对应 API 文档 Body 中的 Sequence 参数。
+   * 业务方通过自增 Sequence 实现"AI Agent 后台只处理 Sequence 最新的请求"的效果。
+   * </pre>
+   *
    * Protobuf type {@code zego.aiagent.action.StartListeningParams}
    */
   public static final class StartListeningParams extends
@@ -4546,6 +4997,21 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       }
     }
 
+    public static final int SEQUENCE_FIELD_NUMBER = 2;
+    private long sequence_ = 0L;
+    /**
+     * <pre>
+     * 客户端自增序列号；proto3 int64 默认 0 表示不传（与 API 文档"不传则按后台接收顺序处理"语义一致）。
+     * </pre>
+     *
+     * <code>int64 sequence = 2;</code>
+     * @return The sequence.
+     */
+    @java.lang.Override
+    public long getSequence() {
+      return sequence_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -4563,12 +5029,19 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       if (!com.google.protobuf.GeneratedMessage.isStringEmpty(userId_)) {
         com.google.protobuf.GeneratedMessage.writeString(output, 1, userId_);
       }
+      if (sequence_ != 0L) {
+        output.writeInt64(2, sequence_);
+      }
       getUnknownFields().writeTo(output);
     }
     private int computeSerializedSize_0() {
       int size = 0;
       if (!com.google.protobuf.GeneratedMessage.isStringEmpty(userId_)) {
         size += com.google.protobuf.GeneratedMessage.computeStringSize(1, userId_);
+      }
+      if (sequence_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, sequence_);
       }
       return size;
     }
@@ -4596,6 +5069,8 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
 
       if (!getUserId()
           .equals(other.getUserId())) return false;
+      if (getSequence()
+          != other.getSequence()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -4609,6 +5084,9 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + USER_ID_FIELD_NUMBER;
       hash = (53 * hash) + getUserId().hashCode();
+      hash = (37 * hash) + SEQUENCE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getSequence());
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4707,6 +5185,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       return builder;
     }
     /**
+     * <pre>
+     * StartListening / StopListening 新增 sequence（int64）字段，对应 API 文档 Body 中的 Sequence 参数。
+     * 业务方通过自增 Sequence 实现"AI Agent 后台只处理 Sequence 最新的请求"的效果。
+     * </pre>
+     *
      * Protobuf type {@code zego.aiagent.action.StartListeningParams}
      */
     public static final class Builder extends
@@ -4741,6 +5224,7 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         super.clear();
         bitField0_ = 0;
         userId_ = "";
+        sequence_ = 0L;
         return this;
       }
 
@@ -4777,6 +5261,9 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.userId_ = userId_;
         }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.sequence_ = sequence_;
+        }
       }
 
       @java.lang.Override
@@ -4795,6 +5282,9 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
           userId_ = other.userId_;
           bitField0_ |= 0x00000001;
           onChanged();
+        }
+        if (other.getSequence() != 0L) {
+          setSequence(other.getSequence());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -4827,6 +5317,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
                 bitField0_ |= 0x00000001;
                 break;
               } // case 10
+              case 16: {
+                sequence_ = input.readInt64();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -4916,6 +5411,50 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         return this;
       }
 
+      private long sequence_ ;
+      /**
+       * <pre>
+       * 客户端自增序列号；proto3 int64 默认 0 表示不传（与 API 文档"不传则按后台接收顺序处理"语义一致）。
+       * </pre>
+       *
+       * <code>int64 sequence = 2;</code>
+       * @return The sequence.
+       */
+      @java.lang.Override
+      public long getSequence() {
+        return sequence_;
+      }
+      /**
+       * <pre>
+       * 客户端自增序列号；proto3 int64 默认 0 表示不传（与 API 文档"不传则按后台接收顺序处理"语义一致）。
+       * </pre>
+       *
+       * <code>int64 sequence = 2;</code>
+       * @param value The sequence to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSequence(long value) {
+
+        sequence_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * 客户端自增序列号；proto3 int64 默认 0 表示不传（与 API 文档"不传则按后台接收顺序处理"语义一致）。
+       * </pre>
+       *
+       * <code>int64 sequence = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSequence() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        sequence_ = 0L;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:zego.aiagent.action.StartListeningParams)
     }
 
@@ -4982,8 +5521,18 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
      */
     com.google.protobuf.ByteString
         getUserIdBytes();
+
+    /**
+     * <code>int64 sequence = 2;</code>
+     * @return The sequence.
+     */
+    long getSequence();
   }
   /**
+   * <pre>
+   * StopListening 的 sequence 必须与对应 StartListening 的 sequence 相同，实现开始/结束配对。
+   * </pre>
+   *
    * Protobuf type {@code zego.aiagent.action.StopListeningParams}
    */
   public static final class StopListeningParams extends
@@ -5065,6 +5614,17 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       }
     }
 
+    public static final int SEQUENCE_FIELD_NUMBER = 2;
+    private long sequence_ = 0L;
+    /**
+     * <code>int64 sequence = 2;</code>
+     * @return The sequence.
+     */
+    @java.lang.Override
+    public long getSequence() {
+      return sequence_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -5082,12 +5642,19 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       if (!com.google.protobuf.GeneratedMessage.isStringEmpty(userId_)) {
         com.google.protobuf.GeneratedMessage.writeString(output, 1, userId_);
       }
+      if (sequence_ != 0L) {
+        output.writeInt64(2, sequence_);
+      }
       getUnknownFields().writeTo(output);
     }
     private int computeSerializedSize_0() {
       int size = 0;
       if (!com.google.protobuf.GeneratedMessage.isStringEmpty(userId_)) {
         size += com.google.protobuf.GeneratedMessage.computeStringSize(1, userId_);
+      }
+      if (sequence_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, sequence_);
       }
       return size;
     }
@@ -5115,6 +5682,8 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
 
       if (!getUserId()
           .equals(other.getUserId())) return false;
+      if (getSequence()
+          != other.getSequence()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -5128,6 +5697,9 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + USER_ID_FIELD_NUMBER;
       hash = (53 * hash) + getUserId().hashCode();
+      hash = (37 * hash) + SEQUENCE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getSequence());
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -5226,6 +5798,10 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       return builder;
     }
     /**
+     * <pre>
+     * StopListening 的 sequence 必须与对应 StartListening 的 sequence 相同，实现开始/结束配对。
+     * </pre>
+     *
      * Protobuf type {@code zego.aiagent.action.StopListeningParams}
      */
     public static final class Builder extends
@@ -5260,6 +5836,7 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         super.clear();
         bitField0_ = 0;
         userId_ = "";
+        sequence_ = 0L;
         return this;
       }
 
@@ -5296,6 +5873,9 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         if (((from_bitField0_ & 0x00000001) != 0)) {
           result.userId_ = userId_;
         }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.sequence_ = sequence_;
+        }
       }
 
       @java.lang.Override
@@ -5314,6 +5894,9 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
           userId_ = other.userId_;
           bitField0_ |= 0x00000001;
           onChanged();
+        }
+        if (other.getSequence() != 0L) {
+          setSequence(other.getSequence());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -5346,6 +5929,11 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
                 bitField0_ |= 0x00000001;
                 break;
               } // case 10
+              case 16: {
+                sequence_ = input.readInt64();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -5431,6 +6019,38 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
         checkByteStringIsUtf8(value);
         userId_ = value;
         bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+
+      private long sequence_ ;
+      /**
+       * <code>int64 sequence = 2;</code>
+       * @return The sequence.
+       */
+      @java.lang.Override
+      public long getSequence() {
+        return sequence_;
+      }
+      /**
+       * <code>int64 sequence = 2;</code>
+       * @param value The sequence to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSequence(long value) {
+
+        sequence_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 sequence = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSequence() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        sequence_ = 0L;
         onChanged();
         return this;
       }
@@ -5535,21 +6155,26 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
       "\001(\t\022\013\n\003seq\030\002 \001(\t\022\016\n\006params\030\003 \001(\014\"s\n\023Agen" +
       "tActionResponse\022\016\n\006action\030\001 \001(\t\022\013\n\003seq\030\002" +
       " \001(\t\022\014\n\004code\030\003 \001(\005\022\017\n\007message\030\004 \001(\t\022\022\n\nr" +
-      "equest_id\030\005 \001(\t\022\014\n\004data\030\006 \001(\014\"\244\001\n\032SendAg" +
-      "entInstanceTTSParams\022\014\n\004text\030\001 \001(\t\022\023\n\013ad" +
-      "d_history\030\002 \001(\010\022\026\n\016interrupt_mode\030\003 \001(\005\022" +
-      "\020\n\010priority\030\004 \001(\t\022\034\n\024same_priority_optio" +
-      "n\030\005 \001(\t\022\033\n\023enqueue_user_speech\030\006 \001(\010\"\316\001\n" +
-      "\032SendAgentInstanceLLMParams\022\014\n\004text\030\001 \001(" +
-      "\t\022\025\n\rsystem_prompt\030\002 \001(\t\022\037\n\027add_question" +
-      "_to_history\030\003 \001(\010\022\035\n\025add_answer_to_histo" +
-      "ry\030\004 \001(\010\022\020\n\010priority\030\005 \001(\t\022\034\n\024same_prior" +
-      "ity_option\030\006 \001(\t\022\033\n\023enqueue_user_speech\030" +
-      "\007 \001(\010\"\036\n\034InterruptAgentInstanceParams\"\'\n" +
-      "\024StartListeningParams\022\017\n\007user_id\030\001 \001(\t\"&" +
-      "\n\023StopListeningParams\022\017\n\007user_id\030\001 \001(\tB1" +
-      "\n\024com.zego.agentactionB\022AIAgentActionPro" +
-      "to\272\002\004Zegob\006proto3"
+      "equest_id\030\005 \001(\t\022\014\n\004data\030\006 \001(\014\"\351\001\n\032SendAg" +
+      "entInstanceTTSParams\022\014\n\004text\030\001 \001(\t\022\030\n\013ad" +
+      "d_history\030\002 \001(\010H\000\210\001\001\022\026\n\016interrupt_mode\030\003" +
+      " \001(\005\022\025\n\010priority\030\004 \001(\tH\001\210\001\001\022!\n\024same_prio" +
+      "rity_option\030\005 \001(\tH\002\210\001\001\022\033\n\023enqueue_user_s" +
+      "peech\030\006 \001(\010B\016\n\014_add_historyB\013\n\t_priority" +
+      "B\027\n\025_same_priority_option\"\235\002\n\032SendAgentI" +
+      "nstanceLLMParams\022\014\n\004text\030\001 \001(\t\022\025\n\rsystem" +
+      "_prompt\030\002 \001(\t\022\037\n\027add_question_to_history" +
+      "\030\003 \001(\010\022\"\n\025add_answer_to_history\030\004 \001(\010H\000\210" +
+      "\001\001\022\025\n\010priority\030\005 \001(\tH\001\210\001\001\022!\n\024same_priori" +
+      "ty_option\030\006 \001(\tH\002\210\001\001\022\033\n\023enqueue_user_spe" +
+      "ech\030\007 \001(\010B\030\n\026_add_answer_to_historyB\013\n\t_" +
+      "priorityB\027\n\025_same_priority_option\"\036\n\034Int" +
+      "erruptAgentInstanceParams\"9\n\024StartListen" +
+      "ingParams\022\017\n\007user_id\030\001 \001(\t\022\020\n\010sequence\030\002" +
+      " \001(\003\"8\n\023StopListeningParams\022\017\n\007user_id\030\001" +
+      " \001(\t\022\020\n\010sequence\030\002 \001(\003B1\n\024com.zego.agent" +
+      "actionB\022AIAgentActionProto\272\002\004Zegob\006proto" +
+      "3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -5590,13 +6215,13 @@ public final class AIAgentActionProto extends com.google.protobuf.GeneratedFile 
     internal_static_zego_aiagent_action_StartListeningParams_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_zego_aiagent_action_StartListeningParams_descriptor,
-        new java.lang.String[] { "UserId", });
+        new java.lang.String[] { "UserId", "Sequence", });
     internal_static_zego_aiagent_action_StopListeningParams_descriptor =
       getDescriptor().getMessageType(6);
     internal_static_zego_aiagent_action_StopListeningParams_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_zego_aiagent_action_StopListeningParams_descriptor,
-        new java.lang.String[] { "UserId", });
+        new java.lang.String[] { "UserId", "Sequence", });
     descriptor.resolveAllFeaturesImmutable();
   }
 

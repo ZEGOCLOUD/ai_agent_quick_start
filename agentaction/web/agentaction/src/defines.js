@@ -120,6 +120,8 @@
         addAnswerToHistory: 'AddAnswerToHistory',
         /** StartListening / StopListening 请求 Params.UserId（要聆听 / 结束聆听的用户 ID） */
         userId: 'UserId',
+        /** StartListening / StopListening 请求 Params.Sequence（客户端自增序列号；不传则按后台接收顺序处理） */
+        sequence: 'Sequence',
     };
 
     /**

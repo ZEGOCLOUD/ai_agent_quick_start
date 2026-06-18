@@ -726,10 +726,10 @@ proto.zego.aiagent.action.SendAgentInstanceTTSParams.prototype.toObject = functi
 proto.zego.aiagent.action.SendAgentInstanceTTSParams.toObject = function(includeInstance, msg) {
   var f, obj = {
 text: jspb.Message.getFieldWithDefault(msg, 1, ""),
-addHistory: jspb.Message.getBooleanFieldWithDefault(msg, 2, false),
+addHistory: (f = jspb.Message.getBooleanField(msg, 2)) == null ? undefined : f,
 interruptMode: jspb.Message.getFieldWithDefault(msg, 3, 0),
-priority: jspb.Message.getFieldWithDefault(msg, 4, ""),
-samePriorityOption: jspb.Message.getFieldWithDefault(msg, 5, ""),
+priority: (f = jspb.Message.getField(msg, 4)) == null ? undefined : f,
+samePriorityOption: (f = jspb.Message.getField(msg, 5)) == null ? undefined : f,
 enqueueUserSpeech: jspb.Message.getBooleanFieldWithDefault(msg, 6, false)
   };
 
@@ -827,8 +827,8 @@ proto.zego.aiagent.action.SendAgentInstanceTTSParams.serializeBinaryToWriter = f
       f
     );
   }
-  f = message.getAddHistory();
-  if (f) {
+  f = /** @type {boolean} */ (jspb.Message.getField(message, 2));
+  if (f != null) {
     writer.writeBool(
       2,
       f
@@ -841,15 +841,15 @@ proto.zego.aiagent.action.SendAgentInstanceTTSParams.serializeBinaryToWriter = f
       f
     );
   }
-  f = message.getPriority();
-  if (f.length > 0) {
+  f = /** @type {string} */ (jspb.Message.getField(message, 4));
+  if (f != null) {
     writer.writeString(
       4,
       f
     );
   }
-  f = message.getSamePriorityOption();
-  if (f.length > 0) {
+  f = /** @type {string} */ (jspb.Message.getField(message, 5));
+  if (f != null) {
     writer.writeString(
       5,
       f
@@ -897,7 +897,25 @@ proto.zego.aiagent.action.SendAgentInstanceTTSParams.prototype.getAddHistory = f
  * @return {!proto.zego.aiagent.action.SendAgentInstanceTTSParams} returns this
  */
 proto.zego.aiagent.action.SendAgentInstanceTTSParams.prototype.setAddHistory = function(value) {
-  return jspb.Message.setProto3BooleanField(this, 2, value);
+  return jspb.Message.setField(this, 2, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.zego.aiagent.action.SendAgentInstanceTTSParams} returns this
+ */
+proto.zego.aiagent.action.SendAgentInstanceTTSParams.prototype.clearAddHistory = function() {
+  return jspb.Message.setField(this, 2, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.zego.aiagent.action.SendAgentInstanceTTSParams.prototype.hasAddHistory = function() {
+  return jspb.Message.getField(this, 2) != null;
 };
 
 
@@ -933,7 +951,25 @@ proto.zego.aiagent.action.SendAgentInstanceTTSParams.prototype.getPriority = fun
  * @return {!proto.zego.aiagent.action.SendAgentInstanceTTSParams} returns this
  */
 proto.zego.aiagent.action.SendAgentInstanceTTSParams.prototype.setPriority = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
+  return jspb.Message.setField(this, 4, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.zego.aiagent.action.SendAgentInstanceTTSParams} returns this
+ */
+proto.zego.aiagent.action.SendAgentInstanceTTSParams.prototype.clearPriority = function() {
+  return jspb.Message.setField(this, 4, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.zego.aiagent.action.SendAgentInstanceTTSParams.prototype.hasPriority = function() {
+  return jspb.Message.getField(this, 4) != null;
 };
 
 
@@ -951,7 +987,25 @@ proto.zego.aiagent.action.SendAgentInstanceTTSParams.prototype.getSamePriorityOp
  * @return {!proto.zego.aiagent.action.SendAgentInstanceTTSParams} returns this
  */
 proto.zego.aiagent.action.SendAgentInstanceTTSParams.prototype.setSamePriorityOption = function(value) {
-  return jspb.Message.setProto3StringField(this, 5, value);
+  return jspb.Message.setField(this, 5, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.zego.aiagent.action.SendAgentInstanceTTSParams} returns this
+ */
+proto.zego.aiagent.action.SendAgentInstanceTTSParams.prototype.clearSamePriorityOption = function() {
+  return jspb.Message.setField(this, 5, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.zego.aiagent.action.SendAgentInstanceTTSParams.prototype.hasSamePriorityOption = function() {
+  return jspb.Message.getField(this, 5) != null;
 };
 
 
@@ -1008,9 +1062,9 @@ proto.zego.aiagent.action.SendAgentInstanceLLMParams.toObject = function(include
 text: jspb.Message.getFieldWithDefault(msg, 1, ""),
 systemPrompt: jspb.Message.getFieldWithDefault(msg, 2, ""),
 addQuestionToHistory: jspb.Message.getBooleanFieldWithDefault(msg, 3, false),
-addAnswerToHistory: jspb.Message.getBooleanFieldWithDefault(msg, 4, false),
-priority: jspb.Message.getFieldWithDefault(msg, 5, ""),
-samePriorityOption: jspb.Message.getFieldWithDefault(msg, 6, ""),
+addAnswerToHistory: (f = jspb.Message.getBooleanField(msg, 4)) == null ? undefined : f,
+priority: (f = jspb.Message.getField(msg, 5)) == null ? undefined : f,
+samePriorityOption: (f = jspb.Message.getField(msg, 6)) == null ? undefined : f,
 enqueueUserSpeech: jspb.Message.getBooleanFieldWithDefault(msg, 7, false)
   };
 
@@ -1126,22 +1180,22 @@ proto.zego.aiagent.action.SendAgentInstanceLLMParams.serializeBinaryToWriter = f
       f
     );
   }
-  f = message.getAddAnswerToHistory();
-  if (f) {
+  f = /** @type {boolean} */ (jspb.Message.getField(message, 4));
+  if (f != null) {
     writer.writeBool(
       4,
       f
     );
   }
-  f = message.getPriority();
-  if (f.length > 0) {
+  f = /** @type {string} */ (jspb.Message.getField(message, 5));
+  if (f != null) {
     writer.writeString(
       5,
       f
     );
   }
-  f = message.getSamePriorityOption();
-  if (f.length > 0) {
+  f = /** @type {string} */ (jspb.Message.getField(message, 6));
+  if (f != null) {
     writer.writeString(
       6,
       f
@@ -1225,7 +1279,25 @@ proto.zego.aiagent.action.SendAgentInstanceLLMParams.prototype.getAddAnswerToHis
  * @return {!proto.zego.aiagent.action.SendAgentInstanceLLMParams} returns this
  */
 proto.zego.aiagent.action.SendAgentInstanceLLMParams.prototype.setAddAnswerToHistory = function(value) {
-  return jspb.Message.setProto3BooleanField(this, 4, value);
+  return jspb.Message.setField(this, 4, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.zego.aiagent.action.SendAgentInstanceLLMParams} returns this
+ */
+proto.zego.aiagent.action.SendAgentInstanceLLMParams.prototype.clearAddAnswerToHistory = function() {
+  return jspb.Message.setField(this, 4, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.zego.aiagent.action.SendAgentInstanceLLMParams.prototype.hasAddAnswerToHistory = function() {
+  return jspb.Message.getField(this, 4) != null;
 };
 
 
@@ -1243,7 +1315,25 @@ proto.zego.aiagent.action.SendAgentInstanceLLMParams.prototype.getPriority = fun
  * @return {!proto.zego.aiagent.action.SendAgentInstanceLLMParams} returns this
  */
 proto.zego.aiagent.action.SendAgentInstanceLLMParams.prototype.setPriority = function(value) {
-  return jspb.Message.setProto3StringField(this, 5, value);
+  return jspb.Message.setField(this, 5, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.zego.aiagent.action.SendAgentInstanceLLMParams} returns this
+ */
+proto.zego.aiagent.action.SendAgentInstanceLLMParams.prototype.clearPriority = function() {
+  return jspb.Message.setField(this, 5, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.zego.aiagent.action.SendAgentInstanceLLMParams.prototype.hasPriority = function() {
+  return jspb.Message.getField(this, 5) != null;
 };
 
 
@@ -1261,7 +1351,25 @@ proto.zego.aiagent.action.SendAgentInstanceLLMParams.prototype.getSamePriorityOp
  * @return {!proto.zego.aiagent.action.SendAgentInstanceLLMParams} returns this
  */
 proto.zego.aiagent.action.SendAgentInstanceLLMParams.prototype.setSamePriorityOption = function(value) {
-  return jspb.Message.setProto3StringField(this, 6, value);
+  return jspb.Message.setField(this, 6, value);
+};
+
+
+/**
+ * Clears the field making it undefined.
+ * @return {!proto.zego.aiagent.action.SendAgentInstanceLLMParams} returns this
+ */
+proto.zego.aiagent.action.SendAgentInstanceLLMParams.prototype.clearSamePriorityOption = function() {
+  return jspb.Message.setField(this, 6, undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.zego.aiagent.action.SendAgentInstanceLLMParams.prototype.hasSamePriorityOption = function() {
+  return jspb.Message.getField(this, 6) != null;
 };
 
 
@@ -1416,7 +1524,8 @@ proto.zego.aiagent.action.StartListeningParams.prototype.toObject = function(opt
  */
 proto.zego.aiagent.action.StartListeningParams.toObject = function(includeInstance, msg) {
   var f, obj = {
-userId: jspb.Message.getFieldWithDefault(msg, 1, "")
+userId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+sequence: jspb.Message.getFieldWithDefault(msg, 2, 0)
   };
 
   if (includeInstance) {
@@ -1457,6 +1566,10 @@ proto.zego.aiagent.action.StartListeningParams.deserializeBinaryFromReader = fun
       var value = /** @type {string} */ (reader.readString());
       msg.setUserId(value);
       break;
+    case 2:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setSequence(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -1493,6 +1606,13 @@ proto.zego.aiagent.action.StartListeningParams.serializeBinaryToWriter = functio
       f
     );
   }
+  f = message.getSequence();
+  if (f !== 0) {
+    writer.writeInt64(
+      2,
+      f
+    );
+  }
 };
 
 
@@ -1511,6 +1631,24 @@ proto.zego.aiagent.action.StartListeningParams.prototype.getUserId = function() 
  */
 proto.zego.aiagent.action.StartListeningParams.prototype.setUserId = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional int64 sequence = 2;
+ * @return {number}
+ */
+proto.zego.aiagent.action.StartListeningParams.prototype.getSequence = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.zego.aiagent.action.StartListeningParams} returns this
+ */
+proto.zego.aiagent.action.StartListeningParams.prototype.setSequence = function(value) {
+  return jspb.Message.setProto3IntField(this, 2, value);
 };
 
 
@@ -1546,7 +1684,8 @@ proto.zego.aiagent.action.StopListeningParams.prototype.toObject = function(opt_
  */
 proto.zego.aiagent.action.StopListeningParams.toObject = function(includeInstance, msg) {
   var f, obj = {
-userId: jspb.Message.getFieldWithDefault(msg, 1, "")
+userId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+sequence: jspb.Message.getFieldWithDefault(msg, 2, 0)
   };
 
   if (includeInstance) {
@@ -1587,6 +1726,10 @@ proto.zego.aiagent.action.StopListeningParams.deserializeBinaryFromReader = func
       var value = /** @type {string} */ (reader.readString());
       msg.setUserId(value);
       break;
+    case 2:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setSequence(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -1623,6 +1766,13 @@ proto.zego.aiagent.action.StopListeningParams.serializeBinaryToWriter = function
       f
     );
   }
+  f = message.getSequence();
+  if (f !== 0) {
+    writer.writeInt64(
+      2,
+      f
+    );
+  }
 };
 
 
@@ -1641,6 +1791,24 @@ proto.zego.aiagent.action.StopListeningParams.prototype.getUserId = function() {
  */
 proto.zego.aiagent.action.StopListeningParams.prototype.setUserId = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional int64 sequence = 2;
+ * @return {number}
+ */
+proto.zego.aiagent.action.StopListeningParams.prototype.getSequence = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.zego.aiagent.action.StopListeningParams} returns this
+ */
+proto.zego.aiagent.action.StopListeningParams.prototype.setSequence = function(value) {
+  return jspb.Message.setProto3IntField(this, 2, value);
 };
 
 

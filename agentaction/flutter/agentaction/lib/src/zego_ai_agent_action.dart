@@ -540,9 +540,11 @@ class ZegoAIAgentActionClient {
     if (params is SendAgentInstanceTTSParams) {
       return {
         ZegoAIAgentActionProtocolKeys.text: params.text,
-        ZegoAIAgentActionProtocolKeys.addHistory: params.addHistory,
-        ZegoAIAgentActionProtocolKeys.priority: params.priority,
-        ZegoAIAgentActionProtocolKeys.samePriorityOption: params.samePriorityOption,
+        // addHistory：业务方未显式赋值时兜底为 API 文档默认值 true；显式赋值（true/false）按业务方值输出。
+        ZegoAIAgentActionProtocolKeys.addHistory: params.hasAddHistory() ? params.addHistory : true,
+        // priority / samePriorityOption：业务方未显式赋值时兜底为文档默认值，避免触发服务端 410000003 "Priority is invalid"。
+        ZegoAIAgentActionProtocolKeys.priority: params.hasPriority() ? params.priority : 'Medium',
+        ZegoAIAgentActionProtocolKeys.samePriorityOption: params.hasSamePriorityOption() ? params.samePriorityOption : 'ClearAndInterrupt',
         if (params.hasInterruptMode()) ZegoAIAgentActionProtocolKeys.interruptMode: params.interruptMode,
         if (params.hasEnqueueUserSpeech()) ZegoAIAgentActionProtocolKeys.enqueueUserSpeech: params.enqueueUserSpeech,
       };
@@ -552,20 +554,26 @@ class ZegoAIAgentActionClient {
         ZegoAIAgentActionProtocolKeys.text: params.text,
         ZegoAIAgentActionProtocolKeys.systemPrompt: params.systemPrompt,
         ZegoAIAgentActionProtocolKeys.addQuestionToHistory: params.addQuestionToHistory,
-        ZegoAIAgentActionProtocolKeys.addAnswerToHistory: params.addAnswerToHistory,
-        ZegoAIAgentActionProtocolKeys.priority: params.priority,
-        ZegoAIAgentActionProtocolKeys.samePriorityOption: params.samePriorityOption,
+        // addAnswerToHistory：业务方未显式赋值时兜底为 API 文档默认值 true；显式赋值（true/false）按业务方值输出。
+        ZegoAIAgentActionProtocolKeys.addAnswerToHistory: params.hasAddAnswerToHistory() ? params.addAnswerToHistory : true,
+        // priority / samePriorityOption：业务方未显式赋值时兜底为文档默认值。
+        ZegoAIAgentActionProtocolKeys.priority: params.hasPriority() ? params.priority : 'Medium',
+        ZegoAIAgentActionProtocolKeys.samePriorityOption: params.hasSamePriorityOption() ? params.samePriorityOption : 'ClearAndInterrupt',
         if (params.hasEnqueueUserSpeech()) ZegoAIAgentActionProtocolKeys.enqueueUserSpeech: params.enqueueUserSpeech,
       };
     }
     if (params is StartListeningParams) {
       return {
         if (params.hasUserId()) ZegoAIAgentActionProtocolKeys.userId: params.userId,
+        // sequence：业务方自增序列号；用 0 判断"未设置"，与其他端保持一致（业务方显式 setSequence(0) 也不发）。
+        if (params.sequence.toInt() != 0) ZegoAIAgentActionProtocolKeys.sequence: params.sequence.toInt(),
       };
     }
     if (params is StopListeningParams) {
       return {
         if (params.hasUserId()) ZegoAIAgentActionProtocolKeys.userId: params.userId,
+        // sequence：必须与对应 StartListening 的 sequence 相同。
+        if (params.sequence.toInt() != 0) ZegoAIAgentActionProtocolKeys.sequence: params.sequence.toInt(),
       };
     }
     if (params is InterruptAgentInstanceParams) {

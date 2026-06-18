@@ -229,10 +229,10 @@ typedef struct AgentActionResponse__storage_ {
 @implementation SendAgentInstanceTTSParams
 
 @dynamic text;
-@dynamic addHistory;
+@dynamic hasAddHistory, addHistory;
 @dynamic interruptMode;
-@dynamic priority;
-@dynamic samePriorityOption;
+@dynamic hasPriority, priority;
+@dynamic hasSamePriorityOption, samePriorityOption;
 @dynamic enqueueUserSpeech;
 
 typedef struct SendAgentInstanceTTSParams__storage_ {
@@ -264,7 +264,7 @@ typedef struct SendAgentInstanceTTSParams__storage_ {
         .number = SendAgentInstanceTTSParams_FieldNumber_AddHistory,
         .hasIndex = 1,
         .offset = 2,  // Stored in _has_storage_ to save space.
-        .flags = GPBFieldClearHasIvarOnZero,
+        .flags = GPBFieldNone,
         .dataType = GPBDataTypeBool,
       },
       {
@@ -282,7 +282,7 @@ typedef struct SendAgentInstanceTTSParams__storage_ {
         .number = SendAgentInstanceTTSParams_FieldNumber_Priority,
         .hasIndex = 4,
         .offset = (uint32_t)offsetof(SendAgentInstanceTTSParams__storage_, priority),
-        .flags = GPBFieldClearHasIvarOnZero,
+        .flags = GPBFieldNone,
         .dataType = GPBDataTypeString,
       },
       {
@@ -291,7 +291,7 @@ typedef struct SendAgentInstanceTTSParams__storage_ {
         .number = SendAgentInstanceTTSParams_FieldNumber_SamePriorityOption,
         .hasIndex = 5,
         .offset = (uint32_t)offsetof(SendAgentInstanceTTSParams__storage_, samePriorityOption),
-        .flags = GPBFieldClearHasIvarOnZero,
+        .flags = GPBFieldNone,
         .dataType = GPBDataTypeString,
       },
       {
@@ -330,9 +330,9 @@ typedef struct SendAgentInstanceTTSParams__storage_ {
 @dynamic text;
 @dynamic systemPrompt;
 @dynamic addQuestionToHistory;
-@dynamic addAnswerToHistory;
-@dynamic priority;
-@dynamic samePriorityOption;
+@dynamic hasAddAnswerToHistory, addAnswerToHistory;
+@dynamic hasPriority, priority;
+@dynamic hasSamePriorityOption, samePriorityOption;
 @dynamic enqueueUserSpeech;
 
 typedef struct SendAgentInstanceLLMParams__storage_ {
@@ -382,7 +382,7 @@ typedef struct SendAgentInstanceLLMParams__storage_ {
         .number = SendAgentInstanceLLMParams_FieldNumber_AddAnswerToHistory,
         .hasIndex = 4,
         .offset = 5,  // Stored in _has_storage_ to save space.
-        .flags = GPBFieldClearHasIvarOnZero,
+        .flags = GPBFieldNone,
         .dataType = GPBDataTypeBool,
       },
       {
@@ -391,7 +391,7 @@ typedef struct SendAgentInstanceLLMParams__storage_ {
         .number = SendAgentInstanceLLMParams_FieldNumber_Priority,
         .hasIndex = 6,
         .offset = (uint32_t)offsetof(SendAgentInstanceLLMParams__storage_, priority),
-        .flags = GPBFieldClearHasIvarOnZero,
+        .flags = GPBFieldNone,
         .dataType = GPBDataTypeString,
       },
       {
@@ -400,7 +400,7 @@ typedef struct SendAgentInstanceLLMParams__storage_ {
         .number = SendAgentInstanceLLMParams_FieldNumber_SamePriorityOption,
         .hasIndex = 7,
         .offset = (uint32_t)offsetof(SendAgentInstanceLLMParams__storage_, samePriorityOption),
-        .flags = GPBFieldClearHasIvarOnZero,
+        .flags = GPBFieldNone,
         .dataType = GPBDataTypeString,
       },
       {
@@ -470,10 +470,12 @@ typedef struct InterruptAgentInstanceParams__storage_ {
 @implementation StartListeningParams
 
 @dynamic userId;
+@dynamic sequence;
 
 typedef struct StartListeningParams__storage_ {
   uint32_t _has_storage_[1];
   NSString *userId;
+  int64_t sequence;
 } StartListeningParams__storage_;
 
 // This method is threadsafe because it is initially called
@@ -490,6 +492,15 @@ typedef struct StartListeningParams__storage_ {
         .offset = (uint32_t)offsetof(StartListeningParams__storage_, userId),
         .flags = GPBFieldClearHasIvarOnZero,
         .dataType = GPBDataTypeString,
+      },
+      {
+        .name = "sequence",
+        .dataTypeSpecific.clazz = Nil,
+        .number = StartListeningParams_FieldNumber_Sequence,
+        .hasIndex = 1,
+        .offset = (uint32_t)offsetof(StartListeningParams__storage_, sequence),
+        .flags = GPBFieldClearHasIvarOnZero,
+        .dataType = GPBDataTypeInt64,
       },
     };
     GPBDescriptor *localDescriptor =
@@ -516,10 +527,12 @@ typedef struct StartListeningParams__storage_ {
 @implementation StopListeningParams
 
 @dynamic userId;
+@dynamic sequence;
 
 typedef struct StopListeningParams__storage_ {
   uint32_t _has_storage_[1];
   NSString *userId;
+  int64_t sequence;
 } StopListeningParams__storage_;
 
 // This method is threadsafe because it is initially called
@@ -536,6 +549,15 @@ typedef struct StopListeningParams__storage_ {
         .offset = (uint32_t)offsetof(StopListeningParams__storage_, userId),
         .flags = GPBFieldClearHasIvarOnZero,
         .dataType = GPBDataTypeString,
+      },
+      {
+        .name = "sequence",
+        .dataTypeSpecific.clazz = Nil,
+        .number = StopListeningParams_FieldNumber_Sequence,
+        .hasIndex = 1,
+        .offset = (uint32_t)offsetof(StopListeningParams__storage_, sequence),
+        .flags = GPBFieldClearHasIvarOnZero,
+        .dataType = GPBDataTypeInt64,
       },
     };
     GPBDescriptor *localDescriptor =

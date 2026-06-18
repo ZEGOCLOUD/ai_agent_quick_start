@@ -106,13 +106,24 @@ GPB_FINAL @interface SendAgentInstanceTTSParams : GPBMessage
 
 @property(nonatomic, readwrite, copy, null_resettable) NSString *text;
 
+/**
+ * optional 标记：让生成器产出 hasAddHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+ * 业务方显式传 true/false 时按业务方值输出。
+ **/
 @property(nonatomic, readwrite) BOOL addHistory;
+@property(nonatomic, readwrite) BOOL hasAddHistory;
 
 @property(nonatomic, readwrite) int32_t interruptMode;
 
+/** optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。 */
 @property(nonatomic, readwrite, copy, null_resettable) NSString *priority;
+/** Test to see if @c priority has been set. */
+@property(nonatomic, readwrite) BOOL hasPriority;
 
+/** optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。 */
 @property(nonatomic, readwrite, copy, null_resettable) NSString *samePriorityOption;
+/** Test to see if @c samePriorityOption has been set. */
+@property(nonatomic, readwrite) BOOL hasSamePriorityOption;
 
 @property(nonatomic, readwrite) BOOL enqueueUserSpeech;
 
@@ -138,11 +149,22 @@ GPB_FINAL @interface SendAgentInstanceLLMParams : GPBMessage
 
 @property(nonatomic, readwrite) BOOL addQuestionToHistory;
 
+/**
+ * optional 标记：让生成器产出 hasAddAnswerToHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+ * 业务方显式传 true/false 时按业务方值输出。
+ **/
 @property(nonatomic, readwrite) BOOL addAnswerToHistory;
+@property(nonatomic, readwrite) BOOL hasAddAnswerToHistory;
 
+/** optional 标记：业务方未显式赋值时兜底为 "Medium"。 */
 @property(nonatomic, readwrite, copy, null_resettable) NSString *priority;
+/** Test to see if @c priority has been set. */
+@property(nonatomic, readwrite) BOOL hasPriority;
 
+/** optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。 */
 @property(nonatomic, readwrite, copy, null_resettable) NSString *samePriorityOption;
+/** Test to see if @c samePriorityOption has been set. */
+@property(nonatomic, readwrite) BOOL hasSamePriorityOption;
 
 @property(nonatomic, readwrite) BOOL enqueueUserSpeech;
 
@@ -158,11 +180,19 @@ GPB_FINAL @interface InterruptAgentInstanceParams : GPBMessage
 
 typedef GPB_ENUM(StartListeningParams_FieldNumber) {
   StartListeningParams_FieldNumber_UserId = 1,
+  StartListeningParams_FieldNumber_Sequence = 2,
 };
 
+/**
+ * StartListening / StopListening 新增 sequence（int64）字段，对应 API 文档 Body 中的 Sequence 参数。
+ * 业务方通过自增 Sequence 实现"AI Agent 后台只处理 Sequence 最新的请求"的效果。
+ **/
 GPB_FINAL @interface StartListeningParams : GPBMessage
 
 @property(nonatomic, readwrite, copy, null_resettable) NSString *userId;
+
+/** 客户端自增序列号；proto3 int64 默认 0 表示不传（与 API 文档"不传则按后台接收顺序处理"语义一致）。 */
+@property(nonatomic, readwrite) int64_t sequence;
 
 @end
 
@@ -170,11 +200,17 @@ GPB_FINAL @interface StartListeningParams : GPBMessage
 
 typedef GPB_ENUM(StopListeningParams_FieldNumber) {
   StopListeningParams_FieldNumber_UserId = 1,
+  StopListeningParams_FieldNumber_Sequence = 2,
 };
 
+/**
+ * StopListening 的 sequence 必须与对应 StartListening 的 sequence 相同，实现开始/结束配对。
+ **/
 GPB_FINAL @interface StopListeningParams : GPBMessage
 
 @property(nonatomic, readwrite, copy, null_resettable) NSString *userId;
+
+@property(nonatomic, readwrite) int64_t sequence;
 
 @end
 

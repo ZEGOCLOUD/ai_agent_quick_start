@@ -70,19 +70,48 @@ public nonisolated struct ZegoSendAgentInstanceTTSParams: Sendable {
 
   public var text: String = String()
 
-  public var addHistory: Bool = false
+  /// optional 标记：让生成器产出 hasAddHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+  /// 业务方显式传 true/false 时按业务方值输出。
+  public var addHistory: Bool {
+    get {_addHistory ?? false}
+    set {_addHistory = newValue}
+  }
+  /// Returns true if `addHistory` has been explicitly set.
+  public var hasAddHistory: Bool {self._addHistory != nil}
+  /// Clears the value of `addHistory`. Subsequent reads from it will return its default value.
+  public mutating func clearAddHistory() {self._addHistory = nil}
 
   public var interruptMode: Int32 = 0
 
-  public var priority: String = String()
+  /// optional 标记：业务方未显式赋值时兜底为 "Medium"，避免触发服务端 "Priority is invalid"。
+  public var priority: String {
+    get {_priority ?? String()}
+    set {_priority = newValue}
+  }
+  /// Returns true if `priority` has been explicitly set.
+  public var hasPriority: Bool {self._priority != nil}
+  /// Clears the value of `priority`. Subsequent reads from it will return its default value.
+  public mutating func clearPriority() {self._priority = nil}
 
-  public var samePriorityOption: String = String()
+  /// optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+  public var samePriorityOption: String {
+    get {_samePriorityOption ?? String()}
+    set {_samePriorityOption = newValue}
+  }
+  /// Returns true if `samePriorityOption` has been explicitly set.
+  public var hasSamePriorityOption: Bool {self._samePriorityOption != nil}
+  /// Clears the value of `samePriorityOption`. Subsequent reads from it will return its default value.
+  public mutating func clearSamePriorityOption() {self._samePriorityOption = nil}
 
   public var enqueueUserSpeech: Bool = false
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
+
+  fileprivate var _addHistory: Bool? = nil
+  fileprivate var _priority: String? = nil
+  fileprivate var _samePriorityOption: String? = nil
 }
 
 public nonisolated struct ZegoSendAgentInstanceLLMParams: Sendable {
@@ -96,17 +125,46 @@ public nonisolated struct ZegoSendAgentInstanceLLMParams: Sendable {
 
   public var addQuestionToHistory: Bool = false
 
-  public var addAnswerToHistory: Bool = false
+  /// optional 标记：让生成器产出 hasAddAnswerToHistory()。当业务方未显式赋值时，encodeParams 兜底为 API 文档默认值 true；
+  /// 业务方显式传 true/false 时按业务方值输出。
+  public var addAnswerToHistory: Bool {
+    get {_addAnswerToHistory ?? false}
+    set {_addAnswerToHistory = newValue}
+  }
+  /// Returns true if `addAnswerToHistory` has been explicitly set.
+  public var hasAddAnswerToHistory: Bool {self._addAnswerToHistory != nil}
+  /// Clears the value of `addAnswerToHistory`. Subsequent reads from it will return its default value.
+  public mutating func clearAddAnswerToHistory() {self._addAnswerToHistory = nil}
 
-  public var priority: String = String()
+  /// optional 标记：业务方未显式赋值时兜底为 "Medium"。
+  public var priority: String {
+    get {_priority ?? String()}
+    set {_priority = newValue}
+  }
+  /// Returns true if `priority` has been explicitly set.
+  public var hasPriority: Bool {self._priority != nil}
+  /// Clears the value of `priority`. Subsequent reads from it will return its default value.
+  public mutating func clearPriority() {self._priority = nil}
 
-  public var samePriorityOption: String = String()
+  /// optional 标记：业务方未显式赋值时兜底为 "ClearAndInterrupt"。
+  public var samePriorityOption: String {
+    get {_samePriorityOption ?? String()}
+    set {_samePriorityOption = newValue}
+  }
+  /// Returns true if `samePriorityOption` has been explicitly set.
+  public var hasSamePriorityOption: Bool {self._samePriorityOption != nil}
+  /// Clears the value of `samePriorityOption`. Subsequent reads from it will return its default value.
+  public mutating func clearSamePriorityOption() {self._samePriorityOption = nil}
 
   public var enqueueUserSpeech: Bool = false
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
+
+  fileprivate var _addAnswerToHistory: Bool? = nil
+  fileprivate var _priority: String? = nil
+  fileprivate var _samePriorityOption: String? = nil
 }
 
 public nonisolated struct ZegoInterruptAgentInstanceParams: Sendable {
@@ -119,6 +177,8 @@ public nonisolated struct ZegoInterruptAgentInstanceParams: Sendable {
   public init() {}
 }
 
+/// StartListening / StopListening 新增 sequence（int64）字段，对应 API 文档 Body 中的 Sequence 参数。
+/// 业务方通过自增 Sequence 实现"AI Agent 后台只处理 Sequence 最新的请求"的效果。
 public nonisolated struct ZegoStartListeningParams: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -126,17 +186,23 @@ public nonisolated struct ZegoStartListeningParams: Sendable {
 
   public var userID: String = String()
 
+  /// 客户端自增序列号；proto3 int64 默认 0 表示不传（与 API 文档"不传则按后台接收顺序处理"语义一致）。
+  public var sequence: Int64 = 0
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 }
 
+/// StopListening 的 sequence 必须与对应 StartListening 的 sequence 相同，实现开始/结束配对。
 public nonisolated struct ZegoStopListeningParams: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   public var userID: String = String()
+
+  public var sequence: Int64 = 0
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -253,10 +319,10 @@ nonisolated extension ZegoSendAgentInstanceTTSParams: SwiftProtobuf.Message, Swi
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.text) }()
-      case 2: try { try decoder.decodeSingularBoolField(value: &self.addHistory) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self._addHistory) }()
       case 3: try { try decoder.decodeSingularInt32Field(value: &self.interruptMode) }()
-      case 4: try { try decoder.decodeSingularStringField(value: &self.priority) }()
-      case 5: try { try decoder.decodeSingularStringField(value: &self.samePriorityOption) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self._priority) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self._samePriorityOption) }()
       case 6: try { try decoder.decodeSingularBoolField(value: &self.enqueueUserSpeech) }()
       default: break
       }
@@ -264,21 +330,25 @@ nonisolated extension ZegoSendAgentInstanceTTSParams: SwiftProtobuf.Message, Swi
   }
 
   public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.text.isEmpty {
       try visitor.visitSingularStringField(value: self.text, fieldNumber: 1)
     }
-    if self.addHistory != false {
-      try visitor.visitSingularBoolField(value: self.addHistory, fieldNumber: 2)
-    }
+    try { if let v = self._addHistory {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 2)
+    } }()
     if self.interruptMode != 0 {
       try visitor.visitSingularInt32Field(value: self.interruptMode, fieldNumber: 3)
     }
-    if !self.priority.isEmpty {
-      try visitor.visitSingularStringField(value: self.priority, fieldNumber: 4)
-    }
-    if !self.samePriorityOption.isEmpty {
-      try visitor.visitSingularStringField(value: self.samePriorityOption, fieldNumber: 5)
-    }
+    try { if let v = self._priority {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 4)
+    } }()
+    try { if let v = self._samePriorityOption {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 5)
+    } }()
     if self.enqueueUserSpeech != false {
       try visitor.visitSingularBoolField(value: self.enqueueUserSpeech, fieldNumber: 6)
     }
@@ -287,10 +357,10 @@ nonisolated extension ZegoSendAgentInstanceTTSParams: SwiftProtobuf.Message, Swi
 
   public static func ==(lhs: ZegoSendAgentInstanceTTSParams, rhs: ZegoSendAgentInstanceTTSParams) -> Bool {
     if lhs.text != rhs.text {return false}
-    if lhs.addHistory != rhs.addHistory {return false}
+    if lhs._addHistory != rhs._addHistory {return false}
     if lhs.interruptMode != rhs.interruptMode {return false}
-    if lhs.priority != rhs.priority {return false}
-    if lhs.samePriorityOption != rhs.samePriorityOption {return false}
+    if lhs._priority != rhs._priority {return false}
+    if lhs._samePriorityOption != rhs._samePriorityOption {return false}
     if lhs.enqueueUserSpeech != rhs.enqueueUserSpeech {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -310,9 +380,9 @@ nonisolated extension ZegoSendAgentInstanceLLMParams: SwiftProtobuf.Message, Swi
       case 1: try { try decoder.decodeSingularStringField(value: &self.text) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.systemPrompt) }()
       case 3: try { try decoder.decodeSingularBoolField(value: &self.addQuestionToHistory) }()
-      case 4: try { try decoder.decodeSingularBoolField(value: &self.addAnswerToHistory) }()
-      case 5: try { try decoder.decodeSingularStringField(value: &self.priority) }()
-      case 6: try { try decoder.decodeSingularStringField(value: &self.samePriorityOption) }()
+      case 4: try { try decoder.decodeSingularBoolField(value: &self._addAnswerToHistory) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self._priority) }()
+      case 6: try { try decoder.decodeSingularStringField(value: &self._samePriorityOption) }()
       case 7: try { try decoder.decodeSingularBoolField(value: &self.enqueueUserSpeech) }()
       default: break
       }
@@ -320,6 +390,10 @@ nonisolated extension ZegoSendAgentInstanceLLMParams: SwiftProtobuf.Message, Swi
   }
 
   public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.text.isEmpty {
       try visitor.visitSingularStringField(value: self.text, fieldNumber: 1)
     }
@@ -329,15 +403,15 @@ nonisolated extension ZegoSendAgentInstanceLLMParams: SwiftProtobuf.Message, Swi
     if self.addQuestionToHistory != false {
       try visitor.visitSingularBoolField(value: self.addQuestionToHistory, fieldNumber: 3)
     }
-    if self.addAnswerToHistory != false {
-      try visitor.visitSingularBoolField(value: self.addAnswerToHistory, fieldNumber: 4)
-    }
-    if !self.priority.isEmpty {
-      try visitor.visitSingularStringField(value: self.priority, fieldNumber: 5)
-    }
-    if !self.samePriorityOption.isEmpty {
-      try visitor.visitSingularStringField(value: self.samePriorityOption, fieldNumber: 6)
-    }
+    try { if let v = self._addAnswerToHistory {
+      try visitor.visitSingularBoolField(value: v, fieldNumber: 4)
+    } }()
+    try { if let v = self._priority {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 5)
+    } }()
+    try { if let v = self._samePriorityOption {
+      try visitor.visitSingularStringField(value: v, fieldNumber: 6)
+    } }()
     if self.enqueueUserSpeech != false {
       try visitor.visitSingularBoolField(value: self.enqueueUserSpeech, fieldNumber: 7)
     }
@@ -348,9 +422,9 @@ nonisolated extension ZegoSendAgentInstanceLLMParams: SwiftProtobuf.Message, Swi
     if lhs.text != rhs.text {return false}
     if lhs.systemPrompt != rhs.systemPrompt {return false}
     if lhs.addQuestionToHistory != rhs.addQuestionToHistory {return false}
-    if lhs.addAnswerToHistory != rhs.addAnswerToHistory {return false}
-    if lhs.priority != rhs.priority {return false}
-    if lhs.samePriorityOption != rhs.samePriorityOption {return false}
+    if lhs._addAnswerToHistory != rhs._addAnswerToHistory {return false}
+    if lhs._priority != rhs._priority {return false}
+    if lhs._samePriorityOption != rhs._samePriorityOption {return false}
     if lhs.enqueueUserSpeech != rhs.enqueueUserSpeech {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -378,7 +452,7 @@ nonisolated extension ZegoInterruptAgentInstanceParams: SwiftProtobuf.Message, S
 
 nonisolated extension ZegoStartListeningParams: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".StartListeningParams"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0\u{1}sequence\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -387,6 +461,7 @@ nonisolated extension ZegoStartListeningParams: SwiftProtobuf.Message, SwiftProt
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
+      case 2: try { try decoder.decodeSingularInt64Field(value: &self.sequence) }()
       default: break
       }
     }
@@ -396,11 +471,15 @@ nonisolated extension ZegoStartListeningParams: SwiftProtobuf.Message, SwiftProt
     if !self.userID.isEmpty {
       try visitor.visitSingularStringField(value: self.userID, fieldNumber: 1)
     }
+    if self.sequence != 0 {
+      try visitor.visitSingularInt64Field(value: self.sequence, fieldNumber: 2)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: ZegoStartListeningParams, rhs: ZegoStartListeningParams) -> Bool {
     if lhs.userID != rhs.userID {return false}
+    if lhs.sequence != rhs.sequence {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -408,7 +487,7 @@ nonisolated extension ZegoStartListeningParams: SwiftProtobuf.Message, SwiftProt
 
 nonisolated extension ZegoStopListeningParams: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".StopListeningParams"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}user_id\0\u{1}sequence\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -417,6 +496,7 @@ nonisolated extension ZegoStopListeningParams: SwiftProtobuf.Message, SwiftProto
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
+      case 2: try { try decoder.decodeSingularInt64Field(value: &self.sequence) }()
       default: break
       }
     }
@@ -426,11 +506,15 @@ nonisolated extension ZegoStopListeningParams: SwiftProtobuf.Message, SwiftProto
     if !self.userID.isEmpty {
       try visitor.visitSingularStringField(value: self.userID, fieldNumber: 1)
     }
+    if self.sequence != 0 {
+      try visitor.visitSingularInt64Field(value: self.sequence, fieldNumber: 2)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: ZegoStopListeningParams, rhs: ZegoStopListeningParams) -> Bool {
     if lhs.userID != rhs.userID {return false}
+    if lhs.sequence != rhs.sequence {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

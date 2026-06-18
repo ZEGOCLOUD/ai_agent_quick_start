@@ -134,6 +134,16 @@ public class ZegoAIAgentActionClient {
         this.errorCallback = errorCallback;
     }
 
+    /** 获取智能体实例 ID（构造时传入，数字人通话场景下由调用方传入，其它场景可为 null）。 */
+    public String getAgentInstanceId() {
+        return agentInstanceId;
+    }
+
+    /** 获取是否为数字人通话标志（构造时传入）。 */
+    public boolean isDigitalHuman() {
+        return isDigitalHuman;
+    }
+
     /**
      * 主动调用智能体 TTS（便捷重载，使用构造器默认超时）。
      *
@@ -462,10 +472,11 @@ public class ZegoAIAgentActionClient {
         if (params instanceof AIAgentActionProto.SendAgentInstanceTTSParams) {
             AIAgentActionProto.SendAgentInstanceTTSParams value = (AIAgentActionProto.SendAgentInstanceTTSParams) params;
             put(object, ZegoAIAgentActionDefines.ProtocolKeys.text, value.getText());
-            put(object, ZegoAIAgentActionDefines.ProtocolKeys.addHistory, value.getAddHistory());
-            // priority / samePriorityOption 为枚举字符串，客户端不显式赋值时 protobuf 默认空串会触发服务端 410000003 "Priority is invalid"，此处兜底为文档默认值
-            put(object, ZegoAIAgentActionDefines.ProtocolKeys.priority, value.getPriority().isEmpty() ? DEFAULT_PRIORITY : value.getPriority());
-            put(object, ZegoAIAgentActionDefines.ProtocolKeys.samePriorityOption, value.getSamePriorityOption().isEmpty() ? DEFAULT_SAME_PRIORITY_OPTION : value.getSamePriorityOption());
+            // addHistory：业务方未显式赋值时兜底为 API 文档默认值 true；显式赋值（true/false）按业务方值输出。
+            put(object, ZegoAIAgentActionDefines.ProtocolKeys.addHistory, value.hasAddHistory() ? value.getAddHistory() : true);
+            // priority / samePriorityOption 为枚举字符串，客户端不显式赋值时 protobuf 默认空串会触发服务端 410000003 "Priority is invalid"，此处兜底为文档默认值。
+            put(object, ZegoAIAgentActionDefines.ProtocolKeys.priority, value.hasPriority() ? value.getPriority() : DEFAULT_PRIORITY);
+            put(object, ZegoAIAgentActionDefines.ProtocolKeys.samePriorityOption, value.hasSamePriorityOption() ? value.getSamePriorityOption() : DEFAULT_SAME_PRIORITY_OPTION);
             if (value.getInterruptMode() != 0) put(object, ZegoAIAgentActionDefines.ProtocolKeys.interruptMode, value.getInterruptMode());
             if (value.getEnqueueUserSpeech()) put(object, ZegoAIAgentActionDefines.ProtocolKeys.enqueueUserSpeech, true);
             return object;
@@ -475,21 +486,26 @@ public class ZegoAIAgentActionClient {
             put(object, ZegoAIAgentActionDefines.ProtocolKeys.text, value.getText());
             put(object, ZegoAIAgentActionDefines.ProtocolKeys.systemPrompt, value.getSystemPrompt());
             put(object, ZegoAIAgentActionDefines.ProtocolKeys.addQuestionToHistory, value.getAddQuestionToHistory());
-            put(object, ZegoAIAgentActionDefines.ProtocolKeys.addAnswerToHistory, value.getAddAnswerToHistory());
-            // 同 TTS：枚举字段空串兜底为文档默认值，避免服务端校验失败
-            put(object, ZegoAIAgentActionDefines.ProtocolKeys.priority, value.getPriority().isEmpty() ? DEFAULT_PRIORITY : value.getPriority());
-            put(object, ZegoAIAgentActionDefines.ProtocolKeys.samePriorityOption, value.getSamePriorityOption().isEmpty() ? DEFAULT_SAME_PRIORITY_OPTION : value.getSamePriorityOption());
+            // addAnswerToHistory：业务方未显式赋值时兜底为 API 文档默认值 true；显式赋值（true/false）按业务方值输出。
+            put(object, ZegoAIAgentActionDefines.ProtocolKeys.addAnswerToHistory, value.hasAddAnswerToHistory() ? value.getAddAnswerToHistory() : true);
+            // 同 TTS：枚举字段空串兜底为文档默认值，避免服务端校验失败。
+            put(object, ZegoAIAgentActionDefines.ProtocolKeys.priority, value.hasPriority() ? value.getPriority() : DEFAULT_PRIORITY);
+            put(object, ZegoAIAgentActionDefines.ProtocolKeys.samePriorityOption, value.hasSamePriorityOption() ? value.getSamePriorityOption() : DEFAULT_SAME_PRIORITY_OPTION);
             if (value.getEnqueueUserSpeech()) put(object, ZegoAIAgentActionDefines.ProtocolKeys.enqueueUserSpeech, true);
             return object;
         }
         if (params instanceof AIAgentActionProto.StartListeningParams) {
             AIAgentActionProto.StartListeningParams value = (AIAgentActionProto.StartListeningParams) params;
             if (!value.getUserId().isEmpty()) put(object, ZegoAIAgentActionDefines.ProtocolKeys.userId, value.getUserId());
+            // sequence：业务方自增序列号；proto3 int64 默认 0 表示不传（与 API 文档"不传则按后台接收顺序处理"语义一致）。
+            if (value.getSequence() != 0) put(object, ZegoAIAgentActionDefines.ProtocolKeys.sequence, value.getSequence());
             return object;
         }
         if (params instanceof AIAgentActionProto.StopListeningParams) {
             AIAgentActionProto.StopListeningParams value = (AIAgentActionProto.StopListeningParams) params;
             if (!value.getUserId().isEmpty()) put(object, ZegoAIAgentActionDefines.ProtocolKeys.userId, value.getUserId());
+            // sequence：必须与对应 StartListening 的 sequence 相同；0 表示不传。
+            if (value.getSequence() != 0) put(object, ZegoAIAgentActionDefines.ProtocolKeys.sequence, value.getSequence());
             return object;
         }
         if (params instanceof AIAgentActionProto.InterruptAgentInstanceParams) {

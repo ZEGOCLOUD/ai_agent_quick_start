@@ -56,4 +56,5 @@
 + (NSString *)addQuestionToHistory { return @"AddQuestionToHistory"; }
 + (NSString *)addAnswerToHistory { return @"AddAnswerToHistory"; }
 + (NSString *)userId { return @"UserId"; }
++ (NSString *)sequence { return @"Sequence"; }
 @end

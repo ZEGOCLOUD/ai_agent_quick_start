@@ -91,21 +91,29 @@
         class SendAgentInstanceTTSParams {
             constructor() {
                 this.text = '';
-                this.addHistory = false;
-                this.priority = '';
-                this.samePriorityOption = '';
+                // 字段初始值对齐 aigc-agent API 文档默认值，让业务方调 getXxx() 拿到的值与文档承诺一致；
+                // 是否"显式赋值"用 _has* 标志跟踪，encodeParams 用 has*() 决定是否走兜底。
+                this.addHistory = true;
+                this.priority = 'Medium';
+                this.samePriorityOption = 'ClearAndInterrupt';
                 this.interruptMode = 0;
                 this.enqueueUserSpeech = false;
+                this._hasAddHistory = false;
+                this._hasPriority = false;
+                this._hasSamePriorityOption = false;
             }
             serializeBinary() { return []; }
             setText(value) { this.text = value || ''; return this; }
             getText() { return this.text; }
-            setAddHistory(value) { this.addHistory = !!value; return this; }
+            setAddHistory(value) { this.addHistory = !!value; this._hasAddHistory = true; return this; }
             getAddHistory() { return this.addHistory; }
-            setPriority(value) { this.priority = value || ''; return this; }
+            hasAddHistory() { return this._hasAddHistory; }
+            setPriority(value) { this.priority = value == null ? '' : value; this._hasPriority = true; return this; }
             getPriority() { return this.priority; }
-            setSamePriorityOption(value) { this.samePriorityOption = value || ''; return this; }
+            hasPriority() { return this._hasPriority; }
+            setSamePriorityOption(value) { this.samePriorityOption = value == null ? '' : value; this._hasSamePriorityOption = true; return this; }
             getSamePriorityOption() { return this.samePriorityOption; }
+            hasSamePriorityOption() { return this._hasSamePriorityOption; }
             setInterruptMode(value) { this.interruptMode = Number(value || 0); return this; }
             getInterruptMode() { return this.interruptMode; }
             setEnqueueUserSpeech(value) { this.enqueueUserSpeech = !!value; return this; }
@@ -117,10 +125,14 @@
                 this.text = '';
                 this.systemPrompt = '';
                 this.addQuestionToHistory = false;
-                this.addAnswerToHistory = false;
-                this.priority = '';
-                this.samePriorityOption = '';
+                // 字段初始值对齐 aigc-agent API 文档默认值；_has* 跟踪业务方是否显式赋值。
+                this.addAnswerToHistory = true;
+                this.priority = 'Medium';
+                this.samePriorityOption = 'ClearAndInterrupt';
                 this.enqueueUserSpeech = false;
+                this._hasAddAnswerToHistory = false;
+                this._hasPriority = false;
+                this._hasSamePriorityOption = false;
             }
             serializeBinary() { return []; }
             setText(value) { this.text = value || ''; return this; }
@@ -129,12 +141,15 @@
             getSystemPrompt() { return this.systemPrompt; }
             setAddQuestionToHistory(value) { this.addQuestionToHistory = !!value; return this; }
             getAddQuestionToHistory() { return this.addQuestionToHistory; }
-            setAddAnswerToHistory(value) { this.addAnswerToHistory = !!value; return this; }
+            setAddAnswerToHistory(value) { this.addAnswerToHistory = !!value; this._hasAddAnswerToHistory = true; return this; }
             getAddAnswerToHistory() { return this.addAnswerToHistory; }
-            setPriority(value) { this.priority = value || ''; return this; }
+            hasAddAnswerToHistory() { return this._hasAddAnswerToHistory; }
+            setPriority(value) { this.priority = value == null ? '' : value; this._hasPriority = true; return this; }
             getPriority() { return this.priority; }
-            setSamePriorityOption(value) { this.samePriorityOption = value || ''; return this; }
+            hasPriority() { return this._hasPriority; }
+            setSamePriorityOption(value) { this.samePriorityOption = value == null ? '' : value; this._hasSamePriorityOption = true; return this; }
             getSamePriorityOption() { return this.samePriorityOption; }
+            hasSamePriorityOption() { return this._hasSamePriorityOption; }
             setEnqueueUserSpeech(value) { this.enqueueUserSpeech = !!value; return this; }
             getEnqueueUserSpeech() { return this.enqueueUserSpeech; }
         }
@@ -146,13 +161,26 @@
         class StartListeningParams {
             constructor() {
                 this.userId = '';
+                this.sequence = 0;
             }
             serializeBinary() { return []; }
             setUserId(value) { this.userId = value || ''; return this; }
             getUserId() { return this.userId; }
+            setSequence(value) { this.sequence = Number(value || 0); return this; }
+            getSequence() { return this.sequence; }
         }
 
-        class StopListeningParams extends StartListeningParams {}
+        class StopListeningParams {
+            constructor() {
+                this.userId = '';
+                this.sequence = 0;
+            }
+            serializeBinary() { return []; }
+            setUserId(value) { this.userId = value || ''; return this; }
+            getUserId() { return this.userId; }
+            setSequence(value) { this.sequence = Number(value || 0); return this; }
+            getSequence() { return this.sequence; }
+        }
 
         return {
             AgentActionEnvelope: AgentActionEnvelope,
@@ -507,10 +535,11 @@
         if (params instanceof pb.SendAgentInstanceTTSParams) {
             const json = {};
             json[defines.ProtocolKeys.text] = params.getText();
-            json[defines.ProtocolKeys.addHistory] = params.getAddHistory();
-            // priority / samePriorityOption 为枚举字符串，客户端不显式赋值时 protobuf 默认空串会触发服务端 410000003 "Priority is invalid"，此处兜底为文档默认值
-            json[defines.ProtocolKeys.priority] = params.getPriority() || DEFAULT_PRIORITY;
-            json[defines.ProtocolKeys.samePriorityOption] = params.getSamePriorityOption() || DEFAULT_SAME_PRIORITY_OPTION;
+            // addHistory：业务方未显式赋值时兜底为 API 文档默认值 true；显式赋值（true/false）按业务方值输出。
+            json[defines.ProtocolKeys.addHistory] = params.hasAddHistory() ? params.getAddHistory() : true;
+            // priority / samePriorityOption 为枚举字符串，客户端不显式赋值时 protobuf 默认空串会触发服务端 410000003 "Priority is invalid"，此处兜底为文档默认值。
+            json[defines.ProtocolKeys.priority] = params.hasPriority() ? params.getPriority() : DEFAULT_PRIORITY;
+            json[defines.ProtocolKeys.samePriorityOption] = params.hasSamePriorityOption() ? params.getSamePriorityOption() : DEFAULT_SAME_PRIORITY_OPTION;
             if (params.getInterruptMode() !== 0) json[defines.ProtocolKeys.interruptMode] = params.getInterruptMode();
             if (params.getEnqueueUserSpeech()) json[defines.ProtocolKeys.enqueueUserSpeech] = true;
             return json;
@@ -520,21 +549,26 @@
             json[defines.ProtocolKeys.text] = params.getText();
             json[defines.ProtocolKeys.systemPrompt] = params.getSystemPrompt();
             json[defines.ProtocolKeys.addQuestionToHistory] = params.getAddQuestionToHistory();
-            json[defines.ProtocolKeys.addAnswerToHistory] = params.getAddAnswerToHistory();
-            // 同 TTS：枚举字段空串兜底为文档默认值，避免服务端校验失败
-            json[defines.ProtocolKeys.priority] = params.getPriority() || DEFAULT_PRIORITY;
-            json[defines.ProtocolKeys.samePriorityOption] = params.getSamePriorityOption() || DEFAULT_SAME_PRIORITY_OPTION;
+            // addAnswerToHistory：业务方未显式赋值时兜底为 API 文档默认值 true；显式赋值（true/false）按业务方值输出。
+            json[defines.ProtocolKeys.addAnswerToHistory] = params.hasAddAnswerToHistory() ? params.getAddAnswerToHistory() : true;
+            // priority / samePriorityOption：业务方未显式赋值时兜底为文档默认值。
+            json[defines.ProtocolKeys.priority] = params.hasPriority() ? params.getPriority() : DEFAULT_PRIORITY;
+            json[defines.ProtocolKeys.samePriorityOption] = params.hasSamePriorityOption() ? params.getSamePriorityOption() : DEFAULT_SAME_PRIORITY_OPTION;
             if (params.getEnqueueUserSpeech()) json[defines.ProtocolKeys.enqueueUserSpeech] = true;
             return json;
         }
         if (params instanceof pb.StartListeningParams) {
             const json = {};
             if (params.getUserId()) json[defines.ProtocolKeys.userId] = params.getUserId();
+            // sequence：业务方自增序列号；0 表示不传（与 API 文档"不传则按后台接收顺序处理"语义一致）。
+            if (params.getSequence() !== 0) json[defines.ProtocolKeys.sequence] = params.getSequence();
             return json;
         }
         if (params instanceof pb.StopListeningParams) {
             const json = {};
             if (params.getUserId()) json[defines.ProtocolKeys.userId] = params.getUserId();
+            // sequence：必须与对应 StartListening 的 sequence 相同；0 表示不传。
+            if (params.getSequence() !== 0) json[defines.ProtocolKeys.sequence] = params.getSequence();
             return json;
         }
         if (params instanceof pb.InterruptAgentInstanceParams) {

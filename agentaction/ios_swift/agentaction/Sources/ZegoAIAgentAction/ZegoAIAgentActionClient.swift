@@ -477,10 +477,11 @@ public final class ZegoAIAgentActionClient {
         case let value as ZegoSendAgentInstanceTTSParams:
             var json: [String: Any] = [
                 ZegoAIAgentActionProtocolKeys.text: value.text,
-                ZegoAIAgentActionProtocolKeys.addHistory: value.addHistory,
-                // priority / samePriorityOption 为枚举字符串，客户端不显式赋值时 protobuf 默认空串会触发服务端 410000003 "Priority is invalid"，此处兜底为文档默认值
-                ZegoAIAgentActionProtocolKeys.priority: value.priority.isEmpty ? Self.defaultPriority : value.priority,
-                ZegoAIAgentActionProtocolKeys.samePriorityOption: value.samePriorityOption.isEmpty ? Self.defaultSamePriorityOption : value.samePriorityOption
+                // addHistory：业务方未显式赋值时兜底为 API 文档默认值 true；显式赋值（true/false）按业务方值输出。
+                ZegoAIAgentActionProtocolKeys.addHistory: value.hasAddHistory ? value.addHistory : true,
+                // priority / samePriorityOption 为枚举字符串，客户端不显式赋值时 protobuf 默认空串会触发服务端 410000003 "Priority is invalid"，此处兜底为文档默认值。
+                ZegoAIAgentActionProtocolKeys.priority: value.hasPriority ? value.priority : Self.defaultPriority,
+                ZegoAIAgentActionProtocolKeys.samePriorityOption: value.hasSamePriorityOption ? value.samePriorityOption : Self.defaultSamePriorityOption
             ]
             if value.interruptMode != 0 { json[ZegoAIAgentActionProtocolKeys.interruptMode] = Int(value.interruptMode) }
             if value.enqueueUserSpeech { json[ZegoAIAgentActionProtocolKeys.enqueueUserSpeech] = true }
@@ -490,20 +491,25 @@ public final class ZegoAIAgentActionClient {
                 ZegoAIAgentActionProtocolKeys.text: value.text,
                 ZegoAIAgentActionProtocolKeys.systemPrompt: value.systemPrompt,
                 ZegoAIAgentActionProtocolKeys.addQuestionToHistory: value.addQuestionToHistory,
-                ZegoAIAgentActionProtocolKeys.addAnswerToHistory: value.addAnswerToHistory,
-                // 同 TTS：枚举字段空串兜底为文档默认值，避免服务端校验失败
-                ZegoAIAgentActionProtocolKeys.priority: value.priority.isEmpty ? Self.defaultPriority : value.priority,
-                ZegoAIAgentActionProtocolKeys.samePriorityOption: value.samePriorityOption.isEmpty ? Self.defaultSamePriorityOption : value.samePriorityOption
+                // addAnswerToHistory：业务方未显式赋值时兜底为 API 文档默认值 true；显式赋值（true/false）按业务方值输出。
+                ZegoAIAgentActionProtocolKeys.addAnswerToHistory: value.hasAddAnswerToHistory ? value.addAnswerToHistory : true,
+                // priority / samePriorityOption：业务方未显式赋值时兜底为文档默认值。
+                ZegoAIAgentActionProtocolKeys.priority: value.hasPriority ? value.priority : Self.defaultPriority,
+                ZegoAIAgentActionProtocolKeys.samePriorityOption: value.hasSamePriorityOption ? value.samePriorityOption : Self.defaultSamePriorityOption
             ]
             if value.enqueueUserSpeech { json[ZegoAIAgentActionProtocolKeys.enqueueUserSpeech] = true }
             return json
         case let value as ZegoStartListeningParams:
             var json: [String: Any] = [:]
             if !value.userID.isEmpty { json[ZegoAIAgentActionProtocolKeys.userId] = value.userID }
+            // sequence：业务方自增序列号；Swift protobuf 对普通 int64 字段不提供 has*，用 0 判断"未设置"。
+            if value.sequence != 0 { json[ZegoAIAgentActionProtocolKeys.sequence] = value.sequence }
             return json
         case let value as ZegoStopListeningParams:
             var json: [String: Any] = [:]
             if !value.userID.isEmpty { json[ZegoAIAgentActionProtocolKeys.userId] = value.userID }
+            // sequence：必须与对应 StartListening 的 sequence 相同；0 表示不传。
+            if value.sequence != 0 { json[ZegoAIAgentActionProtocolKeys.sequence] = value.sequence }
             return json
         case is ZegoInterruptAgentInstanceParams:
             return [:]
