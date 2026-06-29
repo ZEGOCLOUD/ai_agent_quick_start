@@ -152,8 +152,10 @@ ZegoAIAgentActionOCClient *client =
     [[ZegoAIAgentActionOCClient alloc] initWithRoomId:@"room_1"
                                           agentUserId:@"agent_1"
                                                userId:@"client_A"
-                                          deviceId:nil                // 缺省时自动生成 "oc_<uuid8>"
-                                          timeoutMs:5000              // 默认 5s
+                                      agentInstanceId:nil                // 非数字人场景传 nil
+                                       isDigitalHuman:NO                  // 非数字人通话
+                                             deviceId:nil                 // 缺省时自动生成 "oc_<uuid8>"
+                                            timeoutMs:5000               // 默认 5s
                                                sender:sender
                                            onResponse:^(ZegoAIAgentActionOCResponse *response) {
         NSLog(@"recv action=%@ seq=%@ code=%ld message=%@",

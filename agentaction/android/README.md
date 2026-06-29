@@ -47,9 +47,13 @@ dependencies {
 
 ```java
 ZegoAIAgentActionClient client = new ZegoAIAgentActionClient(
-    "room_1",
-    "agent_1",
-    "client_A",
+    "room_1",                                            // 1  roomId
+    "agent_1",                                           // 2  agentUserId
+    "client_A",                                          // 3  userId
+    null,                                                // 4  agentInstanceId（非数字人场景传 null）
+    false,                                               // 5  isDigitalHuman
+    null,                                                // 6  deviceId（null 时套件自动生成 "android_<uuid8>"）
+    5000,                                                // 7  timeoutMs（默认 5s）
     (params, formatedJson, callback) -> {
         // params 携带 roomId / msgType(=20) / userList(=[agentUserId]) / seq
         // formatedJson 已经按 Express 房间通道消息协议组装好：

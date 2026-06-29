@@ -64,9 +64,13 @@ public class MainActivity extends Activity {
         });
 
         client = new ZegoAIAgentActionClient(
-                roomId,
-                agentUserId,
-                userId,
+                roomId,                                                                                  // 1 roomId
+                agentUserId,                                                                             // 2 agentUserId
+                userId,                                                                                  // 3 userId
+                null,                                                                                    // 4 agentInstanceId（非数字人场景传 null）
+                false,                                                                                   // 5 isDigitalHuman
+                null,                                                                                    // 6 deviceId（null 时套件自动生成 "android_<uuid8>"）
+                5000,                                                                                    // 7 timeoutMs
                 (params, formatedJson, callback) -> {
                     log("[sender] action=callExperimentalAPI seq=" + params.seq);
                     log("[sender] formatedJson=" + formatedJson);

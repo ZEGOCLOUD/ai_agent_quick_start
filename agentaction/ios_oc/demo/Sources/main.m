@@ -52,6 +52,10 @@ static void DemoLog(NSString *line) {
     self.client = [[ZegoAIAgentActionOCClient alloc] initWithRoomId:self.roomId
                                                        agentUserId:self.agentUserId
                                                             userId:self.userId
+                                                   agentInstanceId:nil
+                                                    isDigitalHuman:NO
+                                                          deviceId:nil
+                                                         timeoutMs:5000
                                                             sender:self
                                                         onResponse:^(ZegoAIAgentActionOCResponse *response) {
         DemoLog([NSString stringWithFormat:@"[response] action=%@ seq=%@ code=%ld message=%@",

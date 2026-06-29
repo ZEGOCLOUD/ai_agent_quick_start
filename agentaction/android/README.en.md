@@ -47,9 +47,13 @@ Example:
 
 ```java
 ZegoAIAgentActionClient client = new ZegoAIAgentActionClient(
-    "room_1",
-    "agent_1",
-    "client_A",
+    "room_1",                                            // 1  roomId
+    "agent_1",                                           // 2  agentUserId
+    "client_A",                                          // 3  userId
+    null,                                                // 4  agentInstanceId (null in non-digital-human mode)
+    false,                                               // 5  isDigitalHuman
+    null,                                                // 6  deviceId (null → suite auto-generates "android_<uuid8>")
+    5000,                                                // 7  timeoutMs (default 5s)
     (params, formatedJson, callback) -> {
         // params carries roomId / msgType(=20) / userList(=[agentUserId]) / seq
         // formatedJson is already shaped for Express room-channel messages:
