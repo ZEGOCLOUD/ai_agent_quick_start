@@ -18,6 +18,17 @@ import im.zego.aiagent.express.quickstart.voice.AudioChatMessageParser.AudioChat
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 语音聊天的消息列表控件，用于展示用户与 AI Agent 的对话内容。
+ * <p>
+ * 内部通过 {@link ZegoVoiceCallMessageAdapter} 渲染 {@link AudioChatMessage}：
+ * - cmd==3 为己方（ASR 识别到的用户语音）消息，靠右显示
+ * - 其余为对方（AI Agent）消息，靠左显示
+ * <p>
+ * 列表在底部可见时自动滚动到最新消息；用户手动上滑查看历史时暂停自动滚动。
+ * 数据源由 {@link AudioChatMessageParser} 解析后通过
+ * {@link #onMessageListUpdated(List)} 传入。
+ */
 public class AIChatListView extends ListView {
 
     private static final String TAG = "AIChatListView";

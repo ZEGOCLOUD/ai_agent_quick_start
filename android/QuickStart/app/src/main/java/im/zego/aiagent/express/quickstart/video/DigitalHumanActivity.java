@@ -1,14 +1,16 @@
 package im.zego.aiagent.express.quickstart.video;
 
+import android.Manifest;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.squareup.picasso.Picasso;
@@ -33,74 +35,63 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * 播报数字人：单向观看场景（用户只看不推流）。
- * <p>
- * 与 {@link DigitalHumanActivity} 的差异：不推流、不申请麦克风权限、onCreate 直接初始化；
- * 启动接口为 /api/start-live-digital-human（请求体仅需 digital_human_id / config_id / room_id）；
- * 额外支持 sendTTS 主动播报。
+ * 数字人通话：与数字人进行双向音视频对话（用户推流 + 数字人形象渲染）。
  * <p>
  * 接口调用顺序：
  * <pre>
- * 1. initExpressSDK()                初始化 Express 引擎
- * 2. requestZegoToken()              GET  /api/zego-token          获取登录 token
- * 3. ExpressHelper.loginRoom()       登录 Express 房间（advancedConfig 含 sideinfo）
- * 4. ├─ openExpressCustomRender()    房间登录成功后：开启自定义渲染（须在拉流前）
- *    └─ startLiveDigitalHumanChat()  POST /api/start-live-digital-human 启动播报数字人
+ * 1. initExpressSDK()              初始化 Express 引擎
+ * 2. requestZegoToken()            GET  /api/zego-token          获取登录 token
+ * 3. ExpressHelper.loginRoom()     登录 Express 房间（advancedConfig 含 sideinfo）
+ * 4. ├─ openExpressCustomRender()  房间登录成功后：开启自定义渲染（须在推/拉流前）
+ *    ├─ startPublishingStream()    推本地流
+ *    └─ startDigitalHumanChat()    POST /api/start-digital-human 启动数字人
  * 5. (拉数字人流 + initDigitalMobileSDK)   收到 start 响应后渲染数字人
  *
- * 互动（可选）：
- *    sendTTS()                       POST /api/send-agent-instance-tts   主动播报文本
- *
  * 结束：
- * 6. stopDigitalHumanChat()          POST /api/stop               停止数字人
- * 7. destroyExpressSDK()             销毁 Express 引擎
+ * 6. stopDigitalHumanChat()        POST /api/stop               停止数字人
+ * 7. destroyExpressSDK()           销毁 Express 引擎
  * </pre>
  * 详见 README.md「核心流程」。
  */
-public class LiveDigitalHumanActivity extends AppCompatActivity {
+public class DigitalHumanActivity extends AppCompatActivity {
 
-    public static final String TAG = "LiveDigitalHuman";
+    public static final String TAG = "DigitalHumanActivity";
     private ZegoDigitalView digitalView;
     private View loadingView;
     private ImageView digitalPic;
-    private EditText ttsInput;
-    private Button ttsSend;
     private IZegoDigitalMobile digitalMobileSDK;
-    private String agent_user_id; // 数字人在 RTC 房间内的用户 ID
-    private String agent_stream_id; // 数字人推流 id
-    private String agent_name; // 数字人名称
-    private String agent_instance_id; // 用于 sendTTS / stop
+    private String agent_user_id; //agent推流id，数字人推流id
+    private String agent_stream_id; //agent推流id，数字人推流id
+    private String agent_name; //agent推流id，数字人推流id
+    private String agent_instance_id;
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
+        new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted) {
+                init();
+            } else {
+                showError("Activity", "please enable permission");
+            }
+        });
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_live_digital_human);
+        setContentView(R.layout.activity_digital_human);
         initViews();
-        // 播报场景为单向观看，无需麦克风权限，直接初始化
-        init();
+        // 申请麦克风权限，授权后在回调中 init()
+        requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO);
     }
 
     /**
-     * 初始化控件：数字人视图、占位图、挂断按钮、TTS 输入栏
+     * 初始化控件：数字人视图、占位图、挂断按钮
      */
     private void initViews() {
         digitalView = findViewById(R.id.digital_view);
         loadingView = findViewById(R.id.loading_view);
         digitalPic = findViewById(R.id.digital_pic);
-        ttsInput = findViewById(R.id.tts_input);
-        ttsSend = findViewById(R.id.tts_send);
         Picasso.get().load(Uri.parse(Constant.digital_human_image_URL)).into(digitalPic);
         findViewById(R.id.end_call).setOnClickListener(v -> finish());
-        // 输入文本后发送，让数字人主动播报
-        ttsSend.setOnClickListener(v -> {
-            String text = ttsInput.getText().toString().trim();
-            if (TextUtils.isEmpty(text)) {
-                Toast.makeText(this, "Please enter text to speak", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            sendTTS(text);
-            ttsInput.setText("");
-        });
     }
 
     @Override
@@ -117,6 +108,7 @@ public class LiveDigitalHumanActivity extends AppCompatActivity {
         initExpressSDK();
         requestZegoToken();
     }
+
 
     /**
      * 初始化 express SDK
@@ -156,8 +148,10 @@ public class LiveDigitalHumanActivity extends AppCompatActivity {
                         ExpressHelper.loginRoom(Constant.user_id, Constant.user_id, token, advancedConfig,
                             (errorCode, extendedData) -> {
                                 if (errorCode == 0) {
-                                    openExpressCustomRender();  // 开启自定义渲染，需在 startPlayingStream 前
-                                    startLiveDigitalHumanChat();
+                                    openExpressCustomRender();  // 开启自定义渲染，需在 startPublishingStream/startPlayingStream 前
+                                    ZegoExpressEngine.getEngine().startPublishingStream(Constant.user_stream_id);
+                                    ZegoExpressEngine.getEngine().muteMicrophone(false);
+                                    startDigitalHumanChat();
                                 } else {
                                     showError("requestZegoToken", "join room failed");
                                 }
@@ -225,12 +219,13 @@ public class LiveDigitalHumanActivity extends AppCompatActivity {
     }
 
     /**
-     * 通知业务后台开启播报数字人
+     * 通知业务后台开启数字人通话
      */
-    private void startLiveDigitalHumanChat() {
-        Log.i(TAG, "startLiveDigitalHumanChat");
-        QuickStartApi.startLiveDigitalHuman(Constant.digital_human_id, Constant.config_id,
-            Constant.room_id, new HttpHelper.HttpCallback() {
+    private void startDigitalHumanChat() {
+        Log.i(TAG, "startDigitalHumanChat");
+        QuickStartApi.startDigitalHuman(Constant.digital_human_id, Constant.config_id,
+            Constant.user_id, Constant.room_id, Constant.user_stream_id,
+            new HttpHelper.HttpCallback() {
             @Override
             public void onResponse(String responseBody) {
                 try {
@@ -244,62 +239,28 @@ public class LiveDigitalHumanActivity extends AppCompatActivity {
                     if (errorCode == 0) {
                         ZegoExpressEngine.getEngine().setPlayStreamBufferIntervalRange(agent_stream_id, 100, 2000);
                         ZegoExpressEngine.getEngine().startPlayingStream(agent_stream_id);
-                        runOnUiThread(() -> Toast.makeText(LiveDigitalHumanActivity.this, message, Toast.LENGTH_LONG)
-                            .show());
-                        final String digitalHumanConfig = (String) json.get("digital_human_config");
+                        runOnUiThread(
+                            () -> Toast.makeText(DigitalHumanActivity.this, message, Toast.LENGTH_LONG).show());
+                        final var digitalHumanConfig = (String) json.get("digital_human_config");
                         initDigitalMobileSDK(digitalHumanConfig);
                     } else {
                         ZegoExpressEngine.getEngine().logoutRoom();
-                        showError("startLiveDigitalHumanChat", "start failed: " + errorCode);
+                        showError("startDigitalHumanChat", "start failed: " + errorCode);
                     }
                 } catch (JSONException e) {
-                    showError("startLiveDigitalHumanChat", "parse json failed: " + e.getMessage());
+                    showError("startDigitalHumanChat", "parse json failed: " + e.getMessage());
                 }
             }
 
             @Override
             public void onFailure(String errorMsg) {
-                showError("startLiveDigitalHumanChat", errorMsg);
+                showError("startDigitalHumanChat", errorMsg);
             }
         });
     }
 
     /**
-     * 主动让数字人播报文本（调用 /api/send-agent-instance-tts）
-     */
-    private void sendTTS(String text) {
-        Log.i(TAG, "sendTTS: " + text);
-        if (TextUtils.isEmpty(agent_instance_id)) {
-            Toast.makeText(this, "Digital human is not ready, please try again later", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        QuickStartApi.sendAgentInstanceTTS(agent_instance_id, text, new HttpHelper.HttpCallback() {
-            @Override
-            public void onResponse(String responseBody) {
-                try {
-                    JSONObject json = new JSONObject(responseBody);
-                    int code = (int) json.get("code");
-                    String message = (String) json.get("message");
-                    if (code == 0) {
-                        runOnUiThread(() -> Toast.makeText(LiveDigitalHumanActivity.this,
-                            "Sent", Toast.LENGTH_SHORT).show());
-                    } else {
-                        showError("sendTTS", message);
-                    }
-                } catch (JSONException e) {
-                    showError("sendTTS", "parse json failed: " + e.getMessage());
-                }
-            }
-
-            @Override
-            public void onFailure(String errorMsg) {
-                showError("sendTTS", errorMsg);
-            }
-        });
-    }
-
-    /**
-     * 通知业务后台停止播报数字人
+     * 通知业务后台停止数字人通话
      */
     private void stopDigitalHumanChat() {
         Log.i(TAG, "stopDigitalHumanChat");
@@ -318,7 +279,7 @@ public class LiveDigitalHumanActivity extends AppCompatActivity {
         Log.i(TAG, "initDigitalMobileSDK: " + digitalHumanConfig);
         runOnUiThread(() -> {
 
-            digitalMobileSDK = ZegoDigitalHuman.create(LiveDigitalHumanActivity.this);
+            digitalMobileSDK = ZegoDigitalHuman.create(DigitalHumanActivity.this);
             digitalMobileSDK.start(digitalHumanConfig, new IZegoDigitalMobile.ZegoDigitalMobileListener() {
                 @Override
                 public void onDigitalMobileStartSuccess() {
@@ -328,7 +289,7 @@ public class LiveDigitalHumanActivity extends AppCompatActivity {
                 @Override
                 public void onError(int i, String s) {
                     runOnUiThread(() -> {
-                        if (LiveDigitalHumanActivity.this.isDestroyed()) {
+                        if (DigitalHumanActivity.this.isDestroyed()) {
                             return;
                         }
                         String errorMsg = "initDigitalMobileSDK" + ": " + s;
@@ -371,7 +332,7 @@ public class LiveDigitalHumanActivity extends AppCompatActivity {
             String errorMsg = infoTag + ": " + msg;
             Log.e(TAG, errorMsg);
             loadingView.setVisibility(View.GONE);
-            Toast.makeText(LiveDigitalHumanActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+            Toast.makeText(DigitalHumanActivity.this, errorMsg, Toast.LENGTH_LONG).show();
             finish();
         });
     }

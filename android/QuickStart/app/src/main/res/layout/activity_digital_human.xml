@@ -4,7 +4,7 @@
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  tools:context=".voice.VoiceChatActivity">
+  tools:context=".video.DigitalHumanActivity">
 
   <im.zego.digitalmobile.ZegoDigitalView
     android:id="@+id/digital_view"
@@ -48,7 +48,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="正在初始化数字人"
+        android:text="Initializing digital human"
         android:textColor="#FFFFFF"
         android:textSize="14sp" />
     </LinearLayout>

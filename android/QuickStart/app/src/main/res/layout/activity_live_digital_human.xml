@@ -42,7 +42,7 @@
       android:layout_height="wrap_content"
       android:layout_weight="1"
       android:background="@android:color/white"
-      android:hint="输入要让数字人播报的文本"
+      android:hint="Enter text for the digital human to speak"
       android:inputType="text"
       android:maxLines="1"
       android:padding="10dp" />
@@ -52,7 +52,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginStart="8dp"
-      android:text="发送"
+      android:text="Send"
       android:textAllCaps="false" />
   </LinearLayout>
 
@@ -78,7 +78,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="正在初始化数字人"
+        android:text="Initializing digital human"
         android:textColor="#FFFFFF"
         android:textSize="14sp" />
     </LinearLayout>

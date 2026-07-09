@@ -19,6 +19,22 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * 语音聊天消息解析器：解析业务后台通过 Express 房间消息下发的 AI Agent 对话数据，
+ * 维护有序的消息列表，并通过 {@link AudioChatMessageListListener} 回调通知 UI 刷新。
+ * <p>
+ * 调用 {@link #parseAudioChatMessage(String)} 传入原始 JSON，内部按 cmd 分发：
+ * <pre>
+ * cmd == 3 : ASR 消息（用户语音识别结果），按 messageId 去重、按 seqId 取最新
+ * cmd == 4 : LLM 消息（AI 回复），同一轮(round)内按 seqId 排序合并分片文本，仅保留最新的一条
+ * cmd == 6 : Agent 状态变更（IDLE/LISTENING/THINKING/SPEAKING），按 seqId 去重后回调
+ * </pre>
+ * LLM 消息可能分片下发，解析器会按 messageId 缓存分片、按 seqId 排序拼接成完整文本，
+ * 超过 4 秒未更新的缓存会被清理（见 {@link #clearCacheIfNeed(AudioChatMessage)}）。
+ * <p>
+ * 在 {@code VoiceChatActivity.initChatText()} 中注册：Express 的
+ * {@code onRecvExperimentalAPI} 收到房间消息后调用本解析器，解析结果驱动 {@link AIChatListView} 刷新。
+ */
 public class AudioChatMessageParser {
 
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();

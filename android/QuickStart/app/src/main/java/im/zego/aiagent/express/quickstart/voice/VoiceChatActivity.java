@@ -17,48 +17,47 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import com.google.gson.JsonObject;
 import im.zego.aiagent.express.quickstart.Constant;
 import im.zego.aiagent.express.quickstart.R;
+import im.zego.aiagent.express.quickstart.util.ExpressHelper;
+import im.zego.aiagent.express.quickstart.util.HttpHelper;
+import im.zego.aiagent.express.quickstart.util.QuickStartApi;
 import im.zego.aiagent.express.quickstart.voice.AudioChatMessageParser.AudioChatAgentStatusMessage;
 import im.zego.aiagent.express.quickstart.voice.AudioChatMessageParser.AudioChatMessage;
 import im.zego.aiagent.express.quickstart.voice.AudioChatMessageParser.AudioChatMessageListListener;
 import im.zego.zegoexpress.ZegoExpressEngine;
 import im.zego.zegoexpress.callback.IZegoEventHandler;
 import im.zego.zegoexpress.callback.IZegoRoomLoginCallback;
-import im.zego.zegoexpress.constants.ZegoAECMode;
-import im.zego.zegoexpress.constants.ZegoANSMode;
-import im.zego.zegoexpress.constants.ZegoAudioDeviceMode;
-import im.zego.zegoexpress.constants.ZegoScenario;
-import im.zego.zegoexpress.entity.ZegoEngineConfig;
-import im.zego.zegoexpress.entity.ZegoEngineProfile;
-import im.zego.zegoexpress.entity.ZegoRoomConfig;
 import im.zego.zegoexpress.entity.ZegoUser;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.logging.HttpLoggingInterceptor;
-import okhttp3.logging.HttpLoggingInterceptor.Level;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * 语音通话：与 AI Agent 进行实时语音对话（双向语音，无数字人形象）。
+ * <p>
+ * 页面有一个「登录/登出」按钮：登录后开始通话，再次点击登出并停止。
+ * <p>
+ * 接口调用顺序：
+ * <pre>
+ * 1. initExpressSDK()            初始化 Express 引擎
+ * 2. requestZegoToken()          GET  /api/zego-token      获取登录 token
+ * 3. ExpressHelper.loginRoom()   登录 Express 房间（advancedConfig 仅 2 项，无 sideinfo）
+ * 4. ├─ startPublishingStream()  房间登录成功后：推本地流
+ *    └─ start()                  POST /api/start          启动 AI Agent
+ * 5. (拉 Agent 流，开始语音对话)
+ *
+ * 结束（点击登出）：
+ * 6. stop()                      POST /api/stop           停止 AI Agent + 登出房间
+ * </pre>
+ * 详见 README.md「核心流程」。
+ */
 public class VoiceChatActivity extends AppCompatActivity {
 
     private static final String TAG = "VoiceChatActivity";
     private AudioChatMessageParser audioChatMessageParser = new AudioChatMessageParser();
     private boolean login = false;
-    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    private static final OkHttpClient client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS).readTimeout(30, TimeUnit.SECONDS)
-        .addInterceptor(new HttpLoggingInterceptor().setLevel(Level.BODY)).build();
     private TextView loadingText;
     private String agent_instance_id;
     private String agent_user_id; //agent推流id，数字人推流id
@@ -69,28 +68,31 @@ public class VoiceChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_voice);
+        initViews();
+        initExpressSDK();
+        initChatText();
+    }
+
+    /**
+     * 初始化控件：状态栏内边距、用户/房间信息展示、登录按钮
+     */
+    private void initViews() {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
-        initExpressSDK();
-
-        initChatText();
-
+        // 展示当前用户与房间信息
         TextView userId = findViewById(R.id.user_id);
         TextView userName = findViewById(R.id.user_name);
         TextView roomId = findViewById(R.id.room_id);
         userId.setText(Constant.user_id);
         userName.setText(Constant.userName);
         roomId.setText("RoomId:" + Constant.room_id);
-
         loadingText = findViewById(R.id.loading_text);
-
-        findViewById(R.id.login_room).setOnClickListener(v -> {
-            requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO);
-        });
+        // 点击登录/登出按钮，先申请麦克风权限
+        findViewById(R.id.login_room)
+            .setOnClickListener(v -> requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO));
     }
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
@@ -115,51 +117,34 @@ public class VoiceChatActivity extends AppCompatActivity {
 
 
     private void start() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("room_id", Constant.room_id);
-        jsonObject.addProperty("user_id", Constant.user_id);
-        jsonObject.addProperty("user_stream_id", Constant.user_stream_id);
-        RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
-        Request request = new Request.Builder().url(Constant.BASE_URL + "/api/start").post(body).build();
-
-        client.newCall(request).enqueue(new Callback() {
+        QuickStartApi.start(Constant.room_id, Constant.user_id, Constant.user_stream_id,
+            new HttpHelper.HttpCallback() {
             @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                System.err.println("Request failed: " + e.getMessage());
-                ZegoExpressEngine.getEngine().logoutRoom();
-                resetUI("start 失败");
+            public void onResponse(String responseBody) {
+                Log.d(TAG, "api/start onResponse: " + responseBody);
+                try {
+                    JSONObject json = new JSONObject(responseBody);
+                    int errorCode = (int) json.get("code");
+                    agent_name = (String) json.get("agent_name");
+                    agent_instance_id = (String) json.get("agent_instance_id");
+                    agent_user_id = (String) json.get("agent_user_id");
+                    agent_stream_id = (String) json.get("agent_stream_id");
+                    if (errorCode == 0) {
+                        ZegoExpressEngine.getEngine().startPlayingStream(agent_stream_id);
+                        updateUI();
+                    } else {
+                        ZegoExpressEngine.getEngine().logoutRoom();
+                        resetUI("start failed");
+                    }
+                } catch (JSONException e) {
+                    resetUI("start failed");
+                }
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    String responseBody = response.body().string();
-                    Log.d(TAG, "api/start onResponse: " + responseBody);
-                    try {
-                        JSONObject json = new JSONObject(responseBody);
-                        int errorCode = (int) json.get("code");
-                        String message = (String) json.get("message");
-                        //                        String agent_id = (String) json.get("agent_id");
-                        agent_name = (String) json.get("agent_name");
-                        agent_instance_id = (String) json.get("agent_instance_id");
-                        agent_user_id = (String) json.get("agent_user_id");
-                        agent_stream_id = (String) json.get("agent_stream_id");
-                        if (errorCode == 0) {
-                            ZegoExpressEngine.getEngine().startPlayingStream(agent_stream_id);
-                            updateUI();
-                        } else {
-                            ZegoExpressEngine.getEngine().logoutRoom();
-                            resetUI("start failed");
-                        }
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    System.err.println("Request failed with status: " + response.code());
-                    ZegoExpressEngine.getEngine().logoutRoom();
-                    resetUI("start failed");
-                }
-
+            public void onFailure(String errorMsg) {
+                ZegoExpressEngine.getEngine().logoutRoom();
+                resetUI("start failed");
             }
         });
     }
@@ -201,96 +186,65 @@ public class VoiceChatActivity extends AppCompatActivity {
     }
 
     private void stop() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("agent_instance_id", agent_instance_id);
-        RequestBody body = RequestBody.create(jsonObject.toString(), JSON);
-
-        Request request = new Request.Builder().url(Constant.BASE_URL + "/api/stop").post(body).build();
-
-        client.newCall(request).enqueue(new Callback() {
+        QuickStartApi.stop(agent_instance_id, new HttpHelper.HttpCallback() {
             @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                System.err.println("Request failed: " + e.getMessage());
-                resetUI("");
+            public void onResponse(String responseBody) {
                 ZegoExpressEngine.getEngine().logoutRoom();
+                resetUI("");
             }
 
             @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    String responseBody = response.body().string();
-                    System.out.println(responseBody);
-
-                    try {
-                        JSONObject json = new JSONObject(responseBody);
-                        int errorCode = (int) json.get("code");
-                        String message = (String) json.get("message");
-                        ZegoExpressEngine.getEngine().logoutRoom();
-                        resetUI("");
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    System.err.println("Request failed with status: " + response.code());
-                }
-
+            public void onFailure(String errorMsg) {
+                resetUI("");
+                ZegoExpressEngine.getEngine().logoutRoom();
             }
         });
     }
 
     private void requestZegoToken() {
-        Request request = new Request.Builder().url(Constant.BASE_URL + "/api/zego-token?userId=" + Constant.user_id)
-            .get().build();
-        client.newCall(request).enqueue(new Callback() {
+        QuickStartApi.getZegoToken(Constant.user_id, new HttpHelper.HttpCallback() {
             @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                System.err.println("Request failed: " + e.getMessage());
-                resetUI("get token failed");
-            }
+            public void onResponse(String responseBody) {
+                try {
+                    JSONObject json = new JSONObject(responseBody);
+                    String token = (String) json.get("token");
 
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    String responseBody = response.body().string();
-                    System.out.println(responseBody);
-                    try {
-                        JSONObject json = new JSONObject(responseBody);
-                        String token = (String) json.get("token");
-                        long expireTime = (long) json.get("expire_time");
-
-                        if (!TextUtils.isEmpty(token)) {
-                            loginRoom(Constant.user_id, Constant.user_id, token, new IZegoRoomLoginCallback() {
+                    if (!TextUtils.isEmpty(token)) {
+                        // 语音场景的引擎高级配置（比数字人场景少 sideinfo 相关项）
+                        HashMap<String, String> advancedConfig = new HashMap<>();
+                        advancedConfig.put("set_audio_volume_ducking_mode", "1");
+                        advancedConfig.put("enable_rnd_volume_adaptive", "true");
+                        ExpressHelper.loginRoom(Constant.user_id, Constant.user_id, token, advancedConfig,
+                            new IZegoRoomLoginCallback() {
                                 @Override
                                 public void onRoomLoginResult(int errorCode, JSONObject extendedData) {
                                     if (errorCode == 0) {
+                                        // 登录成功后推本地流，再启动 Agent
+                                        ZegoExpressEngine.getEngine().startPublishingStream(Constant.user_stream_id);
+                                        ZegoExpressEngine.getEngine().muteMicrophone(false);
                                         start();
                                     } else {
                                         resetUI("join room failed");
                                     }
                                 }
                             });
-
-                        } else {
-                            resetUI("get token failed");
-                        }
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
+                    } else {
+                        resetUI("get token failed");
                     }
-                } else {
-                    System.err.println("Request failed with status: " + response.code());
+                } catch (JSONException e) {
                     resetUI("get token failed");
                 }
+            }
 
+            @Override
+            public void onFailure(String errorMsg) {
+                resetUI("get token failed");
             }
         });
     }
 
     private void initExpressSDK() {
-        ZegoEngineProfile zegoEngineProfile = new ZegoEngineProfile();
-        zegoEngineProfile.appID = Constant.appId;
-        zegoEngineProfile.scenario = ZegoScenario.HIGH_QUALITY_CHATROOM;
-        zegoEngineProfile.application = getApplication();
-        ZegoExpressEngine.createEngine(zegoEngineProfile, null);
+        ExpressHelper.initEngine(getApplication());
     }
 
     private void initChatText() {
@@ -350,43 +304,6 @@ public class VoiceChatActivity extends AppCompatActivity {
         });
     }
 
-    private void loginRoom(String userId, String userName, String token, IZegoRoomLoginCallback callback) {
-        ZegoEngineConfig config = new ZegoEngineConfig();
-        HashMap<String, String> advanceConfig = new HashMap<String, String>();
-        advanceConfig.put("set_audio_volume_ducking_mode", "1");
-        advanceConfig.put("enable_rnd_volume_adaptive", "true");
-        config.advancedConfig = advanceConfig;
-        ZegoExpressEngine.setEngineConfig(config);
-
-        ZegoExpressEngine.getEngine().setRoomScenario(ZegoScenario.HIGH_QUALITY_CHATROOM);
-
-        ZegoExpressEngine.getEngine().setAudioDeviceMode(ZegoAudioDeviceMode.GENERAL);
-
-        ZegoExpressEngine.getEngine().enableAEC(true);
-        ZegoExpressEngine.getEngine().setAECMode(ZegoAECMode.AI_BALANCED);
-        ZegoExpressEngine.getEngine().enableAGC(true);
-        ZegoExpressEngine.getEngine().enableANS(true);
-        ZegoExpressEngine.getEngine().setANSMode(ZegoANSMode.MEDIUM);
-
-        ZegoRoomConfig roomConfig = new ZegoRoomConfig();
-        roomConfig.isUserStatusNotify = true;
-        roomConfig.token = token;
-
-        ZegoExpressEngine.getEngine()
-            .loginRoom(Constant.room_id, new ZegoUser(userId, userName), roomConfig, (errorCode, extendedData) -> {
-                Log.d(TAG,
-                    "loginRoom() called with: errorCode = [" + errorCode + "], extendedData = [" + extendedData + "]");
-                if (errorCode == 0) {
-                    ZegoExpressEngine.getEngine().startPublishingStream(Constant.user_stream_id);
-                    ZegoExpressEngine.getEngine().muteMicrophone(false);
-                }
-                if (callback != null) {
-                    callback.onRoomLoginResult(errorCode, extendedData);
-                }
-
-            });
-    }
-
     private void showLoading(boolean show) {
         findViewById(R.id.loading_layout).setVisibility(show ? View.VISIBLE : View.GONE);
         findViewById(R.id.login_room).setEnabled(!show);
@@ -417,10 +334,6 @@ public class VoiceChatActivity extends AppCompatActivity {
     // 当前activity 的 oncreate 先执行，然后上一个activity的onDestroy后执行
     // 如果是正常的finish, 这里在 onPause 里面去判断，如果是 finish 状态，则先执行清理。
     protected void onActivityStartDestroy() {
-        if (ZegoExpressEngine.getEngine() != null) {
-            ZegoExpressEngine.getEngine().logoutRoom();
-            ZegoExpressEngine.getEngine().setEventHandler(null);
-            ZegoExpressEngine.destroyEngine(null);
-        }
+        ExpressHelper.destroyEngine();
     }
 }

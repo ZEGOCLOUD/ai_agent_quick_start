@@ -3,11 +3,11 @@ package im.zego.aiagent.express.quickstart;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import im.zego.aiagent.express.quickstart.util.HttpHelper;
+import im.zego.aiagent.express.quickstart.video.DigitalHumanActivity;
 import im.zego.aiagent.express.quickstart.video.LiveDigitalHumanActivity;
-import im.zego.aiagent.express.quickstart.video.VideoChatActivity;
 import im.zego.aiagent.express.quickstart.voice.VoiceChatActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!checkConfigValid()) {
                     return;
                 }
-                Intent intent = new Intent(MainActivity.this, VideoChatActivity.class);
+                Intent intent = new Intent(MainActivity.this, DigitalHumanActivity.class);
                 startActivity(intent);
             });
             findViewById(R.id.button_live_digital_human).setOnClickListener(view -> {
@@ -50,11 +50,9 @@ public class MainActivity extends AppCompatActivity {
      * 跳转前校验 BASE_URL，避免进入目标页后才因非法 URL 崩溃或闪退
      */
     private boolean checkConfigValid() {
-        String url = Constant.BASE_URL;
-        if (TextUtils.isEmpty(url)
-            || (!url.startsWith("http://") && !url.startsWith("https://"))) {
+        if (!HttpHelper.isBaseUrlValid()) {
             Toast.makeText(this,
-                "请先在 Constant.java 中配置正确的 BASE_URL（需以 http:// 或 https:// 开头）",
+                "Please configure BASE_URL in Constant.java (must start with http:// or https://)",
                 Toast.LENGTH_LONG).show();
             return false;
         }

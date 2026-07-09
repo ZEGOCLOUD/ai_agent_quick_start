@@ -1,88 +1,105 @@
-# AI Agent Quick Start (Android)
+# 跑通示例代码
 
-## 项目概述
+## 概述
 
-本项目是基于 ZEGO Express Engine 的 Android 快速入门示例，演示了如何集成 AI Agent 语音聊天能力。用户可通过本应用体验与 AI Agent 的实时语音交互，消息自动滚动显示，支持房间登录、消息收发、流管理等功能。
+ZEGO 实时互动 AI Agent（下文简称"互动 AI"或"AI Agent"），通过接入 SDK 及服务端 API，即可快速实现用户与 AI（智能体）进行超低延迟的语音通话、数字人语音通话、播报数字人等互动能力。
 
+本示例演示 Android 端如何接入 AI Agent，包含三个场景入口：
 
-⚠️ 在运行客户端前，请先启动[您的业务后台](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server/tree/main)，分支需和客户端匹配
+| 入口 | 类 | 说明 |
+| --- | --- | --- |
+| 语音通话 | `voice.VoiceChatActivity` | 与 AI Agent 进行实时语音对话（双向语音） |
+| 数字人通话 | `video.DigitalHumanActivity` | 与数字人视频对话（双向音视频 + 数字人形象渲染） |
+| 播报数字人 | `video.LiveDigitalHumanActivity` | 单向观看数字人播报，支持主动发送 TTS 文本 |
 
----
+> ⚠️ 运行客户端前，请先部署并启动 [业务后台示例](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server)，且**后台所用的 AppID 必须与客户端一致**。
 
-## 文件目录结构
+## 前提条件
+
+- 已在 [ZEGO 控制台](https://console.zego.im/) 创建项目，并获取有效的 `AppID`，详情请参考 [控制台 - 项目信息](https://doc-zh.zego.im/article/12107)。
+- 已联系 ZEGO 技术支持开通 AI Agent / 数字人相关服务权限。
+- 数字人场景需要已创建数字人形象，可获取到 `digital_human_id`。
+
+## 环境要求
+
+- Android Studio
+- minSdkVersion 26（Android 8.0）及以上
+- 真机或模拟器，麦克风权限（语音/数字人通话场景需要）
+
+## 跑通步骤
+
+1. 将 [ai_agent_quick_start](https://github.com/ZEGOCLOUD/ai_agent_quick_start) 克隆或下载到本地。
+2. Android Studio 打开 `android/QuickStart` 目录。
+3. 打开 `Constant.java`，**填入你自己的配置**（文件内已用 `TODO` 标注）：
+   - `appId`：ZEGO 控制台获取的 AppID
+   - `BASE_URL`：你部署的业务后台地址，例如 `https://your-server.example.com`
+   - `digital_human_id`：数字人形象 ID（数字人 / 播报数字人场景需要）
+4. 连接设备，点击 Run 运行。
+5. 选择对应入口体验：
+   - **StartAudioAgentCall**：语音通话
+   - **StartDigitalHumanCall**：数字人通话（需授录音权限）
+   - **StartLiveDigitalHumanCall**：播报数字人（单向观看，输入文本可让数字人播报）
+
+## 目录结构
 
 ```
-app/src/main/java/im/zego/aiagent/express/quickstart/
-├── MainActivity.java           # 主界面与核心业务逻辑
-├── AIChatListView.java         # 聊天消息列表自定义控件
-├── ZegoQuickStartApi.java      # 网络请求与后端接口封装
-├── AudioChatMessageParser.java # 音频消息解析器（如有）
+QuickStart/app/src/main/java/im/zego/aiagent/express/quickstart/
+├── MainActivity.java                    # 首页：三个场景入口按钮
+├── Constant.java                        # 配置中心：AppID / 业务后台地址 / 数字人 ID（需改这里）
+├── voice/
+│   ├── VoiceChatActivity.java           # 语音通话场景
+│   ├── AIChatListView.java              # 聊天消息列表控件
+│   └── AudioChatMessageParser.java      # 语音消息解析
+├── video/
+│   ├── DigitalHumanActivity.java        # 数字人通话场景
+│   └── LiveDigitalHumanActivity.java    # 播报数字人场景
+└── util/
+    ├── QuickStartApi.java               # 业务后台接口封装（路径常量 + 各接口方法）
+    ├── HttpHelper.java                  # HTTP 底层封装（GET / POST / URL 校验）
+    ├── ExpressHelper.java               # ZegoExpressEngine 初始化/销毁/登录/音频配置
+    └── StringUtil.java                  # 工具方法
 ```
 
----
+## 核心流程
 
-## 主要流程图
+以语音通话为例，接入流程如下（数字人 / 播报数字人同理）：
 
-```mermaid
-graph TD
-    A[启动应用] --> B[初始化 Express SDK]
-    B --> C[点击登录房间]
-    C --> D[请求 Token]
-    D --> E[登录房间]
-    E --> F[开始推流/拉流]
-    F --> G[收发消息]
-    G --> H[消息解析与展示]
-    H --> I[用户与 AI Agent 互动]
-    I --> J[登出/停止]
+```
+QuickStartApi.getZegoToken()       GET  /api/zego-token
+        │
+        ▼
+ExpressHelper.loginRoom()          登录 Express 房间
+        │
+        ▼
+QuickStartApi.start()              POST /api/start（数字人用 startDigitalHuman，播报用 startLiveDigitalHuman）
+        │
+        ▼
+推流 / 拉流，开始互动
+        │
+        ▼
+结束：QuickStartApi.stop()         POST /api/stop + 登出房间
 ```
 
----
+三个场景的差异：
 
-## 组件介绍
+- **语音通话 / 数字人通话**：需要推本地流（`user_stream_id`），请求启动接口时传 `user_id`、`user_stream_id`。
+- **播报数字人**：单向观看，不推流、不传 `user_id` / `user_stream_id`，额外支持 `QuickStartApi.sendAgentInstanceTTS()` 主动播报。
 
-### 1. MainActivity
+## 依赖说明
 
-- 负责应用主流程，包括 SDK 初始化、房间登录、Token 获取、流管理、UI 状态切换等。
-- 通过 `initExpressSDK()` 初始化 ZEGO 引擎。
-- 通过 `requestZegoToken()` 获取 Token 并登录房间。
-- 通过 `start()` 和 `stop()` 控制 AI Agent 会话的开始与结束。
-- 通过 `initChatText()` 监听消息事件并更新聊天列表。
+网络请求与引擎操作已分层封装在 `util` 下，自底向上：
 
-### 2. AIChatListView
-
-- 自定义 ListView 控件，用于展示聊天消息。
-- 内部包含 `ZegoVoiceCallMessageAdapter`，负责消息数据的适配与 UI 渲染。
-- 支持自动滚动到底部、消息分己方/对方样式区分。
-
-### 3. ZegoQuickStartApi
-
-- 封装与后端服务的 HTTP 请求，包括获取 Token、启动/停止 AI Agent 会话等。
-- 使用 OkHttp 进行异步网络通信。
-
-### 4. AudioChatMessageParser
-
-- 负责解析收到的音频/文本消息，将其转换为可展示的数据结构。
-- 通过回调接口将解析后的消息列表传递给 UI 层。
-
----
-
-## 快速开始
-1. 参考[ai_agent_quick_start_server](https://github.com/ZEGOCLOUD/ai_agent_quick_start_server) 部署 quick_start 的业务后台
-2. 克隆本仓库并导入 Android Studio。
-3. 在 VoiceChatActivity.java 中配置您的 appId
-4. 运行应用，点击“LoginRoom”申请语音权限，同意后体验 AI Agent 语音聊天。
-
----
+- `HttpHelper`：HTTP 底层封装，提供 GET / POST，回调只回原始响应体，由调用方自行解析。
+- `QuickStartApi`：业务后台接口封装，集中定义所有接口路径常量（`PATH_*`），并提供语义化方法（`getZegoToken` / `start` / `stop` 等）。
+- `ExpressHelper`：`ZegoExpressEngine` 封装，提供引擎创建、销毁、登录房间、音频配置。
 
 ## 注意事项
 
-- 使用前请确保已注册 ZEGO 开发者账号并创建应用
-- 运行时需要麦克风权限，请确保授予
-- 确保设备有稳定的网络连接
-- 本示例使用了 ZEGO Express SDK，请确保了解其基本用法
-
+- `Constant.java` 中的 `appId` 必须与业务后台使用的 AppID 一致，否则登录房间会失败。
+- `BASE_URL` 不要带末尾斜杠，代码内部会拼接路径。
+- `digital_human_id` 需使用你账号下有效的数字人 ID，示例中的默认值仅供格式参考。
+- 语音通话 / 数字人通话需要麦克风权限；播报数字人为单向观看，无需麦克风。
 
 ## 联系与支持
 
-如有任何问题，请联系 ZEGO 技术支持或访问[开发者中心](https://docs.zegocloud.com/)获取更多信息。
-
+如有任何问题，请联系 ZEGO 技术支持或访问 [开发者中心](https://docs.zegocloud.com/) 获取更多信息。

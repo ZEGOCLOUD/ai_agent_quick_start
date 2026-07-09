@@ -28,7 +28,7 @@
       android:name=".voice.VoiceChatActivity"
       android:exported="true"></activity>
     <activity
-      android:name=".video.VideoChatActivity"
+      android:name=".video.DigitalHumanActivity"
       android:exported="true"></activity>
     <activity
       android:name=".video.LiveDigitalHumanActivity"

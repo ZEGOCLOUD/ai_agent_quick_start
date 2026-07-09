@@ -13,7 +13,7 @@
         android:layout_marginBottom="8dp"
         android:paddingLeft="32dp"
         android:paddingRight="32dp"
-        android:text="StartAIAudioCall"
+        android:text="StartAudioAgentCall"
         android:textAllCaps="false"
         app:layout_constraintBottom_toTopOf="@+id/button_video_call"
         app:layout_constraintEnd_toEndOf="parent"
