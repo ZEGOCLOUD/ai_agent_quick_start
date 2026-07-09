@@ -20,3 +20,11 @@ export interface GetZegoTokenRes {
   expireTime: number;
   userId: string;
 }
+
+export interface SendAgentInstanceTTSResponse {
+  code: number;
+  message: string;
+  agent_instance_id?: string;
+  request_id?: string;
+  round?: number;
+}

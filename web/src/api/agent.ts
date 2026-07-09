@@ -1,5 +1,5 @@
 import { get, post } from '../utils/http';
-import type { Response } from '../types/http';
+import type { Response, SendAgentInstanceTTSResponse } from '../types/http';
 import config from '../config';
 
 const ActionCmd = {
@@ -7,6 +7,7 @@ const ActionCmd = {
   Start: "/api/start", // 开始
   StartDigitalHuman: "/api/start-digital-human",
   StartLiveDigitalHuman: "/api/start-live-digital-human",
+  SendAgentInstanceTTS: "/api/send-agent-instance-tts",
   Stop: "/api/stop", // 停止
 }
 
@@ -17,7 +18,16 @@ export interface StartLiveDigitalHumanParams {
   tts?: Record<string, unknown>;
   callbackConfig?: Record<string, unknown>;
   advancedConfig?: Record<string, unknown>;
-  extensionParams?: Record<string, unknown>;
+}
+
+export interface SendAgentInstanceTTSParams {
+  agentInstanceId: string;
+  text: string;
+  addHistory?: boolean;
+  interruptMode?: number;
+  priority?: "Low" | "Medium" | "High";
+  samePriorityOption?: "ClearAndInterrupt" | "Enqueue";
+  enqueueUserSpeech?: boolean;
 }
 
 /**
@@ -71,11 +81,44 @@ export function StartLiveDigitalHuman(params: StartLiveDigitalHumanParams): Prom
   if (params.advancedConfig) {
     data.advanced_config = params.advancedConfig;
   }
-  if (params.extensionParams) {
-    data.extension_params = params.extensionParams;
-  }
 
   return post(ActionCmd.StartLiveDigitalHuman, data);
+}
+
+/**
+ * 播报数字人主动播报文本
+ */
+export async function SendAgentInstanceTTS(
+  params: SendAgentInstanceTTSParams
+): Promise<SendAgentInstanceTTSResponse> {
+  const data: Record<string, unknown> = {
+    agent_instance_id: params.agentInstanceId,
+    text: params.text,
+  };
+
+  if (params.addHistory !== undefined) {
+    data.add_history = params.addHistory;
+  }
+  if (params.interruptMode !== undefined) {
+    data.interrupt_mode = params.interruptMode;
+  }
+  if (params.priority) {
+    data.priority = params.priority;
+  }
+  if (params.samePriorityOption) {
+    data.same_priority_option = params.samePriorityOption;
+  }
+  if (params.enqueueUserSpeech !== undefined) {
+    data.enqueue_user_speech = params.enqueueUserSpeech;
+  }
+
+  const result = await post<SendAgentInstanceTTSResponse>(ActionCmd.SendAgentInstanceTTS, data);
+
+  if (result.code !== 0) {
+    throw new Error(result.message || "自定义调用 TTS 失败");
+  }
+
+  return result;
 }
 
 /**

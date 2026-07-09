@@ -65,6 +65,28 @@
           1.同一个 AppID 内，需保证“userlD”全局唯一，否则会互踢。<br />
           2.请先在服务端创建对应的智能体，并在Call时同步创建智能体实例
         </div>
+
+        <div v-if="isLogin && currentCallType === 'liveDigitalHuman'" class="tts-panel">
+          <el-input
+            v-model="ttsText"
+            class="tts-input"
+            type="textarea"
+            :rows="3"
+            maxlength="300"
+            show-word-limit
+            placeholder="输入需要播报的文本"
+            @keyup.enter.ctrl="handleSendTTS"
+          />
+          <el-button
+            type="primary"
+            class="tts-send-btn"
+            :loading="ttsSending"
+            :disabled="!ttsText.trim() || !agentInstanceId"
+            @click="handleSendTTS"
+          >
+            Send TTS
+          </el-button>
+        </div>
       </div>
       <div class="room-container"> 
         <div class="stream-container">
@@ -91,6 +113,7 @@ import ChatMessage from "./ChatMessage.vue";
 import RemoteSteamView from "./RemoteSteamView.vue";
 import { useChat } from "../hooks/useChat";
 import { useRoom, type AgentCallType } from "../hooks/useRoom";
+import { SendAgentInstanceTTS } from "../api/agent";
 import { ErrorHandler } from "../utils/error-handler";
 import { logger } from "../utils/logger";
 
@@ -125,8 +148,11 @@ const userStreamId = ref(randomId("stream_user_"));
 const loading = ref(false);
 const digitalHumanLoading = ref(false);
 const liveDigitalHumanLoading = ref(false);
+const ttsSending = ref(false);
+const ttsText = ref("");
 const activeCollapse = ref(["chat"]);
 const isDigitalHuman = ref(false);
+const currentCallType = ref<AgentCallType | "">("");
 let agentInstanceId = ref("");
 
 function setLoginLoading(type: AgentCallType, value: boolean) {
@@ -162,6 +188,7 @@ const handleLogin = async (type: AgentCallType) => {
     });
     
     isDigitalHuman.value = type === "digitalHuman";
+    currentCallType.value = type;
     agentInstanceId.value = res.agent_instance_id || "";
   } catch (error) {
     logger.userAction('用户登录失败', { type, roomId: roomId.value, userId: userId.value, error });
@@ -176,6 +203,8 @@ const handleLogout = async () => {
   try {
     loading.value = true;
     isDigitalHuman.value = false;
+    currentCallType.value = "";
+    ttsText.value = "";
     
     logger.userAction('用户开始退出房间', { 
       roomId: roomId.value, 
@@ -199,6 +228,44 @@ const handleLogout = async () => {
   } finally {
     clearMessages();
     loading.value = false;
+  }
+};
+
+const handleSendTTS = async () => {
+  const text = ttsText.value.trim();
+  if (!text || !agentInstanceId.value) {
+    return;
+  }
+
+  try {
+    ttsSending.value = true;
+    logger.userAction('用户发送播报数字人 TTS', {
+      roomId: roomId.value,
+      agentInstanceId: agentInstanceId.value,
+      textLength: text.length,
+    });
+
+    const result = await SendAgentInstanceTTS({
+      agentInstanceId: agentInstanceId.value,
+      text,
+    });
+
+    ttsText.value = "";
+    logger.userAction('播报数字人 TTS 发送成功', {
+      roomId: roomId.value,
+      agentInstanceId: agentInstanceId.value,
+      requestId: result.request_id,
+      round: result.round,
+    });
+  } catch (error) {
+    logger.userAction('播报数字人 TTS 发送失败', {
+      roomId: roomId.value,
+      agentInstanceId: agentInstanceId.value,
+      error,
+    });
+    ErrorHandler.handle(error, 'Chat.handleSendTTS');
+  } finally {
+    ttsSending.value = false;
   }
 };
 
@@ -339,6 +406,23 @@ onMounted(async () => {
   border-radius: 4px;
   margin-top: 20px;
 }
+
+.tts-panel {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-top: 16px;
+}
+
+.tts-input {
+  flex: 1;
+}
+
+.tts-send-btn {
+  min-width: 96px;
+  height: 36px;
+}
+
 .room-container {
   display: flex;
 }
@@ -405,6 +489,15 @@ onMounted(async () => {
     font-size: 12px;
     padding: 10px;
     margin-top: 15px;
+  }
+
+  .tts-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tts-send-btn {
+    width: 100%;
   }
 
   .chat-section {
