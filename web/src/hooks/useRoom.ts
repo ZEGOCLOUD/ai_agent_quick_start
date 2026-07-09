@@ -3,10 +3,12 @@ import { ExpressManager } from "../solution/ExpressManager";
 import type ZegoLocalStream from "zego-express-engine-webrtc/sdk/code/zh/ZegoLocalStream.web";
 import type { ZegoStreamList } from "zego-express-engine-webrtc/sdk/code/zh/ZegoExpressEntity.web";
 import config from "../config";
-import { GetZegoToken, Start, StartDigitalHuman, Stop } from "../api/agent";
+import { GetZegoToken, Start, StartDigitalHuman, StartLiveDigitalHuman, Stop } from "../api/agent";
 import type { ZegoRoomStateChangedReason } from "zego-express-engine-webrtc/sdk/code/zh/ZegoExpressEntity.rtm";
 import { ErrorHandler, createError } from "../utils/error-handler";
 import { logger } from "../utils/logger";
+
+export type AgentCallType = "normal" | "digitalHuman" | "liveDigitalHuman";
 
 export function useRoom() {
   const zg = ExpressManager.getInstance();
@@ -33,7 +35,7 @@ export function useRoom() {
   }
 
   async function loginRoom(
-    type: "normal" | "digitalHuman",
+    type: AgentCallType,
     roomId: string,
     userID: string,
     userName: string,
@@ -53,13 +55,23 @@ export function useRoom() {
     isLogin.value = true;
     logger.info('ROOM', 'RTC房间登录成功', { roomId, userID });
 
-    await startPublishingStream(userStreamId);
+    if (type !== "liveDigitalHuman") {
+      await startPublishingStream(userStreamId);
+    }
 
     try {
       let res;
       if (type === "digitalHuman") {
         res = await createDigitalHuman(roomId, userID, userStreamId);
         logger.info('ROOM', '数字人创建成功', { roomId, userID });
+      } else if (type === "liveDigitalHuman") {
+        res = await createLiveDigitalHuman(roomId);
+        logger.info('ROOM', '播报数字人创建成功', {
+          roomId,
+          agentInstanceId: res.agent_instance_id,
+          agentStreamId: res.agent_stream_id,
+          agentUserId: res.agent_user_id,
+        });
       } else {
         res = await Start(roomId, userID, userStreamId);
         logger.info('ROOM', 'AI Agent 启动成功', { roomId, userID });
@@ -81,6 +93,11 @@ export function useRoom() {
   ) {
     logger.info('ROOM', '启动数字人服务', { roomId, userID, userStreamId });
     return await StartDigitalHuman(roomId, userID, userStreamId);
+  }
+
+  async function createLiveDigitalHuman(roomId: string) {
+    logger.info('ROOM', '启动播报数字人服务', { roomId });
+    return await StartLiveDigitalHuman({ roomId });
   }
 
   async function startPublishingStream(

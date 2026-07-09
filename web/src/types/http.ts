@@ -3,7 +3,12 @@ export interface Response {
   code: number;
   message: string;
   renderType?: string;
+  agent_id?: string;
   agent_instance_id?: string;
+  agent_stream_id?: string;
+  agent_user_id?: string;
+  digital_human_config?: Record<string, unknown>;
+  request_id?: string;
 }
 
 export interface GetZegoTokenReq {

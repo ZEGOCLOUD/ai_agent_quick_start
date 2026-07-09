@@ -41,6 +41,14 @@
               Start Digital Human Call
             </el-button>
             <el-button
+              v-if="!isLogin"
+              :loading="liveDigitalHumanLoading"
+              type="primary"
+              class="login-btn"
+              @click="handleLogin('liveDigitalHuman')">
+              Start Live Digital Human
+            </el-button>
+            <el-button
               v-else
               type="danger"
               :loading="loading"
@@ -82,7 +90,7 @@ import { onMounted, ref } from "vue";
 import ChatMessage from "./ChatMessage.vue";
 import RemoteSteamView from "./RemoteSteamView.vue";
 import { useChat } from "../hooks/useChat";
-import { useRoom } from "../hooks/useRoom";
+import { useRoom, type AgentCallType } from "../hooks/useRoom";
 import { ErrorHandler } from "../utils/error-handler";
 import { logger } from "../utils/logger";
 
@@ -116,14 +124,25 @@ const userStreamId = ref(randomId("stream_user_"));
 // 状态管理
 const loading = ref(false);
 const digitalHumanLoading = ref(false);
+const liveDigitalHumanLoading = ref(false);
 const activeCollapse = ref(["chat"]);
 const isDigitalHuman = ref(false);
 let agentInstanceId = ref("");
 
+function setLoginLoading(type: AgentCallType, value: boolean) {
+  if (type === "normal") {
+    loading.value = value;
+  } else if (type === "digitalHuman") {
+    digitalHumanLoading.value = value;
+  } else {
+    liveDigitalHumanLoading.value = value;
+  }
+}
+
 // 处理登录房间
-const handleLogin = async (type: "normal" | "digitalHuman") => {
+const handleLogin = async (type: AgentCallType) => {
   try {
-    type === "normal" ? (loading.value = true) : (digitalHumanLoading.value = true);
+    setLoginLoading(type, true);
     
     logger.userAction('用户开始登录', { type, roomId: roomId.value, userId: userId.value });
     
@@ -148,7 +167,7 @@ const handleLogin = async (type: "normal" | "digitalHuman") => {
     logger.userAction('用户登录失败', { type, roomId: roomId.value, userId: userId.value, error });
     ErrorHandler.handle(error, 'Chat.handleLogin');
   } finally {
-    type === "normal" ? (loading.value = false) : (digitalHumanLoading.value = false);
+    setLoginLoading(type, false);
   }
 };
 
@@ -302,6 +321,8 @@ onMounted(async () => {
 .controls-container {
   display: flex;
   justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .login-btn,
