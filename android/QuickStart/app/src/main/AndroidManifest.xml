@@ -30,6 +30,9 @@
     <activity
       android:name=".video.VideoChatActivity"
       android:exported="true"></activity>
+    <activity
+      android:name=".video.LiveDigitalHumanActivity"
+      android:exported="true"></activity>
   </application>
 
 </manifest>

@@ -11,6 +11,8 @@
     <item name="colorOnSecondary">@color/black</item>
     <!-- Status bar color. -->
     <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+    <!-- 按钮文本保持原始大小写，不被 Material 主题强制转为全大写 -->
+    <item name="textAllCaps">false</item>
     <!-- Customize your theme here. -->
   </style>
 </resources>

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import im.zego.aiagent.express.quickstart.video.LiveDigitalHumanActivity;
 import im.zego.aiagent.express.quickstart.video.VideoChatActivity;
 import im.zego.aiagent.express.quickstart.voice.VoiceChatActivity;
 
@@ -31,6 +32,13 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 Intent intent = new Intent(MainActivity.this, VideoChatActivity.class);
+                startActivity(intent);
+            });
+            findViewById(R.id.button_live_digital_human).setOnClickListener(view -> {
+                if (!checkConfigValid()) {
+                    return;
+                }
+                Intent intent = new Intent(MainActivity.this, LiveDigitalHumanActivity.class);
                 startActivity(intent);
             });
         } else {
