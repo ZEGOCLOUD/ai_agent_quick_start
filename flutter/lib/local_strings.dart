@@ -6,6 +6,7 @@ class LocalStrings {
 
   static const audioPageTitle = 'VideoChat';
   static const digitalHumanPageTitle = 'DigitalHumanChat';
+  static const digitalHumanLiveBroadcastPageTitle = 'DigitalHumanBroadcast';
   static String roomIdLabel(String roomId) => 'RoomID = $roomId';
   static const logoutRoomButton = 'LogoutRoom';
   static const loginRoomButton = 'LoginRoom';

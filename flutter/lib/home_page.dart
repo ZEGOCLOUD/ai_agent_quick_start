@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'audio/page.dart';
+import 'digital_human/live_broadcast_page.dart';
 import 'digital_human/page.dart';
 
 /// AI Agent 首页
@@ -68,6 +69,17 @@ class _ZegoAIAgentHomePageState extends State<ZegoAIAgentHomePage> {
                 color: const Color(0xFFCC4DFF), // 紫色
                 icon: Icons.person,
                 onTap: () => _navigateToDigitalHuman(),
+              ),
+
+              const SizedBox(height: 30),
+
+              // 数字人播报按钮（单向 TTS）
+              _buildFeatureButton(
+                title: 'Start Digital Human Broadcast',
+                subtitle: '服务端主动下发 TTS 让数字人朗读',
+                color: const Color(0xFFFF8A4D), // 橙色
+                icon: Icons.record_voice_over,
+                onTap: () => _navigateToDigitalHumanBroadcast(),
               ),
 
               const Spacer(),
@@ -192,19 +204,19 @@ class _ZegoAIAgentHomePageState extends State<ZegoAIAgentHomePage> {
 
   /// 导航到数字人页面
   void _navigateToDigitalHuman() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('尚未支持'),
-        backgroundColor: Colors.red,
-        duration: Duration(seconds: 3),
-      ),
-    );
-
-    return;
-
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const ZegoAIAgentDigitalHumanPage(),
+        fullscreenDialog: true,
+      ),
+    );
+  }
+
+  /// 导航到数字人播报页面（单向 TTS）
+  void _navigateToDigitalHumanBroadcast() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const ZegoAIAgentDigitalHumanLiveBroadcastPage(),
         fullscreenDialog: true,
       ),
     );

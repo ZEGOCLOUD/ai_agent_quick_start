@@ -96,6 +96,7 @@ class ZegoAIAgentService {
   String? getAgentName() => _agentName;
   String? getAgentRobotId() => _agentRobotId;
   String? getAgentStreamId() => _agentStreamId;
+  String? getAgentInstanceId() => _agentInstanceId;
   String getUserId() => _userId;
   String getRoomId() => _roomId;
 
@@ -454,6 +455,101 @@ class ZegoAIAgentService {
     }
   }
 
+  /// 启动数字人播报（单向 TTS，不需要本地推流）
+  ///
+  /// 与 startDigitalHuman 的差异：
+  /// - 业务后台接口使用 /api/start-live-digital-human，由服务端自动生成 agent_user_id / agent_stream_id；
+  /// - 本地不推送麦克风流，只拉智能体音视频流；
+  /// - 不需要麦克风权限。
+  Future<AIAgentServiceResponse> startLiveDigitalHuman(
+    ZegoDigitalHumanStreamInfo streamInfo,
+  ) async {
+    debugPrint('开始启动数字人播报...');
+
+    /// 通知业务后台开始数字人播报（不传 user_id / user_stream_id，服务端自动生成）
+    debugPrint('通知业务后台开始数字人播报...');
+    final url = '$_currentBaseUrl/api/start-live-digital-human';
+    final requestData = <String, dynamic>{
+      'room_id': _roomId,
+      'digital_human_id': ZegoKey.kDigitalHumanId,
+      'config_id': _digitalHumanConfigId,
+    };
+    final response =
+        await HttpUtil.post(url, body: requestData, fromJson: (json) => json);
+    if (!response.isSuccess) {
+      debugPrint('通知业务后台开始数字人播报失败: ${response.message}');
+      return AIAgentServiceResponse.failure(
+        errorCode: response.code,
+        errorMessage: response.message,
+      );
+    }
+
+    // 从响应中获取后端返回的信息
+    String? digitalHumanConfig;
+    if (response.data != null && response.data is Map<String, dynamic>) {
+      final data = response.data as Map<String, dynamic>;
+      _agentId = data['agent_id'];
+      _agentName = data['agent_name'];
+      _agentStreamId = data['agent_stream_id'];
+      _agentUserId = data['agent_user_id'];
+      _agentInstanceId = data['agent_instance_id'];
+      digitalHumanConfig = data['digital_human_config'];
+      debugPrint(
+          '获取到播报数字人agent信息: agentId=$_agentId, agentStreamId=$_agentStreamId, agentInstanceId=$_agentInstanceId');
+    }
+    debugPrint('通知业务后台开始数字人播报成功');
+
+    /// 获取Token
+    final token = await getToken();
+    if (token.isEmpty) {
+      debugPrint('获取token失败，无法继续启动数字人播报');
+      return AIAgentServiceResponse.failure(
+        errorCode: -1,
+        errorMessage: '获取token失败',
+      );
+    }
+    debugPrint('成功获取token');
+
+    /// 更新数字人拉流信息
+    digitalHumanStreamInfo = streamInfo;
+
+    try {
+      /// 登录房间（播报场景下不推本地音频流）
+      debugPrint('开始登录房间...');
+      final user = ZegoUser(_userId, _userId);
+      final roomConfig = ZegoRoomConfig.defaultConfig()
+        ..isUserStatusNotify = true
+        ..token = token;
+      final loginResult = await ZegoExpressEngine.instance.loginRoom(
+        _roomId,
+        user,
+        config: roomConfig,
+      );
+      if (0 != loginResult.errorCode && 1002001 != loginResult.errorCode) {
+        debugPrint('登录房间失败，错误码: ${loginResult.errorCode}');
+        return AIAgentServiceResponse.failure(
+          errorCode: loginResult.errorCode,
+          errorMessage: '进入播报数字人房间失败:${loginResult.errorCode}',
+        );
+      }
+      debugPrint('房间登录成功');
+
+      /// 注意：播报数字人场景不调用 startPublishingStream，避免占用麦克风
+      debugPrint('数字人播报启动完成（无需本地推流）');
+      return AIAgentServiceResponse.success(
+        digitalHumanEncodeConfig: digitalHumanConfig ?? '',
+        agentInstanceId: _agentInstanceId,
+      );
+    } catch (e, stackTrace) {
+      debugPrint('启动数字人播报失败: $e');
+      debugPrint('错误堆栈: $stackTrace');
+      return AIAgentServiceResponse.failure(
+        errorCode: -1,
+        errorMessage: '启动数字人播报失败: $e',
+      );
+    }
+  }
+
   /// 停止数字人会话
   Future<AIAgentServiceResponse> stopDigitalHuman() async {
     debugPrint('开始停止数字人会话...');
@@ -515,6 +611,50 @@ class ZegoAIAgentService {
         errorMessage: '停止数字人会话失败: $e',
       );
     }
+  }
+
+  /// 停止数字人播报（与 stopDigitalHuman 共用停止逻辑）
+  Future<AIAgentServiceResponse> stopLiveDigitalHuman() {
+    debugPrint('开始停止数字人播报...');
+    return stopDigitalHuman();
+  }
+
+  /// 向数字人播报实例发送自定义 TTS 内容
+  Future<AIAgentServiceResponse> sendAgentInstanceTTS(String text) async {
+    debugPrint('开始发送TTS: text=$text');
+
+    /// 本地校验：播报文本不可为空
+    if (text.isEmpty) {
+      return AIAgentServiceResponse.failure(
+        errorCode: 400,
+        errorMessage: '播报文本不能为空',
+      );
+    }
+
+    /// 本地校验：必须先有可用的播报数字人实例
+    if (_agentInstanceId == null || _agentInstanceId!.isEmpty) {
+      return AIAgentServiceResponse.failure(
+        errorCode: 400,
+        errorMessage: '当前没有可用的播报数字人实例',
+      );
+    }
+
+    final url = '$_currentBaseUrl/api/send-agent-instance-tts';
+    final requestData = <String, dynamic>{
+      'agent_instance_id': _agentInstanceId,
+      'text': text,
+    };
+    final response =
+        await HttpUtil.post(url, body: requestData, fromJson: (json) => json);
+    if (!response.isSuccess) {
+      debugPrint('发送TTS失败: ${response.message}');
+      return AIAgentServiceResponse.failure(
+        errorCode: response.code,
+        errorMessage: response.message,
+      );
+    }
+    debugPrint('发送TTS成功');
+    return AIAgentServiceResponse.success();
   }
 
   Future<void> _startPlayingStream(String streamId) async {
