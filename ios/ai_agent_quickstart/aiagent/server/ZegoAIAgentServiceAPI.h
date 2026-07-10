@@ -41,6 +41,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)getAgentId;
 
 /**
+ * 获取当前智能体实例ID
+ * @return 智能体实例ID
+ */
+- (NSString *)getAgentInstanceId;
+
+/**
+ * 获取当前智能体用户ID
+ * @return 智能体在RTC房间内的用户ID
+ */
+- (NSString *)getAgentUserId;
+
+/**
  * 获取当前用户ID
  * @return 用户ID
  */
@@ -73,10 +85,22 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)startDigitalHumanWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion;
 
 /**
+ * 开始播报数字人
+ * @param completion 开始播报数字人的回调，成功返回数字人配置
+ */
+- (void)startLiveDigitalHumanWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion;
+
+/**
  * 结束数字人聊天
  * @param completion 停止聊天的回调
  */
 - (void)stopDigitalHumanWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion;
+
+/**
+ * 结束播报数字人
+ * @param completion 停止播报数字人的回调
+ */
+- (void)stopLiveDigitalHumanWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion;
 
 /**
  * 开始与智能体聊天
@@ -101,6 +125,14 @@ NS_ASSUME_NONNULL_BEGIN
  * 4. 回调通知会话终止结果
  */
 - (void)stopAudioWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion;
+
+/**
+ * 向播报数字人实例发送自定义TTS内容
+ * @param text 需要播报的文本内容
+ * @param completion 发送结果回调
+ */
+- (void)sendAgentInstanceTTSWithText:(NSString *)text
+                          completion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion;
 
 /**
  * 获取Token

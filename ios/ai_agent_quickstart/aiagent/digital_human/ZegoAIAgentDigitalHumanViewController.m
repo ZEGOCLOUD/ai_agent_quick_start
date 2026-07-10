@@ -21,6 +21,8 @@
 
 // UI组件
 @property (nonatomic, strong) UIButton *backButton;
+/// 页面标题，用于区分当前是对话数字人还是播报数字人
+@property (nonatomic, strong) UILabel *titleLabel;
 
 // loading
 @property (nonatomic, strong) UIView *loadingView;
@@ -33,6 +35,16 @@
 
 // 静态图片视图
 @property (nonatomic, strong) UIImageView *staticImageView;
+/// 播报数字人的底部控制面板
+@property (nonatomic, strong) UIView *broadcastControlView;
+/// 用于展示当前 agent_instance_id，方便调试接口
+@property (nonatomic, strong) UILabel *agentInstanceLabel;
+/// 播报内容输入框
+@property (nonatomic, strong) UITextField *broadcastTextField;
+/// 发送播报按钮
+@property (nonatomic, strong) UIButton *broadcastButton;
+/// 播报发送中的加载指示器
+@property (nonatomic, strong) UIActivityIndicatorView *broadcastLoadingIndicator;
 
 @end
 
@@ -72,6 +84,22 @@
         make.top.equalTo(self.view.mas_safeAreaLayoutGuideTop).offset(10);
         make.left.equalTo(self.view.mas_left).offset(16);
     }];
+
+    // 页面标题
+    self.titleLabel = [[UILabel alloc] init];
+    self.titleLabel.text = [self pageTitleText];
+    self.titleLabel.textColor = [UIColor blackColor];
+    self.titleLabel.font = [UIFont boldSystemFontOfSize:18];
+    [self.view addSubview:self.titleLabel];
+    [self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(self.backButton);
+        make.centerX.equalTo(self.view);
+    }];
+
+    // 播报数字人模式下展示额外控制区，用于发送自定义TTS
+    if (self.mode == ZegoAIAgentDigitalHumanModeLiveBroadcast) {
+        [self setupBroadcastControlView];
+    }
 }
 
 - (void)setupPreviewView {
@@ -191,6 +219,7 @@
 - (void)showLoading {
     dispatch_async(dispatch_get_main_queue(), ^{
         self.loadingView.hidden = NO;
+        self.loadingLabel.text = self.mode == ZegoAIAgentDigitalHumanModeLiveBroadcast ? @"播报数字人加载中..." : @"数字人加载中...";
         [self.loadingIndicator startAnimating];
         NSLog(@"显示 loading 界面");
     });
@@ -211,6 +240,35 @@
     // 设置自己为数字人事件处理器
     [[ZegoAIAgentServiceAPI sharedInstance] registerDigitalHumanEventHandler:self];
 
+    if (self.mode == ZegoAIAgentDigitalHumanModeLiveBroadcast) {
+        [self startLiveBroadcastDigitalHuman];
+        return;
+    }
+
+    [self startInteractiveDigitalHuman];
+}
+
+- (void)stopDigitalHumanChat {
+    // 清除数字人事件处理器
+    [[ZegoAIAgentServiceAPI sharedInstance] registerDigitalHumanEventHandler:nil];
+
+    if (self.mode == ZegoAIAgentDigitalHumanModeLiveBroadcast) {
+        [[ZegoAIAgentServiceAPI sharedInstance] stopLiveDigitalHumanWithCompletion:nil];
+    } else {
+        [[ZegoAIAgentServiceAPI sharedInstance] stopDigitalHumanWithCompletion:nil];
+    }
+    
+    // 清理digitalMobile
+    if (self.digitalMobile) {
+        // 停止数字人
+        [self.digitalMobile stop];
+        
+        self.digitalMobile = nil;
+    }
+}
+
+// 对话数字人模式需要请求麦克风权限并建立双向语音链路
+- (void)startInteractiveDigitalHuman {
     [self requestAudioPermission:^(BOOL granted) {
         if (!granted) {
             [self hideLoading];
@@ -222,37 +280,11 @@
         [[ZegoAIAgentServiceAPI sharedInstance] startDigitalHumanWithCompletion:^(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) return;
-            
+
             NSLog(@"%@", errorMessage);
-            
+
             if (success) {
-                // 创建数字人实例
-                strongSelf.digitalMobile = [ZegoDigitalHuman create];
-                if (!strongSelf.digitalMobile) {
-                    [strongSelf showToast:@"创建数字人实例失败"];
-                } else {
-                    // 启动数字人（设置委托时再次检查页面状态）
-                    if (!strongSelf.view.window) {
-                        // 页面已经不在显示，清理资源
-                        strongSelf.digitalMobile = nil;
-                        NSLog(@"Page dismissed, cleaning up digital mobile instance");
-                        return;
-                    }
-
-                    // 启动数字人，使用返回的配置（可能包含服务器返回的 digital_human_config）
-                    NSString *configToUse = digitalHumanEncodeConfig ?: @"";
-                    NSLog(@"使用数字人配置: %@", configToUse);
-                    [strongSelf.digitalMobile start:configToUse delegate:strongSelf];
-
-                    // 绑定渲染视图
-                    if (strongSelf.digitalView) {
-                        NSLog(@"开始绑定数字人到 previewView，frame: %@", NSStringFromCGRect(strongSelf.digitalView.frame));
-                        [strongSelf.digitalMobile attach:strongSelf.digitalView];
-                        NSLog(@"数字人已绑定到 previewView");
-                    } else {
-                        NSLog(@"previewView is nil, cannot attach");
-                    }
-                }
+                [strongSelf startDigitalHumanRenderWithConfig:digitalHumanEncodeConfig];
             } else {
                 [strongSelf hideLoading];
                 [strongSelf showToast:[NSString stringWithFormat:@"Failed to start digital human chat: %@", errorMessage]];
@@ -261,19 +293,132 @@
     }];
 }
 
-- (void)stopDigitalHumanChat {
-    // 清除数字人事件处理器
-    [[ZegoAIAgentServiceAPI sharedInstance] registerDigitalHumanEventHandler:nil];
+// 播报数字人模式只需要创建实例并进入房间拉取数字人流，不需要本地录音权限
+- (void)startLiveBroadcastDigitalHuman {
+    __weak typeof(self) weakSelf = self;
+    [[ZegoAIAgentServiceAPI sharedInstance] startLiveDigitalHumanWithCompletion:^(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
 
-    [[ZegoAIAgentServiceAPI sharedInstance] stopDigitalHumanWithCompletion:nil];
-    
-    // 清理digitalMobile
-    if (self.digitalMobile) {
-        // 停止数字人
-        [self.digitalMobile stop];
-        
-        self.digitalMobile = nil;
+        NSLog(@"%@", errorMessage);
+
+        if (success) {
+            [strongSelf updateBroadcastDebugInfo];
+            [strongSelf startDigitalHumanRenderWithConfig:digitalHumanEncodeConfig];
+        } else {
+            [strongSelf hideLoading];
+            [strongSelf showToast:[NSString stringWithFormat:@"Failed to start live digital human: %@", errorMessage]];
+        }
+    }];
+}
+
+// 数字人渲染启动逻辑在两种模式下完全一致，因此抽到统一方法中复用
+- (void)startDigitalHumanRenderWithConfig:(NSString *)digitalHumanEncodeConfig {
+    self.digitalMobile = [ZegoDigitalHuman create];
+    if (!self.digitalMobile) {
+        [self hideLoading];
+        [self showToast:@"创建数字人实例失败"];
+        return;
     }
+
+    if (!self.view.window) {
+        self.digitalMobile = nil;
+        NSLog(@"Page dismissed, cleaning up digital mobile instance");
+        return;
+    }
+
+    NSString *configToUse = digitalHumanEncodeConfig ?: @"";
+    NSLog(@"使用数字人配置: %@", configToUse);
+    [self.digitalMobile start:configToUse delegate:self];
+
+    if (self.digitalView) {
+        NSLog(@"开始绑定数字人到 previewView，frame: %@", NSStringFromCGRect(self.digitalView.frame));
+        [self.digitalMobile attach:self.digitalView];
+        NSLog(@"数字人已绑定到 previewView");
+    } else {
+        NSLog(@"previewView is nil, cannot attach");
+    }
+}
+
+// 播报数字人模式提供文本输入和主动播报按钮，便于直接联调 send-agent-instance-tts
+- (void)setupBroadcastControlView {
+    self.broadcastControlView = [[UIView alloc] init];
+    self.broadcastControlView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.65];
+    self.broadcastControlView.layer.cornerRadius = 16;
+    [self.view addSubview:self.broadcastControlView];
+    [self.broadcastControlView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.view).offset(16);
+        make.right.equalTo(self.view).offset(-16);
+        make.bottom.equalTo(self.view.mas_safeAreaLayoutGuideBottom).offset(-16);
+    }];
+
+    self.agentInstanceLabel = [[UILabel alloc] init];
+    self.agentInstanceLabel.textColor = [UIColor whiteColor];
+    self.agentInstanceLabel.font = [UIFont systemFontOfSize:12];
+    self.agentInstanceLabel.numberOfLines = 2;
+    self.agentInstanceLabel.text = @"AgentInstanceID: waiting...";
+    [self.broadcastControlView addSubview:self.agentInstanceLabel];
+
+    self.broadcastTextField = [[UITextField alloc] init];
+    self.broadcastTextField.borderStyle = UITextBorderStyleRoundedRect;
+    self.broadcastTextField.backgroundColor = [UIColor whiteColor];
+    self.broadcastTextField.textColor = [UIColor blackColor];
+    self.broadcastTextField.placeholder = @"输入播报内容";
+    self.broadcastTextField.text = @"尊敬的开发者你好，欢迎使用 ZEGO RTC 共建实时互动世界。";
+    [self.broadcastControlView addSubview:self.broadcastTextField];
+
+    self.broadcastButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.broadcastButton setTitle:@"发送播报" forState:UIControlStateNormal];
+    [self.broadcastButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    self.broadcastButton.backgroundColor = [UIColor colorWithRed:0.35 green:0.55 blue:1 alpha:1];
+    self.broadcastButton.layer.cornerRadius = 10;
+    [self.broadcastButton addTarget:self action:@selector(broadcastButtonTapped) forControlEvents:UIControlEventTouchUpInside];
+    [self.broadcastControlView addSubview:self.broadcastButton];
+
+    self.broadcastLoadingIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
+    self.broadcastLoadingIndicator.hidesWhenStopped = YES;
+    [self.broadcastButton addSubview:self.broadcastLoadingIndicator];
+
+    [self.agentInstanceLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.broadcastControlView).offset(12);
+        make.left.equalTo(self.broadcastControlView).offset(12);
+        make.right.equalTo(self.broadcastControlView).offset(-12);
+    }];
+
+    [self.broadcastTextField mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.agentInstanceLabel.mas_bottom).offset(10);
+        make.left.equalTo(self.broadcastControlView).offset(12);
+        make.right.equalTo(self.broadcastControlView).offset(-12);
+        make.height.mas_equalTo(40);
+    }];
+
+    [self.broadcastButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.broadcastTextField.mas_bottom).offset(10);
+        make.left.equalTo(self.broadcastControlView).offset(12);
+        make.right.equalTo(self.broadcastControlView).offset(-12);
+        make.height.mas_equalTo(44);
+        make.bottom.equalTo(self.broadcastControlView).offset(-12);
+    }];
+
+    [self.broadcastLoadingIndicator mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerY.equalTo(self.broadcastButton);
+        make.right.equalTo(self.broadcastButton).offset(-12);
+    }];
+}
+
+// 根据页面模式返回对应标题，便于用户区分当前体验场景
+- (NSString *)pageTitleText {
+    return self.mode == ZegoAIAgentDigitalHumanModeLiveBroadcast ? @"播报数字人" : @"数字人对话";
+}
+
+// 在播报模式下展示服务端返回的实例ID，方便调用 stop 和 TTS 接口排查问题
+- (void)updateBroadcastDebugInfo {
+    if (self.mode != ZegoAIAgentDigitalHumanModeLiveBroadcast || self.agentInstanceLabel == nil) {
+        return;
+    }
+
+    NSString *agentInstanceId = [[ZegoAIAgentServiceAPI sharedInstance] getAgentInstanceId];
+    self.agentInstanceLabel.text = [NSString stringWithFormat:@"AgentInstanceID: %@", agentInstanceId.length > 0 ? agentInstanceId : @"waiting..."];
 }
 
 - (void)requestAudioPermission:(void(^)(BOOL granted))completion {
@@ -354,6 +499,7 @@
 
 - (void)onDigitalMobileStartSuccess {
     NSLog(@"数字人启动成功");
+    [self updateBroadcastDebugInfo];
 }
 
 - (void)onError:(int)errorCode errorMsg:(NSString *)errorMsg {
@@ -364,7 +510,37 @@
 
 #pragma mark - Button Actions
 
+- (void)broadcastButtonTapped {
+    // 主动收起键盘，避免发送时遮挡渲染区域
+    [self.view endEditing:YES];
+
+    NSString *broadcastText = self.broadcastTextField.text ?: @"";
+    if (broadcastText.length == 0) {
+        [self showToast:@"请输入播报内容"];
+        return;
+    }
+
+    self.broadcastButton.enabled = NO;
+    [self.broadcastLoadingIndicator startAnimating];
+
+    __weak typeof(self) weakSelf = self;
+    [[ZegoAIAgentServiceAPI sharedInstance] sendAgentInstanceTTSWithText:broadcastText completion:^(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+
+        strongSelf.broadcastButton.enabled = YES;
+        [strongSelf.broadcastLoadingIndicator stopAnimating];
+
+        if (success) {
+            [strongSelf showToast:@"播报发送成功"];
+        } else {
+            [strongSelf showToast:[NSString stringWithFormat:@"播报发送失败: %@", errorMessage ?: @(errorCode)]];
+        }
+    }];
+}
+
 - (void)backButtonTapped {
+    [self.view endEditing:YES];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 

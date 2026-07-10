@@ -28,6 +28,8 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
 @property (nonatomic, copy) NSString *agentName;
 @property (nonatomic, copy) NSString *agentStreamId;
 @property (nonatomic, copy) NSString *agentInstanceId;
+/// 播报数字人在RTC房间中的用户ID
+@property (nonatomic, copy) NSString *agentUserId;
 
 /// 本地随机生成的数据
 @property (nonatomic, copy) NSString *userId;
@@ -37,6 +39,9 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
 /// demo digital human
 @property (nonatomic, copy) NSString *digitalHumanId;
 @property (nonatomic, copy) NSString *digitalHumanConfigId;
+
+/// 当前场景是否需要在登录房间后推本地音频流
+@property (nonatomic, assign) BOOL shouldPublishLocalStream;
 
 /// 音频事件处理器
 @property (nonatomic, weak) id<ZegoAIAgentAudioEventHandler> audioEventHandler;
@@ -75,6 +80,14 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
     return self.agentId;
 }
 
+- (NSString *)getAgentInstanceId {
+    return self.agentInstanceId;
+}
+
+- (NSString *)getAgentUserId {
+    return self.agentUserId;
+}
+
 - (NSString *)getUserId {
     return self.userId;
 }
@@ -110,6 +123,7 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
 
 - (void)startDigitalHumanWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion {
     __weak typeof(self) weakSelf = self;
+    self.shouldPublishLocalStream = YES;
 
     // 先创建Agent实例，传入新的参数
     [self doStartDigitalHumanWithDigitalHumanId:self.digitalHumanId configId:self.digitalHumanConfigId completion:^(ZegoAIServiceCommonResponse *response) {
@@ -139,8 +153,11 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
             if (response.data[@"agent_instance_id"]) {
                 strongSelf.agentInstanceId = response.data[@"agent_instance_id"];
             }
+            if (response.data[@"agent_user_id"]) {
+                strongSelf.agentUserId = response.data[@"agent_user_id"];
+            }
             if (response.data[@"digital_human_config"]) {
-                digitalHumanConfig = response.data[@"digital_human_config"];
+                digitalHumanConfig = [strongSelf extractDigitalHumanConfigStringFromObject:response.data[@"digital_human_config"]];
             }
         }
 
@@ -155,7 +172,7 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) { return; }
             
-            if (errorCode != 0) {
+            if (errorCode != 0 && errorCode != 1002001) {
                 NSString* errorMsg = [NSString stringWithFormat:@"进入数字人房间失败:%d", errorCode];
                 completion(NO, errorCode, errorMsg, nil);
                 return;
@@ -165,12 +182,74 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
             NSString *params_publish = @"{\"method\":\"liveroom.audio.set_publish_latency_mode\",\"params\":{\"mode\":1,\"channel\":0}}";
             [[ZegoExpressEngine sharedEngine] callExperimentalAPI:params_publish];
             
-            // 进房后开始推流
-            [strongSelf startPushlishStream];
+            // 对话数字人场景需要在进房后推送本地语音流
+            if (strongSelf.shouldPublishLocalStream) {
+                [strongSelf startPushlishStream];
+            }
             
             if (completion) {
                 NSString *configToReturn = digitalHumanConfig ?: @"";
                 completion(YES, 0, nil, configToReturn);
+            }
+        }];
+    }];
+}
+
+- (void)startLiveDigitalHumanWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage, NSString * _Nullable digitalHumanEncodeConfig))completion {
+    __weak typeof(self) weakSelf = self;
+    self.shouldPublishLocalStream = NO;
+
+    // 播报数字人只需要创建实例并进入RTC房间拉取智能体流
+    [self doStartLiveDigitalHumanWithDigitalHumanId:self.digitalHumanId configId:self.digitalHumanConfigId completion:^(ZegoAIServiceCommonResponse *response) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) { return; }
+
+        if (response.code != 0) {
+            if (completion) {
+                completion(NO, response.code, response.message ?: @"创建播报数字人Agent实例失败", nil);
+            }
+            return;
+        }
+
+        NSString *digitalHumanConfig = @"";
+        if (response.data && [response.data isKindOfClass:[NSDictionary class]]) {
+            if (response.data[@"agent_id"]) {
+                strongSelf.agentId = response.data[@"agent_id"];
+            }
+            if (response.data[@"agent_name"]) {
+                strongSelf.agentName = response.data[@"agent_name"];
+            }
+            if (response.data[@"agent_stream_id"]) {
+                strongSelf.agentStreamId = response.data[@"agent_stream_id"];
+            }
+            if (response.data[@"agent_instance_id"]) {
+                strongSelf.agentInstanceId = response.data[@"agent_instance_id"];
+            }
+            if (response.data[@"agent_user_id"]) {
+                strongSelf.agentUserId = response.data[@"agent_user_id"];
+            }
+            if (response.data[@"digital_human_config"]) {
+                digitalHumanConfig = [strongSelf extractDigitalHumanConfigStringFromObject:response.data[@"digital_human_config"]];
+            }
+        }
+
+        [strongSelf initZegoExpressEngine];
+        [strongSelf enableCustomVideoRender];
+
+        [strongSelf loginRoom:^(int errorCode, NSDictionary *extendedData) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf) { return; }
+
+            if (errorCode != 0 && errorCode != 1002001) {
+                NSString *errorMsg = [NSString stringWithFormat:@"进入播报数字人房间失败:%d", errorCode];
+                if (completion) {
+                    completion(NO, errorCode, errorMsg, nil);
+                }
+                return;
+            }
+
+            if (completion) {
+                completion(YES, 0, nil, digitalHumanConfig ?: @"");
             }
         }];
     }];
@@ -192,6 +271,8 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
         strongSelf.agentName = nil;
         strongSelf.agentStreamId = nil;
         strongSelf.agentInstanceId = nil;
+        strongSelf.agentUserId = nil;
+        strongSelf.shouldPublishLocalStream = NO;
         
         if (response.code == 0) {
             if (completion) {
@@ -205,8 +286,14 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
     }];
 }
 
+- (void)stopLiveDigitalHumanWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion {
+    // 播报数字人停止逻辑与数字人对话共用同一个 stop 接口
+    [self stopDigitalHumanWithCompletion:completion];
+}
+
 - (void)startAudioWithCompletion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion {
     __weak typeof(self) weakSelf = self;
+    self.shouldPublishLocalStream = YES;
     
     // 先创建Agent实例
     [self doStartAudioWithCompletion:^(ZegoAIServiceCommonResponse *response) {
@@ -235,6 +322,9 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
             if (response.data[@"agent_instance_id"]) {
                 strongSelf.agentInstanceId = response.data[@"agent_instance_id"];
             }
+            if (response.data[@"agent_user_id"]) {
+                strongSelf.agentUserId = response.data[@"agent_user_id"];
+            }
         }
         
         // 创建Agent实例成功后，初始化RTC引擎
@@ -245,7 +335,7 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) { return; }
             
-            if (errorCode != 0) {
+            if (errorCode != 0 && errorCode != 1002001) {
                 NSString* errorMsg = [NSString stringWithFormat:@"进入语音房间失败:%d", errorCode];
                 completion(NO, errorCode, errorMsg);
                 return;
@@ -255,8 +345,10 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
             NSString *params_publish = @"{\"method\":\"liveroom.audio.set_publish_latency_mode\",\"params\":{\"mode\":1,\"channel\":0}}";
             [[ZegoExpressEngine sharedEngine] callExperimentalAPI:params_publish];
             
-            // 进房后开始推流
-            [strongSelf startPushlishStream];
+            // 音频对话场景需要推送本地语音流
+            if (strongSelf.shouldPublishLocalStream) {
+                [strongSelf startPushlishStream];
+            }
             
             if (completion) {
                 completion(YES, 0, nil);
@@ -281,6 +373,8 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
         strongSelf.agentName = nil;
         strongSelf.agentStreamId = nil;
         strongSelf.agentInstanceId = nil;
+        strongSelf.agentUserId = nil;
+        strongSelf.shouldPublishLocalStream = NO;
         
         if (response.code == 0) {
             if (completion) {
@@ -290,6 +384,37 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
             if (completion) {
                 completion(NO, response.code, response.message ?: @"停止聊天失败");
             }
+        }
+    }];
+}
+
+- (void)sendAgentInstanceTTSWithText:(NSString *)text
+                          completion:(void (^)(BOOL success, NSInteger errorCode, NSString * _Nullable errorMessage))completion {
+    // 播报数字人主动播报依赖 agent_instance_id，因此这里先做本地校验
+    if (text.length == 0) {
+        if (completion) {
+            completion(NO, 400, @"播报文本不能为空");
+        }
+        return;
+    }
+
+    if (self.agentInstanceId.length == 0) {
+        if (completion) {
+            completion(NO, 400, @"当前没有可用的播报数字人实例");
+        }
+        return;
+    }
+
+    NSString *url = [NSString stringWithFormat:@"%@/api/send-agent-instance-tts", self.currentBaseURL];
+
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    params[@"agent_instance_id"] = self.agentInstanceId;
+    params[@"text"] = text;
+
+    NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
+    [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
+        if (completion) {
+            completion(response.code == 0, response.code, response.message);
         }
     }];
 }
@@ -318,6 +443,29 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
 
     NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
 
+    [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
+        if (completion) {
+            completion(response);
+        }
+    }];
+}
+
+- (void)doStartLiveDigitalHumanWithDigitalHumanId:(NSString * _Nullable)digitalHumanId
+                                         configId:(NSString * _Nullable)configId
+                                       completion:(void (^)(ZegoAIServiceCommonResponse *response))completion {
+    NSString *url = [NSString stringWithFormat:@"%@/api/start-live-digital-human", self.currentBaseURL];
+
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    params[@"room_id"] = self.roomId;
+
+    if (digitalHumanId && digitalHumanId.length > 0) {
+        params[@"digital_human_id"] = digitalHumanId;
+    }
+    if (configId && configId.length > 0) {
+        params[@"config_id"] = configId;
+    }
+
+    NSMutableURLRequest *urlRequest = [self createRequestWithURL:url params:params method:@"POST"];
     [self sendRequest:urlRequest completion:^(ZegoAIServiceCommonResponse *response) {
         if (completion) {
             completion(response);
@@ -499,7 +647,7 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
             __strong typeof(weakSelf) strongSelf = weakSelf;
             NSLog(@"loginRoom 调用结果: code=%d, roomID=%@", errorCode, strongSelf.roomId);
             
-            if (errorCode != 0 || errorCode != 1002001) {
+            if (errorCode != 0 && errorCode != 1002001) {
                 // 由于写死了房间ID，1002001(登录多个房间报错)默认认为成功
                 NSLog(@"loginRoom 失败: code=%d, extendedData=%@", errorCode, extendedData);
                 complete(errorCode, extendedData);
@@ -704,6 +852,23 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
     // 取UUID的前8位作为随机部分
     NSString *shortRandomString = [randomString substringToIndex:8];
     return [NSString stringWithFormat:@"%@%@", prefix, shortRandomString];
+}
+
+// 将服务端返回的数字人配置统一转换为字符串，兼容字符串和JSON对象两种返回格式
+- (NSString *)extractDigitalHumanConfigStringFromObject:(id)configObject {
+    if ([configObject isKindOfClass:[NSString class]]) {
+        return (NSString *)configObject;
+    }
+
+    if ([NSJSONSerialization isValidJSONObject:configObject]) {
+        NSError *jsonError = nil;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:configObject options:0 error:&jsonError];
+        if (jsonData != nil && jsonError == nil) {
+            return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding] ?: @"";
+        }
+    }
+
+    return @"";
 }
 
 @end

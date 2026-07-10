@@ -16,6 +16,8 @@
 @property (nonatomic, strong) UILabel *subtitleLabel;
 @property (nonatomic, strong) UIButton *audioCallButton;
 @property (nonatomic, strong) UIButton *digitalHumanButton;
+/// 数字人播报模式（单向 TTS）入口按钮
+@property (nonatomic, strong) UIButton *liveDigitalHumanButton;
 
 @end
 
@@ -91,6 +93,26 @@
         make.width.mas_equalTo(280);
         make.height.mas_equalTo(56);
     }];
+
+    // 播报数字人按钮
+    self.liveDigitalHumanButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.liveDigitalHumanButton setTitle:@"StartLiveDigitalHuman" forState:UIControlStateNormal];
+    self.liveDigitalHumanButton.backgroundColor = [UIColor colorWithRed:0.23 green:0.71 blue:0.55 alpha:1.0];
+    [self.liveDigitalHumanButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    self.liveDigitalHumanButton.titleLabel.font = [UIFont systemFontOfSize:18 weight:UIFontWeightMedium];
+    self.liveDigitalHumanButton.layer.cornerRadius = 12;
+    self.liveDigitalHumanButton.layer.shadowColor = [UIColor blackColor].CGColor;
+    self.liveDigitalHumanButton.layer.shadowOffset = CGSizeMake(0, 2);
+    self.liveDigitalHumanButton.layer.shadowOpacity = 0.1;
+    self.liveDigitalHumanButton.layer.shadowRadius = 4;
+    [self.liveDigitalHumanButton addTarget:self action:@selector(liveDigitalHumanButtonTapped) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:self.liveDigitalHumanButton];
+    [self.liveDigitalHumanButton mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.digitalHumanButton.mas_bottom).offset(30);
+        make.centerX.equalTo(self.view);
+        make.width.mas_equalTo(280);
+        make.height.mas_equalTo(56);
+    }];
     
     // 底部说明文字
     UILabel *noteLabel = [[UILabel alloc] init];
@@ -115,8 +137,17 @@
 
 - (void)digitalHumanButtonTapped {
     ZegoAIAgentDigitalHumanViewController *digitalHumanVC = [[ZegoAIAgentDigitalHumanViewController alloc] init];
+    digitalHumanVC.mode = ZegoAIAgentDigitalHumanModeInteractive;
     digitalHumanVC.modalPresentationStyle = UIModalPresentationFullScreen;
     [self presentViewController:digitalHumanVC animated:YES completion:nil];
+}
+
+// 新入口显式进入播报数字人模式，保留旧对话数字人链路不变
+- (void)liveDigitalHumanButtonTapped {
+    ZegoAIAgentDigitalHumanViewController *liveDigitalHumanVC = [[ZegoAIAgentDigitalHumanViewController alloc] init];
+    liveDigitalHumanVC.mode = ZegoAIAgentDigitalHumanModeLiveBroadcast;
+    liveDigitalHumanVC.modalPresentationStyle = UIModalPresentationFullScreen;
+    [self presentViewController:liveDigitalHumanVC animated:YES completion:nil];
 }
 
 @end
