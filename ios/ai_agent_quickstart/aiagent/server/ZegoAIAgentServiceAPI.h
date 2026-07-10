@@ -139,6 +139,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)getTokenWithCompletion:(void (^)(ZegoAIGetTokenResponse *response))completion;
 
+/**
+ * 兜底退出 RTC 房间（幂等）
+ *
+ * 视图层在销毁（pop/dismiss/dealloc）时如果发现用户没有手动 logout，
+ * 应调用本方法安全释放 RTC 资源。本方法内部已做幂等处理：
+ * - 若未登录过房间，直接返回；
+ * - 若已 logout，再次调用也直接返回；
+ * - 不会与 stopAudio/stopDigitalHuman 的 logout 流程产生重复调用。
+ */
+- (void)ensureLogoutRoom;
+
 @end
 
 NS_ASSUME_NONNULL_END 

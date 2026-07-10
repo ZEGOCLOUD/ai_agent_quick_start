@@ -311,7 +311,24 @@
 #pragma mark - Button Actions
 
 - (void)backButtonTapped {
+    // 如果用户已经手动 logout（self.isLoggedIn == NO），则无需兜底；
+    // 否则在 dismiss 前确保退出 RTC 房间，避免房间残留
+    if (self.isLoggedIn) {
+        [[ZegoAIAgentServiceAPI sharedInstance] ensureLogoutRoom];
+        // 本地标记为未登录，避免 dealloc 里重复处理
+        self.isLoggedIn = NO;
+    }
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)dealloc {
+    // 兜底：如果 VC 在没经过 backButtonTapped 的路径下被销毁（系统回收、内存警告等），
+    // 仍尝试确保退出 RTC 房间。ensureLogoutRoom 内部幂等，重复调用安全。
+    if (self.isLoggedIn) {
+        [[ZegoAIAgentServiceAPI sharedInstance] ensureLogoutRoom];
+        self.isLoggedIn = NO;
+    }
+    NSLog(@"ZegoAIAgentAudioViewController dealloc");
 }
 
 @end

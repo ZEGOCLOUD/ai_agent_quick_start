@@ -43,6 +43,9 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
 /// 当前场景是否需要在登录房间后推本地音频流
 @property (nonatomic, assign) BOOL shouldPublishLocalStream;
 
+/// 是否已经退出过 RTC 房间（用于 ensureLogoutRoom 幂等保护）
+@property (nonatomic, assign) BOOL didLogoutRoom;
+
 /// 音频事件处理器
 @property (nonatomic, weak) id<ZegoAIAgentAudioEventHandler> audioEventHandler;
 
@@ -565,8 +568,14 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
     [[ZegoExpressEngine sharedEngine] stopPublishingStream];
     
     NSLog(@"开始登出房间");
+    __weak typeof(self) weakSelf = self;
     [[ZegoExpressEngine sharedEngine] logoutRoomWithCallback:^(int errorCode, NSDictionary * _Nonnull extendedData) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
         NSLog(@"登出房间结果: errorCode=%d", errorCode);
+        // 标记已 logout，避免后续 ensureLogoutRoom 重复调用
+        if (strongSelf) {
+            strongSelf.didLogoutRoom = YES;
+        }
     }];
     
     NSLog(@"开始销毁引擎");
@@ -653,7 +662,10 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
                 complete(errorCode, extendedData);
                 return;
             }
-            
+
+            // 进房成功后，重置 logout 标记，方便后续再次进房时仍能正常 logout
+            strongSelf.didLogoutRoom = NO;
+
             NSLog(@"loginRoom 成功: roomID=%@", strongSelf.roomId);
             complete(errorCode, extendedData);
         }];
@@ -869,6 +881,32 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
     }
 
     return @"";
+}
+
+#pragma mark - Logout Helper
+
+// 幂等登出房间：仅在尚未登出且引擎存在时执行 logoutRoom，避免重复调用
+- (void)ensureLogoutRoom {
+    if (self.didLogoutRoom) {
+        NSLog(@"ensureLogoutRoom: 已登出过房间，跳过本次登出");
+        return;
+    }
+
+    ZegoExpressEngine *engine = [ZegoExpressEngine sharedEngine];
+    if (engine == nil) {
+        NSLog(@"ensureLogoutRoom: ZegoExpressEngine实例不存在，跳过登出");
+        return;
+    }
+
+    __weak typeof(self) weakSelf = self;
+    NSLog(@"ensureLogoutRoom: 开始登出房间");
+    [engine logoutRoomWithCallback:^(int errorCode, NSDictionary * _Nonnull extendedData) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        NSLog(@"ensureLogoutRoom: 登出房间结果: errorCode=%d", errorCode);
+        if (strongSelf) {
+            strongSelf.didLogoutRoom = YES;
+        }
+    }];
 }
 
 @end
