@@ -124,11 +124,12 @@ public class VoiceChatActivity extends AppCompatActivity {
                 Log.d(TAG, "api/start onResponse: " + responseBody);
                 try {
                     JSONObject json = new JSONObject(responseBody);
-                    int errorCode = (int) json.get("code");
-                    agent_name = (String) json.get("agent_name");
-                    agent_instance_id = (String) json.get("agent_instance_id");
-                    agent_user_id = (String) json.get("agent_user_id");
-                    agent_stream_id = (String) json.get("agent_stream_id");
+                    int errorCode = json.optInt("code", -1);
+                    // 以下字段为业务元数据，后台可能不下发，缺失不应阻断主流程
+                    agent_name = json.optString("agent_name");
+                    agent_instance_id = json.optString("agent_instance_id");
+                    agent_user_id = json.optString("agent_user_id");
+                    agent_stream_id = json.optString("agent_stream_id");
                     if (errorCode == 0) {
                         ZegoExpressEngine.getEngine().startPlayingStream(agent_stream_id);
                         updateUI();

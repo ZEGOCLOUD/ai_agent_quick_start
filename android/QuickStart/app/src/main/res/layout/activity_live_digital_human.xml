@@ -16,6 +16,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
 
+  <!-- Agent 播放状态横条：顶部居中，随 onAudioChatStateUpdate 回调刷新 -->
+  <TextView
+    android:id="@+id/agent_status"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="40dp"
+    android:background="@drawable/bg_agent_status"
+    android:drawableStart="@drawable/shape_status_dot"
+    android:drawablePadding="6dp"
+    android:gravity="center"
+    android:paddingStart="14dp"
+    android:paddingTop="6dp"
+    android:paddingEnd="14dp"
+    android:paddingBottom="6dp"
+    android:text="Idle"
+    android:textColor="#FFFFFF"
+    android:textSize="13sp"
+    android:visibility="gone"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
   <ImageView
     android:id="@+id/end_call"
     android:layout_width="60dp"

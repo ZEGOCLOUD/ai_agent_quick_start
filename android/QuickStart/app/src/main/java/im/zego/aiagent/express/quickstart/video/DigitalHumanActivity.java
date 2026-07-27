@@ -230,18 +230,19 @@ public class DigitalHumanActivity extends AppCompatActivity {
             public void onResponse(String responseBody) {
                 try {
                     JSONObject json = new JSONObject(responseBody);
-                    int errorCode = (int) json.get("code");
-                    String message = (String) json.get("message");
-                    agent_name = (String) json.get("agent_name");
-                    agent_instance_id = (String) json.get("agent_instance_id");
-                    agent_user_id = (String) json.get("agent_user_id");
-                    agent_stream_id = (String) json.get("agent_stream_id");
+                    int errorCode = json.optInt("code", -1);
+                    String message = json.optString("message");
+                    // 以下字段为业务元数据，后台可能不下发，缺失不应阻断主流程
+                    agent_name = json.optString("agent_name");
+                    agent_instance_id = json.optString("agent_instance_id");
+                    agent_user_id = json.optString("agent_user_id");
+                    agent_stream_id = json.optString("agent_stream_id");
                     if (errorCode == 0) {
                         ZegoExpressEngine.getEngine().setPlayStreamBufferIntervalRange(agent_stream_id, 100, 2000);
                         ZegoExpressEngine.getEngine().startPlayingStream(agent_stream_id);
                         runOnUiThread(
                             () -> Toast.makeText(DigitalHumanActivity.this, message, Toast.LENGTH_LONG).show());
-                        final var digitalHumanConfig = (String) json.get("digital_human_config");
+                        final String digitalHumanConfig = json.optString("digital_human_config");
                         initDigitalMobileSDK(digitalHumanConfig);
                     } else {
                         ZegoExpressEngine.getEngine().logoutRoom();

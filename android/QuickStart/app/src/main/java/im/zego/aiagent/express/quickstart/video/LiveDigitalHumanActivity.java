@@ -1,5 +1,7 @@
 package im.zego.aiagent.express.quickstart.video;
 
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -8,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +20,9 @@ import im.zego.aiagent.express.quickstart.R;
 import im.zego.aiagent.express.quickstart.util.ExpressHelper;
 import im.zego.aiagent.express.quickstart.util.HttpHelper;
 import im.zego.aiagent.express.quickstart.util.QuickStartApi;
+import im.zego.aiagent.express.quickstart.voice.AudioChatMessageParser;
+import im.zego.aiagent.express.quickstart.voice.AudioChatMessageParser.AudioChatAgentStatusMessage;
+import im.zego.aiagent.express.quickstart.voice.AudioChatMessageParser.AudioChatMessage;
 import im.zego.digitalmobile.IZegoDigitalMobile;
 import im.zego.digitalmobile.ZegoDigitalHuman;
 import im.zego.digitalmobile.ZegoDigitalView;
@@ -29,6 +35,7 @@ import im.zego.zegoexpress.entity.ZegoCustomVideoRenderConfig;
 import im.zego.zegoexpress.entity.ZegoVideoFrameParam;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -63,8 +70,11 @@ public class LiveDigitalHumanActivity extends AppCompatActivity {
     private ZegoDigitalView digitalView;
     private View loadingView;
     private ImageView digitalPic;
+    private TextView agentStatusView;
     private EditText ttsInput;
     private Button ttsSend;
+    /** 解析业务后台通过 Express 房间消息下发的 Agent 状态 */
+    private AudioChatMessageParser audioChatMessageParser = new AudioChatMessageParser();
     private IZegoDigitalMobile digitalMobileSDK;
     private String agent_user_id; // 数字人在 RTC 房间内的用户 ID
     private String agent_stream_id; // 数字人推流 id
@@ -87,9 +97,26 @@ public class LiveDigitalHumanActivity extends AppCompatActivity {
         digitalView = findViewById(R.id.digital_view);
         loadingView = findViewById(R.id.loading_view);
         digitalPic = findViewById(R.id.digital_pic);
+        agentStatusView = findViewById(R.id.agent_status);
         ttsInput = findViewById(R.id.tts_input);
         ttsSend = findViewById(R.id.tts_send);
         Picasso.get().load(Uri.parse(Constant.digital_human_image_URL)).into(digitalPic);
+
+        // 注册 Agent 状态回调：解析到 cmd==6（Agent 状态变更）时刷新顶部状态条
+        audioChatMessageParser.setAudioChatMessageListListener(
+            new AudioChatMessageParser.AudioChatMessageListListener() {
+                @Override
+                public void onMessageListUpdated(List<AudioChatMessage> messagesList) {
+                    // 播报场景只展示播放状态，字幕不处理
+                }
+
+                @Override
+                public void onAudioChatStateUpdate(AudioChatAgentStatusMessage statusMessage) {
+                    if (statusMessage != null && statusMessage.data != null) {
+                        updateAgentStatus(statusMessage.data.status);
+                    }
+                }
+            });
         findViewById(R.id.end_call).setOnClickListener(v -> finish());
         // 输入文本后发送，让数字人主动播报
         ttsSend.setOnClickListener(v -> {
@@ -221,6 +248,24 @@ public class LiveDigitalHumanActivity extends AppCompatActivity {
                     }
                 }
             }
+
+            @Override
+            public void onRecvExperimentalAPI(String content) {
+                super.onRecvExperimentalAPI(content);
+                Log.d(TAG, "onRecvExperimentalAPI() called with: content = [" + content + "]");
+                try {
+                    JSONObject json = new JSONObject(content);
+                    // 仅处理房间频道消息，取出 msg_content 交给解析器（cmd==6 为 Agent 状态变更）
+                    if (json.has("method") && json.getString("method")
+                        .equals("liveroom.room.on_recive_room_channel_message")) {
+                        JSONObject paramsObject = json.getJSONObject("params");
+                        String msgContent = paramsObject.getString("msg_content");
+                        audioChatMessageParser.parseAudioChatMessage(msgContent);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
         });
     }
 
@@ -235,18 +280,19 @@ public class LiveDigitalHumanActivity extends AppCompatActivity {
             public void onResponse(String responseBody) {
                 try {
                     JSONObject json = new JSONObject(responseBody);
-                    int errorCode = (int) json.get("code");
-                    String message = (String) json.get("message");
-                    agent_name = (String) json.get("agent_name");
-                    agent_instance_id = (String) json.get("agent_instance_id");
-                    agent_user_id = (String) json.get("agent_user_id");
-                    agent_stream_id = (String) json.get("agent_stream_id");
+                    int errorCode = json.optInt("code", -1);
+                    String message = json.optString("message");
+                    // 以下字段为业务元数据，后台可能不下发，缺失不应阻断主流程
+                    agent_name = json.optString("agent_name");
+                    agent_instance_id = json.optString("agent_instance_id");
+                    agent_user_id = json.optString("agent_user_id");
+                    agent_stream_id = json.optString("agent_stream_id");
                     if (errorCode == 0) {
                         ZegoExpressEngine.getEngine().setPlayStreamBufferIntervalRange(agent_stream_id, 100, 2000);
                         ZegoExpressEngine.getEngine().startPlayingStream(agent_stream_id);
                         runOnUiThread(() -> Toast.makeText(LiveDigitalHumanActivity.this, message, Toast.LENGTH_LONG)
                             .show());
-                        final String digitalHumanConfig = (String) json.get("digital_human_config");
+                        final String digitalHumanConfig = json.optString("digital_human_config");
                         initDigitalMobileSDK(digitalHumanConfig);
                     } else {
                         ZegoExpressEngine.getEngine().logoutRoom();
@@ -373,6 +419,47 @@ public class LiveDigitalHumanActivity extends AppCompatActivity {
             loadingView.setVisibility(View.GONE);
             Toast.makeText(LiveDigitalHumanActivity.this, errorMsg, Toast.LENGTH_LONG).show();
             finish();
+        });
+    }
+
+    /**
+     * 根据 onAudioChatStateUpdate 回调的 status 刷新顶部状态条。
+     * 状态值见 {@link AudioChatAgentStatusMessage.Data}：
+     * IDLE=0 / LISTENING=1 / THINKING=2 / SPEAKING=3
+     */
+    private void updateAgentStatus(int status) {
+        runOnUiThread(() -> {
+            if (isDestroyed()) {
+                return;
+            }
+            String text;
+            int dotColor;
+            switch (status) {
+                case AudioChatAgentStatusMessage.Data.LISTENING:
+                    text = "Listening";
+                    dotColor = 0xFFFFC107; // 黄
+                    break;
+                case AudioChatAgentStatusMessage.Data.THINKING:
+                    text = "Thinking";
+                    dotColor = 0xFF2196F3; // 蓝
+                    break;
+                case AudioChatAgentStatusMessage.Data.SPEAKING:
+                    text = "Speaking";
+                    dotColor = 0xFF4CAF50; // 绿
+                    break;
+                case AudioChatAgentStatusMessage.Data.IDLE:
+                default:
+                    text = "Idle";
+                    dotColor = 0xFFFFFFFF; // 白
+                    break;
+            }
+            agentStatusView.setText(text);
+            // 给左侧状态点着色（drawableStart 引用的 shape_status_dot，默认白色）
+            Drawable[] drawables = agentStatusView.getCompoundDrawables();
+            if (drawables != null && drawables.length > 0 && drawables[0] != null) {
+                drawables[0].setColorFilter(dotColor, PorterDuff.Mode.SRC_IN);
+            }
+            agentStatusView.setVisibility(View.VISIBLE);
         });
     }
 }
