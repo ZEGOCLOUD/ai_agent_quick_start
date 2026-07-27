@@ -95,7 +95,7 @@
             <p v-show="status === AgentStatus.IDLE">空闲中...</p>
             <p v-show="status === AgentStatus.Listening">正在听...</p>
             <p v-show="status === AgentStatus.Thinking">正在想...</p>
-            <p v-show="status === AgentStatus.Speaking">可以随时说话打断我</p>
+            <p v-show="status === AgentStatus.Speaking">正在说...</p>
           </div>
           <RemoteSteamView />
         </div>
@@ -178,9 +178,9 @@ function setLoginLoading(type: AgentCallType, value: boolean) {
 const handleLogin = async (type: AgentCallType) => {
   try {
     setLoginLoading(type, true);
-    
+
     logger.userAction('用户开始登录', { type, roomId: roomId.value, userId: userId.value });
-    
+
     const res = await loginRoom(
       type,
       roomId.value,
@@ -188,14 +188,14 @@ const handleLogin = async (type: AgentCallType) => {
       userName.value,
       userStreamId.value,
     );
-    
-    logger.userAction('用户登录成功', { 
-      type, 
-      roomId: roomId.value, 
+
+    logger.userAction('用户登录成功', {
+      type,
+      roomId: roomId.value,
       userId: userId.value,
-      agentInstanceId: res.agent_instance_id 
+      agentInstanceId: res.agent_instance_id
     });
-    
+
     isDigitalHuman.value = type === "digitalHuman";
     currentCallType.value = type;
     agentInstanceId.value = res.agent_instance_id || "";
@@ -214,24 +214,24 @@ const handleLogout = async () => {
     isDigitalHuman.value = false;
     currentCallType.value = "";
     ttsText.value = "";
-    
-    logger.userAction('用户开始退出房间', { 
-      roomId: roomId.value, 
+
+    logger.userAction('用户开始退出房间', {
+      roomId: roomId.value,
       userId: userId.value,
-      agentInstanceId: agentInstanceId.value 
+      agentInstanceId: agentInstanceId.value
     });
-    
+
     await logoutRoom(agentInstanceId.value);
-    
-    logger.userAction('用户退出房间成功', { 
-      roomId: roomId.value, 
-      userId: userId.value 
+
+    logger.userAction('用户退出房间成功', {
+      roomId: roomId.value,
+      userId: userId.value
     });
   } catch (error) {
-    logger.userAction('用户退出房间失败', { 
-      roomId: roomId.value, 
+    logger.userAction('用户退出房间失败', {
+      roomId: roomId.value,
       userId: userId.value,
-      error 
+      error
     });
     ErrorHandler.handle(error, 'Chat.handleLogout');
   } finally {
@@ -280,26 +280,26 @@ const handleSendTTS = async () => {
 
 onMounted(async () => {
   try {
-    logger.info('COMPONENT', 'Chat 组件初始化开始', { 
-      roomId: roomId.value, 
-      userId: userId.value 
+    logger.info('COMPONENT', 'Chat 组件初始化开始', {
+      roomId: roomId.value,
+      userId: userId.value
     });
-    
+
     await initSDK();
     setupEventListeners();
     setupChatEventListeners();
     checkPermission();
     await getToken(userId.value);
-    
-    logger.info('COMPONENT', 'Chat 组件初始化完成', { 
-      roomId: roomId.value, 
-      userId: userId.value 
+
+    logger.info('COMPONENT', 'Chat 组件初始化完成', {
+      roomId: roomId.value,
+      userId: userId.value
     });
   } catch (error) {
-    logger.error('COMPONENT', 'Chat 组件初始化失败', { 
-      roomId: roomId.value, 
+    logger.error('COMPONENT', 'Chat 组件初始化失败', {
+      roomId: roomId.value,
       userId: userId.value,
-      error 
+      error
     });
     ErrorHandler.handle(error, 'Chat.onMounted');
   }
