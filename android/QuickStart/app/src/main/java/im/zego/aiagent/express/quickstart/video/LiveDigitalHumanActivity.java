@@ -290,6 +290,10 @@ public class LiveDigitalHumanActivity extends AppCompatActivity {
                     if (errorCode == 0) {
                         ZegoExpressEngine.getEngine().setPlayStreamBufferIntervalRange(agent_stream_id, 100, 2000);
                         ZegoExpressEngine.getEngine().startPlayingStream(agent_stream_id);
+                        // agent 已启动成功，此时它处于 IDLE 静止状态。
+                        // 后台仅在「状态发生变化」时才下发 cmd==6，进房间不发文本时收不到回调，
+                        // 因此这里主动显示初始 Idle 状态，待真正收到状态回调后再更新。
+                        updateAgentStatus(AudioChatAgentStatusMessage.Data.IDLE);
                         runOnUiThread(() -> Toast.makeText(LiveDigitalHumanActivity.this, message, Toast.LENGTH_LONG)
                             .show());
                         final String digitalHumanConfig = json.optString("digital_human_config");
