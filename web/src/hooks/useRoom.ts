@@ -7,6 +7,7 @@ import { GetZegoToken, Start, StartDigitalHuman, StartLiveDigitalHuman, Stop } f
 import type { ZegoRoomStateChangedReason } from "zego-express-engine-webrtc/sdk/code/zh/ZegoExpressEntity.rtm";
 import { ErrorHandler, createError } from "../utils/error-handler";
 import { logger } from "../utils/logger";
+import { AgentStatus } from "../types/enum";
 
 export type AgentCallType = "normal" | "digitalHuman" | "liveDigitalHuman";
 
@@ -15,6 +16,8 @@ export function useRoom() {
   const zegoLocalStream = ref<ZegoLocalStream | null>();
   const isLogin = ref(false);
   const permissionValid = ref(false);
+  const agentInstanceStatus = ref<AgentStatus>(AgentStatus.IDLE);
+  let currentSeqId = -1;
   let currentToken = "";
   async function initSDK() {
     return zg.initSDK(config.zego.appId, config.zego.server);
@@ -42,16 +45,16 @@ export function useRoom() {
     userStreamId: string
   ) {
     logger.info('ROOM', '开始登录房间', { type, roomId, userID });
-    
+
     const login = await zg.loginRoom(roomId, currentToken, {
       userID,
       userName,
     });
-    
+
     if (!login) {
       throw createError.sdk("登录RTC房间失败", { canRetry: true });
     }
-    
+
     isLogin.value = true;
     logger.info('ROOM', 'RTC房间登录成功', { roomId, userID });
 
@@ -79,9 +82,9 @@ export function useRoom() {
       return res;
     } catch (error: any) {
       logger.error('ROOM', 'AI Agent 服务启动失败', { type, error });
-      throw createError.business("并发已满，语音互动启动失败", { 
+      throw createError.business("并发已满，语音互动启动失败", {
         canRetry: true,
-        context: { type, roomId, userID } 
+        context: { type, roomId, userID }
       });
     }
   }
@@ -107,7 +110,7 @@ export function useRoom() {
       const localStream = await zg.createAudioStream();
       zegoLocalStream.value = localStream;
       logger.info('STREAM', '音频流创建成功', { localStreamId });
-      
+
       // 开始推流
       await zg.startPublishingStream(localStreamId, localStream);
       logger.info('STREAM', '开始推流成功', { localStreamId });
@@ -130,7 +133,7 @@ export function useRoom() {
         streamList: ZegoStreamList[]
       ) => {
         logger.webrtc('roomStreamUpdate', { roomID, updateType, streamCount: streamList.length });
-        
+
         if (updateType === "ADD" && streamList.length > 0) {
           try {
             for (const stream of streamList) {
@@ -139,7 +142,7 @@ export function useRoom() {
               remoteView = await zg.createRemoteStreamView(mediaStream);
               if (remoteView) {
                 logger.webrtc('remoteView playAudio', { streamID: stream.streamID });
-                remoteView.playAudio();  
+                remoteView.playAudio();
               }
               logger.info('STREAM', '成功拉取远程流', { streamID: stream.streamID });
               break;
@@ -158,11 +161,11 @@ export function useRoom() {
         streamID: string, status: 'OPEN' | 'MUTE'
       ) => {
         logger.webrtc('remoteCameraStatusUpdate', { streamID, status });
-        
+
         if(status === 'OPEN'){
           if (remoteView) {
             logger.webrtc('remoteView playVideo', { streamID });
-            remoteView?.playVideo("remoteSteamView");  
+            remoteView?.playVideo("remoteSteamView");
           }
         }
       }
@@ -176,7 +179,7 @@ export function useRoom() {
         extendedData: string
       ) => {
         logger.webrtc('roomStateChanged', { roomID, state, errorCode, extendedData });
-        
+
         if (state === "KICKOUT") {
           const kickoutError = createError.business("您已在其他设备登录", {
             code: 'ROOM_KICKOUT',
@@ -188,7 +191,39 @@ export function useRoom() {
         }
       }
     );
-    
+    zg!.on("recvExperimentalAPI", (result: Record<string, any>) => {
+      const { method, content } = result;
+      if (method === "onRecvRoomChannelMessage") {
+        console.log("onRecvRoomChannelMessage:", JSON.stringify(content));
+        console.log("onRecvRoomChannelMessage msgContent:", JSON.stringify(JSON.parse(content.msgContent)));
+        try {
+          const recvMsg = JSON.parse(content.msgContent);
+          console.log("onRecvRoomChannelMessage recvMsg:", JSON.stringify(recvMsg));
+          handleRoomCommandMessage(recvMsg);
+        } catch (error) {
+          console.error("解析消息失败:", error);
+        }
+      }
+    });
+    zg!.callExperimentalAPI({ method: "onRecvRoomChannelMessage", params: {} });
+  }
+
+  function handleRoomCommandMessage(recvMsg: any) {
+    const { Cmd, SeqId, Data, Round, TimestampMs } = recvMsg;
+
+    switch (Cmd) {
+      // 交互状态
+      case 6:
+        if (currentSeqId < SeqId) {
+          agentInstanceStatus.value = Data.Status;
+          currentSeqId = SeqId;
+        }
+        break;
+
+      default:
+        // 自定义处理相应的 Cmd
+        console.warn("Unhandled command", Cmd, SeqId, Data, Round, TimestampMs);
+    }
   }
 
   async function destroy() {
@@ -204,15 +239,15 @@ export function useRoom() {
   async function logoutRoom(agentInstanceId: string) {
     try {
       logger.info('ROOM', '开始退出房间', { agentInstanceId });
-      
+
       if (isLogin.value && agentInstanceId) {
         await Stop(agentInstanceId);
         logger.info('ROOM', 'AI Agent 服务停止成功');
       }
-      
+
       await destroy();
       isLogin.value = false;
-      
+
       logger.info('ROOM', '退出房间成功');
     } catch (error) {
       logger.error('ROOM', '退出房间失败', { agentInstanceId, error });
@@ -220,7 +255,7 @@ export function useRoom() {
       ErrorHandler.updateConfig({ showNotification: false });
       ErrorHandler.handle(error, 'useRoom.logoutRoom');
       ErrorHandler.updateConfig({ showNotification: true });
-      
+
       // 确保状态重置
       isLogin.value = false;
     }
@@ -231,17 +266,17 @@ export function useRoom() {
     try {
       const { webRTC, microphone } = await zg.checkSystemRequirements();
       logger.info('PERMISSION', '设备权限检查', { webRTC, microphone });
-      
+
       if (!webRTC || !microphone) {
         const permissionError = createError.permission(
-          "系统要求不满足，请检查您的浏览器和麦克风设置", 
+          "系统要求不满足，请检查您的浏览器和麦克风设置",
           { context: { webRTC, microphone } }
         );
         ErrorHandler.handle(permissionError, 'useRoom.checkPermission');
         permissionValid.value = false;
         return;
       }
-      
+
       permissionValid.value = true;
       logger.info('PERMISSION', '设备权限检查通过');
     } catch (error) {
@@ -255,6 +290,7 @@ export function useRoom() {
     zg,
     isLogin,
     zegoLocalStream,
+    agentInstanceStatus,
     initSDK,
     checkPermission,
     startPublishingStream,

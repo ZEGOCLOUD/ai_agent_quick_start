@@ -88,8 +88,15 @@
           </el-button>
         </div>
       </div>
-      <div class="room-container"> 
+      <div class="room-container">
         <div class="stream-container">
+          <!-- Agent 状态展示 -->
+          <div v-if="isLogin" class="agent-status">
+            <p v-show="status === AgentStatus.IDLE">空闲中...</p>
+            <p v-show="status === AgentStatus.Listening">正在听...</p>
+            <p v-show="status === AgentStatus.Thinking">正在想...</p>
+            <p v-show="status === AgentStatus.Speaking">可以随时说话打断我</p>
+          </div>
           <RemoteSteamView />
         </div>
         <!-- 聊天组件区域 -->
@@ -116,10 +123,12 @@ import { useRoom, type AgentCallType } from "../hooks/useRoom";
 import { SendAgentInstanceTTS } from "../api/agent";
 import { ErrorHandler } from "../utils/error-handler";
 import { logger } from "../utils/logger";
+import { AgentStatus } from "../types/enum";
 
 const {
   zg,
   isLogin,
+  agentInstanceStatus: status,
   initSDK,
   checkPermission,
   setupEventListeners,
@@ -334,6 +343,20 @@ onMounted(async () => {
   font-weight: 500;
   margin-bottom: 20px;
   color: #303133;
+}
+
+.agent-status {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: #ecf5ff;
+  border-left: 3px solid #409eff;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #303133;
+}
+
+.agent-status p {
+  margin: 0;
 }
 
 .user-info-container {
