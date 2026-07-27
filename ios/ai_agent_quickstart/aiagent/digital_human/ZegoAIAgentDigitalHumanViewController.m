@@ -16,6 +16,7 @@
 #import "ZegoAIAgentServiceAPI.h"
 #import "ZegoAIAgentDigitalHumanEventHandler.h"
 #import "ZegoKey.h"
+#import "ZegoAIAgentSubtitlesMessageProtocol.h"
 
 @interface ZegoAIAgentDigitalHumanViewController ()<ZegoAIAgentDigitalHumanEventHandler, ZegoDigitalMobileDelegate>
 
@@ -23,6 +24,8 @@
 @property (nonatomic, strong) UIButton *backButton;
 /// 页面标题，用于区分当前是对话数字人还是播报数字人
 @property (nonatomic, strong) UILabel *titleLabel;
+/// 数字人顶部显示的智能体状态
+@property (nonatomic, strong) UILabel *agentStatusLabel;
 
 // loading
 @property (nonatomic, strong) UIView *loadingView;
@@ -94,6 +97,23 @@
     [self.titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
         make.centerY.equalTo(self.backButton);
         make.centerX.equalTo(self.view);
+    }];
+
+    // 状态标签覆盖在数字人画面顶部，两个数字人模式共用。
+    self.agentStatusLabel = [[UILabel alloc] init];
+    self.agentStatusLabel.text = @"空闲";
+    self.agentStatusLabel.textColor = [UIColor whiteColor];
+    self.agentStatusLabel.font = [UIFont systemFontOfSize:14 weight:UIFontWeightMedium];
+    self.agentStatusLabel.textAlignment = NSTextAlignmentCenter;
+    self.agentStatusLabel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.58];
+    self.agentStatusLabel.layer.cornerRadius = 16;
+    self.agentStatusLabel.clipsToBounds = YES;
+    [self.view addSubview:self.agentStatusLabel];
+    [self.agentStatusLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.view.mas_safeAreaLayoutGuideTop).offset(48);
+        make.centerX.equalTo(self.view);
+        make.height.mas_equalTo(32);
+        make.width.mas_equalTo(136);
     }];
 
     // 播报数字人模式下展示额外控制区，用于发送自定义TTS
@@ -446,6 +466,52 @@
 }
 
 #pragma mark - ZegoAIAgentDigitalHumanEventHandler
+
+- (void)onRecvExperimentalAPI:(NSString *)content {
+    if (content.length == 0) {
+        return;
+    }
+
+    // Express 回调的房间消息结构与字幕模块一致：
+    // method -> params.msg_content -> { Cmd: 6, Data: { Status: 0...3 } }。
+    NSData *contentData = [content dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *contentDict = [NSJSONSerialization JSONObjectWithData:contentData
+                                                                  options:0
+                                                                    error:nil];
+    if (![contentDict isKindOfClass:[NSDictionary class]]) {
+        return;
+    }
+
+    NSDictionary *params = contentDict[@"params"];
+    NSString *messageContent = [params isKindOfClass:[NSDictionary class]] ? params[@"msg_content"] : nil;
+    if (![messageContent isKindOfClass:[NSString class]]) {
+        return;
+    }
+
+    NSData *messageData = [messageContent dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary *messageDict = [NSJSONSerialization JSONObjectWithData:messageData options:0 error:nil];
+    if (![messageDict isKindOfClass:[NSDictionary class]]) {
+        return;
+    }
+
+    ZegoAIAgentSubtitlesMessageProtocol *message = [[ZegoAIAgentSubtitlesMessageProtocol alloc] initWithDictionary:messageDict];
+    if (message.cmdType != ZegoAgentMessageCmdAgentStatus || !message.agentStatusData) {
+        return;
+    }
+
+    NSString *statusText = nil;
+    switch (message.agentStatusData.status) {
+        case 0: statusText = @"空闲"; break;
+        case 1: statusText = @"正在听"; break;
+        case 2: statusText = @"正在想"; break;
+        case 3: statusText = @"正在说"; break;
+        default: return;
+    }
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.agentStatusLabel.text = statusText;
+    });
+}
 
 - (void)onRemoteVideoFrameRawData:(unsigned char **)data
                        dataLength:(unsigned int *)dataLength

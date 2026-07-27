@@ -740,9 +740,12 @@ typedef void (^JoinRoomCallback)(int errorCode, NSDictionary *extendedData);
 //2. RTC房间事件消息协议
 //实时音视频 服务端 API 推送自定义消息 - 开发者中心 - ZEGO即构科技
 - (void)onRecvExperimentalAPI:(NSString *)content{
-    // 抛出给音频事件处理器处理
+    // 音频和数字人场景都需要接收智能体状态（Cmd=6）等房间消息。
     if (self.audioEventHandler && [self.audioEventHandler respondsToSelector:@selector(onRecvExperimentalAPI:)]) {
         [self.audioEventHandler onRecvExperimentalAPI:content];
+    }
+    if (self.digitalHumanEventHandler && [self.digitalHumanEventHandler respondsToSelector:@selector(onRecvExperimentalAPI:)]) {
+        [self.digitalHumanEventHandler onRecvExperimentalAPI:content];
     }
 }
 

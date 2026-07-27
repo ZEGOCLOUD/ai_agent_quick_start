@@ -40,6 +40,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)onPlayerSyncRecvSEI:(NSData *)data streamID:(NSString *)streamID;
 
+/**
+ * Express 实验性 API 回调，用于接收智能体状态等房间消息。
+ */
+- (void)onRecvExperimentalAPI:(NSString *)content;
+
 @end
 
 NS_ASSUME_NONNULL_END
